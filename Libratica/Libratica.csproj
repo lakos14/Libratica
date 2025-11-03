@@ -10,4 +10,13 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Libratica.DataContext\Libratica.DataContext.csproj" />
+		<ProjectReference Include="..\Libratica.Services\Libratica.Services.csproj" />
+	</ItemGroup>
+
 </Project>

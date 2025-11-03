@@ -5,6 +5,10 @@ VisualStudioVersion = 17.14.36623.8 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libratica", "Libratica\Libratica.csproj", "{7CC57ADE-F51F-4DBA-94ED-91059AC7B3F5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libratica.DataContext", "Libratica.DataContext\Libratica.DataContext.csproj", "{B5602BF9-3136-4BBF-8152-AA7E74B6E872}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libratica.Services", "Libratica.Services\Libratica.Services.csproj", "{A126FF26-E2AF-4054-AE62-C5DDC2273401}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{7CC57ADE-F51F-4DBA-94ED-91059AC7B3F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CC57ADE-F51F-4DBA-94ED-91059AC7B3F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CC57ADE-F51F-4DBA-94ED-91059AC7B3F5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5602BF9-3136-4BBF-8152-AA7E74B6E872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5602BF9-3136-4BBF-8152-AA7E74B6E872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5602BF9-3136-4BBF-8152-AA7E74B6E872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5602BF9-3136-4BBF-8152-AA7E74B6E872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A126FF26-E2AF-4054-AE62-C5DDC2273401}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A126FF26-E2AF-4054-AE62-C5DDC2273401}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A126FF26-E2AF-4054-AE62-C5DDC2273401}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A126FF26-E2AF-4054-AE62-C5DDC2273401}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -161,6 +161,28 @@ namespace Libratica.DataContext.Context
                     .HasForeignKey(r => r.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            // Seed reference data
+            SeedReferenceData(modelBuilder);
+        }
+        private void SeedReferenceData(ModelBuilder modelBuilder)
+        {
+            // Roles
+            modelBuilder.Entity<Role>().HasData(
+                new Role { Id = 1, Name = "user" },
+                new Role { Id = 2, Name = "admin" }
+            );
+
+            // Categories
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Sci-Fi", Description = "Tudományos-fantasztikus regények", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 2, Name = "Fantasy", Description = "Fantasy és varázslatos történetek", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 3, Name = "Romantikus", Description = "Romantikus regények", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 4, Name = "Krimi", Description = "Krimi és thriller", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 5, Name = "Ismeretterjesztő", Description = "Tudományos és ismeretterjesztő könyvek", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 6, Name = "Történelem", Description = "Történelmi könyvek", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 7, Name = "Informatika", Description = "Programozás és IT", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 8, Name = "Gyerekkönyv", Description = "Gyermekeknek szóló könyvek", CreatedAt = new DateTime(2024, 1, 1) }
+            );
         }
     }
 }

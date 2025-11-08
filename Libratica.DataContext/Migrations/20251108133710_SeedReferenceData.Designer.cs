@@ -4,6 +4,7 @@ using Libratica.DataContext.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Libratica.DataContext.Migrations
 {
     [DbContext(typeof(LibraticaDbContext))]
-    partial class LibraticaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251108133710_SeedReferenceData")]
+    partial class SeedReferenceData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,64 +137,6 @@ namespace Libratica.DataContext.Migrations
                     b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Tudományos-fantasztikus regények",
-                            Name = "Sci-Fi"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fantasy és varázslatos történetek",
-                            Name = "Fantasy"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Romantikus regények",
-                            Name = "Romantikus"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Krimi és thriller",
-                            Name = "Krimi"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Tudományos és ismeretterjesztő könyvek",
-                            Name = "Ismeretterjesztő"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Történelmi könyvek",
-                            Name = "Történelem"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Programozás és IT",
-                            Name = "Informatika"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Gyermekeknek szóló könyvek",
-                            Name = "Gyerekkönyv"
-                        });
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Listing", b =>
@@ -396,18 +341,6 @@ namespace Libratica.DataContext.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "user"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "admin"
-                        });
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.User", b =>

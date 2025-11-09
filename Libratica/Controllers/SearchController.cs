@@ -124,7 +124,7 @@ namespace Libratica.Controllers
             [FromQuery] decimal? maxPrice = null,
             [FromQuery] string? condition = null,
             [FromQuery] string? location = null,
-            [FromQuery] bool? isAvailable = true,
+            [FromQuery] bool? isAvailable = null,
             [FromQuery] string? sortBy = "date",
             [FromQuery] string? sortOrder = "desc")
         {

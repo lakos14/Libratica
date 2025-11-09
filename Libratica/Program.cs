@@ -1,16 +1,36 @@
-using Libratica.Services.Interfaces;
+using Libratica.DataContext.Context;
 using Libratica.Services.Implementations;
+using Libratica.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Libratica.DataContext.Context;
-using Libratica.DataContext.Entities;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// CORS configuration ? ÚJ!
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// Database connection
 builder.Services.AddDbContext<LibraticaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register services
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -35,79 +55,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
-
-// Register Services
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
-builder.Services.AddControllers();
-
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "Libratica API",
-        Version = "v1",
-        Description = "Használt könyvek piactere API"
-    });
-
-    // JWT Bearer konfiguráció Swagger-hez
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer eyJhbGciOiJIUzI1NiIsInR5...\""
-    });
-
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<LibraticaDbContext>();
-        await SeedDevelopmentDataAsync(context);
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -116,104 +64,156 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-app.UseCors("AllowAll");
+app.UseCors("AllowFrontend"); // ? ÚJ! (FONTOS: Authorization ELÕTT!)
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
-
-async Task SeedDevelopmentDataAsync(LibraticaDbContext context)
+// Seed data on startup
+using (var scope = app.Services.CreateScope())
 {
-    try
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<LibraticaDbContext>();
+
+    // Run migrations
+    context.Database.Migrate();
+
+    // Seed admin user
+    var adminExists = context.Users.Any(u => u.Email == "admin@libratica.hu");
+    if (!adminExists)
     {
-        await context.Database.MigrateAsync();
-        if (!await context.Users.AnyAsync(u => u.Email == "admin@libratica.hu"))
+        var adminRole = context.Roles.FirstOrDefault(r => r.Name == "admin");
+        if (adminRole != null)
         {
-            var adminUser = new User
+            var adminUser = new Libratica.DataContext.Entities.User
             {
                 Email = "admin@libratica.hu",
                 Username = "admin",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!"),
-                FullName = "Admin Felhasználó",
-                PhoneNumber = "+36301234567",
-                RoleId = 2,
+                FullName = "Admin User",
+                RoleId = adminRole.Id,
                 IsVerified = true,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            await context.Users.AddAsync(adminUser);
-            await context.SaveChangesAsync();
-            Console.WriteLine("Admin user created: admin@libratica.hu / Admin123!");
+            context.Users.Add(adminUser);
+            context.SaveChanges();
+        }
+    }
+
+    // Seed books if empty
+    var booksExist = context.Books.Any();
+    if (!booksExist)
+    {
+        var sciFiCategory = context.Categories.FirstOrDefault(c => c.Name == "Sci-Fi");
+        var fantasyCategory = context.Categories.FirstOrDefault(c => c.Name == "Fantasy");
+
+        var books = new[]
+        {
+            new Libratica.DataContext.Entities.Book
+            {
+                ISBN = "9789632451234",
+                Title = "Dûne",
+                Author = "Frank Herbert",
+                Publisher = "Gabo Kiadó",
+                PublicationYear = 1965,
+                Language = "magyar",
+                Description = "Arrakis, a sivatag bolygója...",
+                PageCount = 688,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Libratica.DataContext.Entities.Book
+            {
+                ISBN = "9789631199437",
+                Title = "1984",
+                Author = "George Orwell",
+                Publisher = "Európa Kiadó",
+                PublicationYear = 1949,
+                Language = "magyar",
+                Description = "Nagy Testvér figyel...",
+                PageCount = 328,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Libratica.DataContext.Entities.Book
+            {
+                ISBN = "9789633245446",
+                Title = "Harry Potter és a bölcsek köve",
+                Author = "J.K. Rowling",
+                Publisher = "Animus Kiadó",
+                PublicationYear = 1997,
+                Language = "magyar",
+                Description = "Harry Potter élete a Roxfort falai között...",
+                PageCount = 336,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        context.Books.AddRange(books);
+        context.SaveChanges();
+
+        // Add categories to books
+        if (sciFiCategory != null)
+        {
+            context.BookCategories.AddRange(
+                new Libratica.DataContext.Entities.BookCategory { BookId = books[0].Id, CategoryId = sciFiCategory.Id },
+                new Libratica.DataContext.Entities.BookCategory { BookId = books[1].Id, CategoryId = sciFiCategory.Id }
+            );
         }
 
-        if (!await context.Books.AnyAsync())
+        if (fantasyCategory != null)
         {
-            var books = new List<Book>
+            context.BookCategories.Add(
+                new Libratica.DataContext.Entities.BookCategory { BookId = books[2].Id, CategoryId = fantasyCategory.Id }
+            );
+        }
+
+        context.SaveChanges();
+
+        // Create listings
+        var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@libratica.hu");
+        if (adminUser != null)
+        {
+            var listings = new[]
             {
-                new Book
+                new Libratica.DataContext.Entities.Listing
                 {
-                    Title = "Dûne",
-                    Author = "Frank Herbert",
-                    ISBN = "9789632451234",
-                    Publisher = "Szukits Könyvkiadó",
-                    PublicationYear = 1965,
-                    Language = "magyar",
-                    Description = "Az emberiség jövõjérõl szóló epikus sci-fi regény, amely a Dûne nevû sivatagi bolygón játszódik.",
-                    PageCount = 704,
-                    CoverImageUrl = "https://s01.static.libri.hu/cover/30/0/1370030_5.jpg",
-                    CreatedAt = DateTime.UtcNow
+                    BookId = books[0].Id,
+                    SellerId = adminUser.Id,
+                    Condition = "good",
+                    ConditionDescription = "Jó állapotban, minimális kopás",
+                    Price = 2500,
+                    Currency = "HUF",
+                    Quantity = 1,
+                    IsAvailable = true,
+                    Location = "Budapest, XIII. kerület",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 },
-                new Book
+                new Libratica.DataContext.Entities.Listing
                 {
-                    Title = "1984",
-                    Author = "George Orwell",
-                    ISBN = "9789631234567",
-                    Publisher = "Európa Könyvkiadó",
-                    PublicationYear = 1949,
-                    Language = "magyar",
-                    Description = "Disztópikus regény egy totalitárius jövõrõl, ahol a Nagy Testvér mindent lát.",
-                    PageCount = 328,
-                    CoverImageUrl = "https://s01.static.libri.hu/cover/b3/5/8962135_5.jpg",
-                    CreatedAt = DateTime.UtcNow
-                },
-                new Book
-                {
-                    Title = "Harry Potter és a bölcsek köve",
-                    Author = "J.K. Rowling",
-                    ISBN = "9789633245712",
-                    Publisher = "Animus Kiadó",
-                    PublicationYear = 1997,
-                    Language = "magyar",
-                    Description = "Harry Potter élete gyökeresen megváltozik 11. születésnapján, amikor megtudja, hogy varázsló.",
-                    PageCount = 368,
-                    CoverImageUrl = "https://s01.static.libri.hu/cover/6f/2/1337726f_5.jpg",
-                    CreatedAt = DateTime.UtcNow
+                    BookId = books[1].Id,
+                    SellerId = adminUser.Id,
+                    Condition = "excellent",
+                    ConditionDescription = "Kiváló állapot",
+                    Price = 1800,
+                    Currency = "HUF",
+                    Quantity = 2,
+                    IsAvailable = true,
+                    Location = "Debrecen",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 }
             };
-            await context.Books.AddRangeAsync(books);
-            await context.SaveChangesAsync();
-            Console.WriteLine($"{books.Count} test books created!");
-            var bookCategories = new List<BookCategory>
-            {
-                new BookCategory { BookId = 1, CategoryId = 1 },
-                new BookCategory { BookId = 2, CategoryId = 1 },
-                new BookCategory { BookId = 3, CategoryId = 2 }
-            };
-            await context.BookCategories.AddRangeAsync(bookCategories);
-            await context.SaveChangesAsync();
-        }
 
-        Console.WriteLine("Development seed data complete!");
+            context.Listings.AddRange(listings);
+            context.SaveChanges();
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error seeding data: {ex.Message}");
-    }
+
+    Console.WriteLine("Development seed data complete!");
 }
+
+app.Run();

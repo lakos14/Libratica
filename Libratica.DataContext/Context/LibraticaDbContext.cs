@@ -20,6 +20,8 @@ namespace Libratica.DataContext.Context
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -160,6 +162,33 @@ namespace Libratica.DataContext.Context
                     .WithMany(o => o.Reviews)
                     .HasForeignKey(r => r.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+            // Cart configuration
+            modelBuilder.Entity<Cart>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.UserId).IsUnique(); // Egy usernek egy kosara
+
+                entity.HasOne(c => c.User)
+                    .WithMany()
+                    .HasForeignKey(c => c.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // CartItem configuration
+            modelBuilder.Entity<CartItem>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(ci => ci.Cart)
+                    .WithMany(c => c.CartItems)
+                    .HasForeignKey(ci => ci.CartId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ci => ci.Listing)
+                    .WithMany()
+                    .HasForeignKey(ci => ci.ListingId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
             // Seed reference data
             SeedReferenceData(modelBuilder);

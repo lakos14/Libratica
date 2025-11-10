@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Listings from './pages/Listings';
 import ListingDetails from './pages/ListingDetails';
 import Cart from './pages/Cart';
+import MyListings from './pages/MyListings';
 
 function App() {
   return (
@@ -19,9 +20,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/listings" element={<Listings />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
-             <Route path="/cart" element={<Cart />} />
+            <Route path="/listings" element={<Listings />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/my-listings" element={<MyListings />} />
           </Routes>
         </div>
       </AuthProvider>

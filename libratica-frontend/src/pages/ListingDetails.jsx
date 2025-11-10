@@ -1,54 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { searchAPI } from '../services/api';
+import { useParams, useNavigate } from 'react-router-dom';
+import { listingsAPI, cartAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-const Listings = () => {
-  const [listings, setListings] = useState([]);
+const ListingDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({
-    minPrice: '',
-    maxPrice: '',
-    condition: '',
-    sortBy: 'date',
-    sortOrder: 'desc',
-  });
+  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
-    loadListings();
-  }, [filters]);
+    loadListing();
+  }, [id]);
 
-  const loadListings = async () => {
+  const loadListing = async () => {
     try {
-      setLoading(true);
-      const params = {
-        query: searchQuery || undefined,
-        minPrice: filters.minPrice || undefined,
-        maxPrice: filters.maxPrice || undefined,
-        condition: filters.condition || undefined,
-        sortBy: filters.sortBy,
-        sortOrder: filters.sortOrder,
-      };
-
-      const response = await searchAPI.searchListings(params);
-      setListings(response.data);
+      const response = await listingsAPI.getById(id);
+      setListing(response.data);
     } catch (error) {
-      console.error('Failed to load listings:', error);
+      console.error('Failed to load listing:', error);
+      alert('Hirdetés nem található');
+      navigate('/listings');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    loadListings();
+  const handleAddToCart = async () => {
+    if (!isAuthenticated) {
+      alert('Kérlek jelentkezz be a kosárba helyezéshez!');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setAddingToCart(true);
+      await cartAPI.addToCart({
+        listingId: listing.id,
+        quantity,
+      });
+      alert(`✅ ${quantity} db hozzáadva a kosárhoz!`);
+    } catch (error) {
+      alert(error.response?.data?.message || 'Hiba történt');
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters({ ...filters, [key]: value });
-  };
-
-  if (loading && listings.length === 0) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-2xl">Betöltés...</div>
@@ -56,134 +59,200 @@ const Listings = () => {
     );
   }
 
+  if (!listing) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h2 className="text-2xl font-bold mb-4">Hirdetés nem található</h2>
+        <button
+          onClick={() => navigate('/listings')}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+        >
+          Vissza a hirdetésekhez
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Hirdetések böngészése</h1>
+      <button
+        onClick={() => navigate('/listings')}
+        className="text-blue-600 hover:text-blue-800 mb-6"
+      >
+        ← Vissza a hirdetésekhez
+      </button>
 
-      {/* Keresés */}
-      <form onSubmit={handleSearch} className="mb-8">
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Keresés cím, szerző alapján..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Bal oldal - Kép */}
+        <div>
+          <img
+            src={listing.book.coverImageUrl || 'https://via.placeholder.com/400x600?text=No+Cover'}
+            alt={listing.book.title}
+            className="w-full rounded-lg shadow-lg"
           />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700"
-          >
-            🔍 Keresés
-          </button>
-        </div>
-      </form>
 
-      {/* Szűrők */}
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-        <h3 className="text-xl font-bold mb-4">Szűrők</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">Min. ár (Ft)</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Max. ár (Ft)</label>
-            <input
-              type="number"
-              placeholder="10000"
-              value={filters.maxPrice}
-              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Állapot</label>
-            <select
-              value={filters.condition}
-              onChange={(e) => handleFilterChange('condition', e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="">Összes</option>
-              <option value="mint">Újszerű</option>
-              <option value="excellent">Kiváló</option>
-              <option value="good">Jó</option>
-              <option value="fair">Elfogadható</option>
-              <option value="poor">Gyenge</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-2">Rendezés</label>
-            <select
-              value={`${filters.sortBy}-${filters.sortOrder}`}
-              onChange={(e) => {
-                const [sortBy, sortOrder] = e.target.value.split('-');
-                setFilters({ ...filters, sortBy, sortOrder });
-              }}
-              className="w-full px-4 py-2 border rounded-lg"
-            >
-              <option value="date-desc">Legújabb</option>
-              <option value="date-asc">Legrégebbi</option>
-              <option value="price-asc">Ár növekvő</option>
-              <option value="price-desc">Ár csökkenő</option>
-              <option value="views-desc">Legnépszerűbb</option>
-            </select>
-          </div>
+          {listing.images && listing.images.length > 0 && (
+            <div className="grid grid-cols-4 gap-2 mt-4">
+              {listing.images.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  alt={`Kép ${index + 1}`}
+                  className="w-full h-24 object-cover rounded cursor-pointer hover:opacity-75"
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
 
-      {/* Találatok száma */}
-      <div className="mb-4 text-gray-600">
-        <strong>{listings.length}</strong> hirdetés találva
-      </div>
+        {/* Jobb oldal - Részletek */}
+        <div>
+          <h1 className="text-4xl font-bold mb-4">{listing.book.title}</h1>
+          <p className="text-xl text-gray-600 mb-4">{listing.book.author}</p>
 
-      {/* Hirdetések listája */}
-      {listings.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          Nincs találat a keresési feltételeknek megfelelően
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {listings.map((listing) => (
-            <Link
-              key={listing.id}
-              to={`/listings/${listing.id}`}
-              className="border rounded-lg p-4 hover:shadow-xl transition"
+          {/* Ár */}
+          <div className="bg-green-50 p-6 rounded-lg mb-6">
+            <div className="text-4xl font-bold text-green-600 mb-2">
+              {listing.price} {listing.currency}
+            </div>
+            <p className="text-gray-600">Elérhető: {listing.quantity} db</p>
+          </div>
+
+          {/* Állapot */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold mb-2">Állapot</h3>
+            <span className={`inline-block px-4 py-2 rounded text-sm ${
+              listing.condition === 'mint' ? 'bg-green-100 text-green-800' :
+              listing.condition === 'excellent' ? 'bg-blue-100 text-blue-800' :
+              listing.condition === 'good' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {listing.condition === 'mint' ? 'Újszerű' :
+               listing.condition === 'excellent' ? 'Kiváló' :
+               listing.condition === 'good' ? 'Jó' :
+               listing.condition === 'fair' ? 'Elfogadható' : 'Gyenge'}
+            </span>
+            {listing.conditionDescription && (
+              <p className="text-gray-600 mt-2">{listing.conditionDescription}</p>
+            )}
+          </div>
+
+          {/* Mennyiség választó */}
+          {listing.isAvailable && (
+            <div className="mb-6">
+              <label className="block text-lg font-bold mb-2">Mennyiség</label>
+              <select
+                value={quantity}
+                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                className="px-4 py-2 border rounded-lg"
+              >
+                {[...Array(Math.min(listing.quantity, 10))].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Kosárba gomb */}
+          {listing.isAvailable ? (
+            <button
+              onClick={handleAddToCart}
+              disabled={addingToCart}
+              className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-bold hover:bg-blue-700 disabled:bg-gray-400 mb-4"
             >
-              <img
-                src={listing.book.coverImageUrl || 'https://via.placeholder.com/200x300?text=No+Cover'}
-                alt={listing.book.title}
-                className="w-full h-64 object-cover rounded mb-4"
-              />
-              <h3 className="font-bold text-lg mb-2 line-clamp-2">{listing.book.title}</h3>
-              <p className="text-gray-600 mb-2 text-sm">{listing.book.author}</p>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xl font-bold text-green-600">
-                  {listing.price} {listing.currency}
-                </span>
-                <span className={`text-xs px-2 py-1 rounded ${
-                  listing.condition === 'mint' ? 'bg-green-100 text-green-800' :
-                  listing.condition === 'excellent' ? 'bg-blue-100 text-blue-800' :
-                  listing.condition === 'good' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {listing.condition}
-                </span>
+              {addingToCart ? 'Hozzáadás...' : '🛒 Kosárba'}
+            </button>
+          ) : (
+            <div className="w-full bg-red-100 text-red-800 py-4 rounded-lg text-center font-bold mb-4">
+              ❌ Jelenleg nem elérhető
+            </div>
+          )}
+
+          {/* Eladó info */}
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="font-bold mb-2">Eladó</h3>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-xl">
+                👤
               </div>
-              <p className="text-xs text-gray-500">📍 {listing.location || 'Nincs megadva'}</p>
-              <p className="text-xs text-gray-500 mt-1">👁️ {listing.viewsCount} megtekintés</p>
-            </Link>
-          ))}
+              <div>
+                <p className="font-semibold">{listing.seller.username}</p>
+                {listing.seller.rating && (
+                  <p className="text-sm text-yellow-600">⭐ {listing.seller.rating.toFixed(1)}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Helyszín */}
+          {listing.location && (
+            <p className="text-gray-600 mb-2">📍 Helyszín: {listing.location}</p>
+          )}
+
+          {/* Megtekintések */}
+          <p className="text-gray-500 text-sm">👁️ {listing.viewsCount} megtekintés</p>
         </div>
-      )}
+      </div>
+
+      {/* Könyv részletei */}
+      <div className="mt-12 bg-white p-8 rounded-lg shadow-md">
+        <h2 className="text-3xl font-bold mb-6">Könyv részletei</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {listing.book.isbn && (
+            <div>
+              <span className="font-bold">ISBN:</span> {listing.book.isbn}
+            </div>
+          )}
+          {listing.book.publisher && (
+            <div>
+              <span className="font-bold">Kiadó:</span> {listing.book.publisher}
+            </div>
+          )}
+          {listing.book.publicationYear && (
+            <div>
+              <span className="font-bold">Kiadás éve:</span> {listing.book.publicationYear}
+            </div>
+          )}
+          {listing.book.language && (
+            <div>
+              <span className="font-bold">Nyelv:</span> {listing.book.language}
+            </div>
+          )}
+          {listing.book.pageCount && (
+            <div>
+              <span className="font-bold">Oldalszám:</span> {listing.book.pageCount}
+            </div>
+          )}
+        </div>
+
+        {listing.book.description && (
+          <div className="mt-6">
+            <h3 className="font-bold text-lg mb-2">Leírás</h3>
+            <p className="text-gray-700">{listing.book.description}</p>
+          </div>
+        )}
+
+        {listing.book.categories && listing.book.categories.length > 0 && (
+          <div className="mt-6">
+            <h3 className="font-bold text-lg mb-2">Kategóriák</h3>
+            <div className="flex flex-wrap gap-2">
+              {listing.book.categories.map((category) => (
+                <span
+                  key={category.id}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+                >
+                  {category.name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default Listings;
+export default ListingDetails;

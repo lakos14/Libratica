@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Books from './pages/Books';
 import Listings from './pages/Listings';
 import ListingDetails from './pages/ListingDetails';
 import Cart from './pages/Cart';
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/books" element={<Books />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
             <Route path="/listings" element={<Listings />} />
             <Route path="/cart" element={<Cart />} />

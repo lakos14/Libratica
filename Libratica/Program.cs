@@ -1,4 +1,4 @@
-using Libratica.DataContext.Context;
+Ôªøusing Libratica.DataContext.Context;
 using Libratica.Services.Implementations;
 using Libratica.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration ? ⁄J!
+// CORS configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -64,7 +64,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend"); // ? ⁄J! (FONTOS: Authorization EL’TT!)
+app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -77,10 +77,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<LibraticaDbContext>();
 
-    // Run migrations
     context.Database.Migrate();
 
-    // Seed admin user
     var adminExists = context.Users.Any(u => u.Email == "admin@libratica.hu");
     if (!adminExists)
     {
@@ -116,12 +114,13 @@ using (var scope = app.Services.CreateScope())
             new Libratica.DataContext.Entities.Book
             {
                 ISBN = "9789632451234",
-                Title = "D˚ne",
+                Title = "D≈±ne",
                 Author = "Frank Herbert",
-                Publisher = "Gabo KiadÛ",
+                Publisher = "Gabo Kiad√≥",
                 PublicationYear = 1965,
                 Language = "magyar",
-                Description = "Arrakis, a sivatag bolygÛja...",
+                Description = "Arrakis, a sivatag bolyg√≥ja...",
+                CoverImageUrl = "https://m.media-amazon.com/images/I/81zN7udGRUL._SY466_.jpg",
                 PageCount = 688,
                 CreatedAt = DateTime.UtcNow
             },
@@ -130,22 +129,24 @@ using (var scope = app.Services.CreateScope())
                 ISBN = "9789631199437",
                 Title = "1984",
                 Author = "George Orwell",
-                Publisher = "EurÛpa KiadÛ",
+                Publisher = "Eur√≥pa Kiad√≥",
                 PublicationYear = 1949,
                 Language = "magyar",
-                Description = "Nagy TestvÈr figyel...",
+                Description = "Nagy Testv√©r figyel...",
+                CoverImageUrl = "https://m.media-amazon.com/images/I/71rpa1-kyvL._SY466_.jpg",
                 PageCount = 328,
                 CreatedAt = DateTime.UtcNow
             },
             new Libratica.DataContext.Entities.Book
             {
                 ISBN = "9789633245446",
-                Title = "Harry Potter Ès a bˆlcsek kˆve",
+                Title = "Harry Potter √©s a b√∂lcsek k√∂ve",
                 Author = "J.K. Rowling",
-                Publisher = "Animus KiadÛ",
+                Publisher = "Animus Kiad√≥",
                 PublicationYear = 1997,
                 Language = "magyar",
-                Description = "Harry Potter Èlete a Roxfort falai kˆzˆtt...",
+                Description = "Harry Potter √©lete a Roxfort falai k√∂z√∂tt...",
+                CoverImageUrl = "https://m.media-amazon.com/images/I/81YOuOGFCJL._SY466_.jpg",
                 PageCount = 336,
                 CreatedAt = DateTime.UtcNow
             }
@@ -154,7 +155,6 @@ using (var scope = app.Services.CreateScope())
         context.Books.AddRange(books);
         context.SaveChanges();
 
-        // Add categories to books
         if (sciFiCategory != null)
         {
             context.BookCategories.AddRange(
@@ -172,7 +172,6 @@ using (var scope = app.Services.CreateScope())
 
         context.SaveChanges();
 
-        // Create listings
         var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@libratica.hu");
         if (adminUser != null)
         {
@@ -183,12 +182,12 @@ using (var scope = app.Services.CreateScope())
                     BookId = books[0].Id,
                     SellerId = adminUser.Id,
                     Condition = "good",
-                    ConditionDescription = "JÛ ·llapotban, minim·lis kop·s",
+                    ConditionDescription = "J√≥ √°llapotban, minim√°lis kop√°s",
                     Price = 2500,
                     Currency = "HUF",
-                    Quantity = 1,
+                    Quantity = 2,
                     IsAvailable = true,
-                    Location = "Budapest, XIII. ker¸let",
+                    Location = "Budapest, XIII. ker√ºlet",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 },
@@ -197,12 +196,26 @@ using (var scope = app.Services.CreateScope())
                     BookId = books[1].Id,
                     SellerId = adminUser.Id,
                     Condition = "excellent",
-                    ConditionDescription = "Kiv·lÛ ·llapot",
+                    ConditionDescription = "Kiv√°l√≥ √°llapot",
                     Price = 1800,
                     Currency = "HUF",
                     Quantity = 2,
                     IsAvailable = true,
                     Location = "Debrecen",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new Libratica.DataContext.Entities.Listing
+                {
+                    BookId = books[2].Id,
+                    SellerId = adminUser.Id,
+                    Condition = "mint",
+                    ConditionDescription = "Teljesen √∫jszer≈±, olvasatlan",
+                    Price = 3200,
+                    Currency = "HUF",
+                    Quantity = 1,
+                    IsAvailable = true,
+                    Location = "Szeged",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 }

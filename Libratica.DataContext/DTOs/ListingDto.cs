@@ -18,7 +18,7 @@ namespace Libratica.DataContext.DTOs
         public int Quantity { get; set; }
         public bool IsAvailable { get; set; }
         public string? Location { get; set; }
-        public List<string> Images { get; set; } = new(); // JSON-ból parse-olva
+        public List<string> Images { get; set; } = new();
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public int ViewsCount { get; set; }

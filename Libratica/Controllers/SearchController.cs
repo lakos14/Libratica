@@ -37,13 +37,11 @@ namespace Libratica.Controllers
                         .ThenInclude(bc => bc.Category)
                     .AsQueryable();
 
-                // Kategória szűrés (SQL-ben)
                 if (categoryId.HasValue)
                 {
                     booksQuery = booksQuery.Where(b => b.BookCategories.Any(bc => bc.CategoryId == categoryId.Value));
                 }
 
-                // Év szűrés (SQL-ben)
                 if (minYear.HasValue)
                 {
                     booksQuery = booksQuery.Where(b => b.PublicationYear >= minYear.Value);
@@ -54,16 +52,13 @@ namespace Libratica.Controllers
                     booksQuery = booksQuery.Where(b => b.PublicationYear <= maxYear.Value);
                 }
 
-                // Nyelv szűrés (SQL-ben)
                 if (!string.IsNullOrWhiteSpace(language))
                 {
                     booksQuery = booksQuery.Where(b => b.Language == language);
                 }
 
-                // ELŐBB lekérdezés SQL-ből!
                 var books = await booksQuery.ToListAsync();
 
-                // Keresés szöveg alapján (MEMÓRIÁBAN, ékezet-mentesen!)
                 if (!string.IsNullOrWhiteSpace(query))
                 {
                     var normalizedQuery = RemoveDiacritics(query.ToLower());
@@ -75,7 +70,6 @@ namespace Libratica.Controllers
                     ).ToList();
                 }
 
-                // Rendezés (MEMÓRIÁBAN!)
                 books = sortBy?.ToLower() switch
                 {
                     "title" => sortOrder == "desc" ? books.OrderByDescending(b => b.Title).ToList() : books.OrderBy(b => b.Title).ToList(),
@@ -120,6 +114,7 @@ namespace Libratica.Controllers
         public async Task<ActionResult<IEnumerable<ListingDto>>> SearchListings(
             [FromQuery] string? query = null,
             [FromQuery] int? categoryId = null,
+            [FromQuery] int? bookId = null,
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
             [FromQuery] string? condition = null,
@@ -138,13 +133,16 @@ namespace Libratica.Controllers
                         .ThenInclude(s => s.Role)
                     .AsQueryable();
 
-                // Kategória szűrés (SQL-ben)
                 if (categoryId.HasValue)
                 {
                     listingsQuery = listingsQuery.Where(l => l.Book.BookCategories.Any(bc => bc.CategoryId == categoryId.Value));
                 }
 
-                // Ár szűrés (SQL-ben)
+                if (bookId.HasValue)
+                {
+                    listingsQuery = listingsQuery.Where(l => l.BookId == bookId.Value);
+                }
+
                 if (minPrice.HasValue)
                 {
                     listingsQuery = listingsQuery.Where(l => l.Price >= minPrice.Value);
@@ -155,22 +153,18 @@ namespace Libratica.Controllers
                     listingsQuery = listingsQuery.Where(l => l.Price <= maxPrice.Value);
                 }
 
-                // Állapot szűrés (SQL-ben)
                 if (!string.IsNullOrWhiteSpace(condition))
                 {
                     listingsQuery = listingsQuery.Where(l => l.Condition == condition);
                 }
 
-                // Elérhető szűrés (SQL-ben)
                 if (isAvailable.HasValue)
                 {
                     listingsQuery = listingsQuery.Where(l => l.IsAvailable == isAvailable.Value);
                 }
 
-                // ELŐBB lekérdezés SQL-ből!
                 var listings = await listingsQuery.ToListAsync();
 
-                // Keresés szöveg alapján (MEMÓRIÁBAN!)
                 if (!string.IsNullOrWhiteSpace(query))
                 {
                     var normalizedQuery = RemoveDiacritics(query.ToLower());
@@ -181,14 +175,12 @@ namespace Libratica.Controllers
                     ).ToList();
                 }
 
-                // Helyszín szűrés (MEMÓRIÁBAN!)
                 if (!string.IsNullOrWhiteSpace(location))
                 {
                     var normalizedLocation = RemoveDiacritics(location.ToLower());
                     listings = listings.Where(l => l.Location != null && RemoveDiacritics(l.Location.ToLower()).Contains(normalizedLocation)).ToList();
                 }
 
-                // Rendezés (MEMÓRIÁBAN!)
                 listings = sortBy?.ToLower() switch
                 {
                     "price" => sortOrder == "desc" ? listings.OrderByDescending(l => l.Price).ToList() : listings.OrderBy(l => l.Price).ToList(),
@@ -291,7 +283,6 @@ namespace Libratica.Controllers
 
             return Ok(conditions);
         }
-        // Helper method: Ékezetek eltávolítása
         private static string RemoveDiacritics(string text)
         {
             var normalizedString = text.Normalize(System.Text.NormalizationForm.FormD);

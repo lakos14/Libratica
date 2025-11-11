@@ -32,6 +32,6 @@ namespace Libratica.DataContext.DTOs
         [MaxLength(200)]
         public string? Location { get; set; }
 
-        public List<string>? Images { get; set; } // Kép URL-ek listája
+        public List<string>? Images { get; set; }
     }
 }

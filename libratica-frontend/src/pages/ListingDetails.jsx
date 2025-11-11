@@ -88,7 +88,7 @@ const ListingDetails = () => {
           <img
             src={listing.book.coverImageUrl || 'https://via.placeholder.com/400x600?text=No+Cover'}
             alt={listing.book.title}
-            className="w-full rounded-lg shadow-lg"
+            className="w-full max-w-md mx-auto rounded-lg shadow-lg"
           />
 
           {listing.images && listing.images.length > 0 && (

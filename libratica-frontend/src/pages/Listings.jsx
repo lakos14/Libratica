@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { searchAPI } from '../services/api';
 
 const Listings = () => {
+  const [searchParams] = useSearchParams(); // ← ÚJ!
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,36 +15,35 @@ const Listings = () => {
     sortOrder: 'desc',
   });
 
+  const bookIdFromUrl = searchParams.get('bookId');
+
   useEffect(() => {
     loadListings();
-  }, [filters]);
+  }, [filters, bookIdFromUrl]); 
 
   const loadListings = async () => {
-  try {
-    setLoading(true);
-    const params = {
-      query: searchQuery || undefined,
-      minPrice: filters.minPrice || undefined,
-      maxPrice: filters.maxPrice || undefined,
-      condition: filters.condition || undefined,
-      sortBy: filters.sortBy,
-      sortOrder: filters.sortOrder,
-    };
+    try {
+      setLoading(true);
+      const params = {
+        query: searchQuery || undefined,
+        bookId: bookIdFromUrl ? parseInt(bookIdFromUrl) : undefined,
+        minPrice: filters.minPrice || undefined,
+        maxPrice: filters.maxPrice || undefined,
+        condition: filters.condition || undefined,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+      };
 
-    console.log('🔍 Keresési paraméterek:', params); // ← ÚJ!
+      console.log('📦 Listings params:', params);
 
-    const response = await searchAPI.searchListings(params);
-    
-    console.log('📦 API válasz:', response.data); // ← ÚJ!
-    
-    setListings(response.data);
-  } catch (error) {
-    console.error('❌ Failed to load listings:', error);
-    console.error('❌ Error response:', error.response?.data); // ← ÚJ!
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await searchAPI.searchListings(params);
+      setListings(response.data);
+    } catch (error) {
+      console.error('Failed to load listings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -64,7 +64,9 @@ const Listings = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Hirdetések böngészése</h1>
+    <h1 className="text-4xl font-bold mb-8">
+      {bookIdFromUrl ? 'Hirdetések ehhez a könyvhöz' : 'Hirdetések böngészése'}
+    </h1>
 
       {/* Keresés */}
       <form onSubmit={handleSearch} className="mb-8">

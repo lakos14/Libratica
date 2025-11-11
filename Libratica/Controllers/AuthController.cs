@@ -59,7 +59,6 @@ namespace Libratica.Controllers
         {
             try
             {
-                // JWT token-ből kinyerjük a userId-t
                 var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
                 {

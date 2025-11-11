@@ -78,32 +78,27 @@ namespace Libratica.Controllers
                 var userId = GetCurrentUserId();
                 var cart = await GetOrCreateCartAsync(userId);
 
-                // Listing létezik és elérhető?
                 var listing = await _context.Listings.FindAsync(addToCartDto.ListingId);
                 if (listing == null || !listing.IsAvailable)
                 {
                     return BadRequest(new { message = "Hirdetés nem elérhető" });
                 }
 
-                // Elég készlet van?
                 if (listing.Quantity < addToCartDto.Quantity)
                 {
                     return BadRequest(new { message = $"Csak {listing.Quantity} db elérhető" });
                 }
 
-                // Már van a kosárban?
                 var existingItem = await _context.CartItems
                     .FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.ListingId == addToCartDto.ListingId);
 
                 if (existingItem != null)
                 {
-                    // Mennyiség növelése
                     existingItem.Quantity += addToCartDto.Quantity;
-                    existingItem.Price = listing.Price; // Frissített ár
+                    existingItem.Price = listing.Price;
                 }
                 else
                 {
-                    // Új tétel hozzáadása
                     var cartItem = new CartItem
                     {
                         CartId = cart.Id,
@@ -144,8 +139,6 @@ namespace Libratica.Controllers
                 {
                     return NotFound(new { message = "Kosár tétel nem található" });
                 }
-
-                // Elég készlet van?
                 if (cartItem.Listing.Quantity < updateDto.Quantity)
                 {
                     return BadRequest(new { message = $"Csak {cartItem.Listing.Quantity} db elérhető" });
@@ -224,7 +217,6 @@ namespace Libratica.Controllers
             }
         }
 
-        // Helper methods
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

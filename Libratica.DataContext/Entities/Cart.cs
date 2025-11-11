@@ -18,7 +18,6 @@ namespace Libratica.DataContext.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation properties
         public ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }

@@ -70,7 +70,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Rendelés nem található" });
                 }
 
-                // Csak saját rendelést láthatod (vevő vagy eladó)
                 if (order.BuyerId != userId && order.SellerId != userId)
                 {
                     return Forbid();
@@ -96,7 +95,6 @@ namespace Libratica.Controllers
             {
                 var userId = GetCurrentUserId();
 
-                // Kosár lekérése
                 var cart = await _context.Carts
                     .Include(c => c.CartItems)
                         .ThenInclude(ci => ci.Listing)
@@ -108,7 +106,6 @@ namespace Libratica.Controllers
                     return BadRequest(new { message = "A kosár üres" });
                 }
 
-                // Ellenőrzések
                 foreach (var cartItem in cart.CartItems)
                 {
                     if (!cartItem.Listing.IsAvailable)
@@ -122,7 +119,6 @@ namespace Libratica.Controllers
                     }
                 }
 
-                // Rendelések létrehozása eladónként (egy kosárból több rendelés lehet!)
                 var ordersBySeller = cart.CartItems.GroupBy(ci => ci.Listing.SellerId);
 
                 var createdOrders = new List<Order>();
@@ -145,9 +141,8 @@ namespace Libratica.Controllers
                     };
 
                     _context.Orders.Add(order);
-                    await _context.SaveChangesAsync(); // Save to get Order ID
+                    await _context.SaveChangesAsync();
 
-                    // OrderItem-ek létrehozása
                     foreach (var cartItem in items)
                     {
                         var orderItem = new OrderItem
@@ -160,10 +155,8 @@ namespace Libratica.Controllers
 
                         _context.OrderItems.Add(orderItem);
 
-                        // Készlet csökkentése
                         cartItem.Listing.Quantity -= cartItem.Quantity;
 
-                        // Ha elfogyott, nem elérhető
                         if (cartItem.Listing.Quantity == 0)
                         {
                             cartItem.Listing.IsAvailable = false;
@@ -173,7 +166,6 @@ namespace Libratica.Controllers
                     createdOrders.Add(order);
                 }
 
-                // Kosár ürítése
                 _context.CartItems.RemoveRange(cart.CartItems);
 
                 await _context.SaveChangesAsync();
@@ -208,7 +200,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Rendelés nem található" });
                 }
 
-                // Csak az eladó módosíthatja a státuszt
                 if (order.SellerId != userId)
                 {
                     return Forbid();
@@ -247,19 +238,16 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Rendelés nem található" });
                 }
 
-                // Csak a vevő mondhatja le
                 if (order.BuyerId != userId)
                 {
                     return Forbid();
                 }
 
-                // Csak pending státusznál
                 if (order.Status != "pending")
                 {
                     return BadRequest(new { message = "Csak függőben lévő rendelést lehet lemondani" });
                 }
 
-                // Készlet visszaállítása
                 foreach (var orderItem in order.OrderItems)
                 {
                     orderItem.Listing.Quantity += orderItem.Quantity;
@@ -335,7 +323,6 @@ namespace Libratica.Controllers
             }
         }
 
-        // Helper methods
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

@@ -10,7 +10,6 @@ namespace Libratica.DataContext.Context
         {
         }
 
-        // DbSets - ezek lesznek a táblák
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -167,7 +166,7 @@ namespace Libratica.DataContext.Context
             modelBuilder.Entity<Cart>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.UserId).IsUnique(); // Egy usernek egy kosara
+                entity.HasIndex(e => e.UserId).IsUnique();
 
                 entity.HasOne(c => c.User)
                     .WithMany()

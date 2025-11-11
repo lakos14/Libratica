@@ -39,7 +39,6 @@ namespace Libratica.Controllers
                         .ThenInclude(s => s.Role)
                     .AsQueryable();
 
-                // Szűrések
                 if (bookId.HasValue)
                     query = query.Where(l => l.BookId == bookId.Value);
 
@@ -52,9 +51,7 @@ namespace Libratica.Controllers
                 if (isAvailable.HasValue)
                     query = query.Where(l => l.IsAvailable == isAvailable.Value);
 
-                var listingsQuery = await query
-    .OrderByDescending(l => l.CreatedAt)
-    .ToListAsync(); // ELŐBB lekérdezés!
+                var listingsQuery = await query.OrderByDescending(l => l.CreatedAt).ToListAsync();
 
                 var listings = listingsQuery.Select(l => new ListingDto
                 {
@@ -134,7 +131,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Hirdetés nem található" });
                 }
 
-                // Views count növelése
                 listing.ViewsCount++;
                 await _context.SaveChangesAsync();
 
@@ -201,7 +197,6 @@ namespace Libratica.Controllers
         {
             try
             {
-                // Aktuális user ID kinyerése JWT token-ből
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
                 if (userIdClaim == null)
                 {
@@ -209,14 +204,12 @@ namespace Libratica.Controllers
                 }
                 var userId = int.Parse(userIdClaim.Value);
 
-                // Könyv létezik-e?
                 var bookExists = await _context.Books.AnyAsync(b => b.Id == createListingDto.BookId);
                 if (!bookExists)
                 {
                     return BadRequest(new { message = "A megadott könyv nem létezik" });
                 }
 
-                // Hirdetés létrehozása
                 var listing = new Libratica.DataContext.Entities.Listing
                 {
                     BookId = createListingDto.BookId,
@@ -226,7 +219,7 @@ namespace Libratica.Controllers
                     Price = createListingDto.Price,
                     Currency = createListingDto.Currency,
                     Quantity = createListingDto.Quantity,
-                    IsAvailable = true, // AZONNAL ÉLŐBEN! 🔥
+                    IsAvailable = true,
                     Location = createListingDto.Location,
                     Images = createListingDto.Images != null ? JsonSerializer.Serialize(createListingDto.Images) : null,
                     CreatedAt = DateTime.UtcNow,
@@ -267,14 +260,12 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Hirdetés nem található" });
                 }
 
-                // Csak saját hirdetést szerkesztheted (kivéve admin)
                 var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
                 if (listing.SellerId != userId && userRole != "admin")
                 {
                     return Forbid();
                 }
 
-                // Frissítés
                 if (updateListingDto.Condition != null) listing.Condition = updateListingDto.Condition;
                 if (updateListingDto.ConditionDescription != null) listing.ConditionDescription = updateListingDto.ConditionDescription;
                 if (updateListingDto.Price.HasValue) listing.Price = updateListingDto.Price.Value;
@@ -317,7 +308,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Hirdetés nem található" });
                 }
 
-                // Csak saját hirdetést törölheted (kivéve admin)
                 var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
                 if (listing.SellerId != userId && userRole != "admin")
                 {

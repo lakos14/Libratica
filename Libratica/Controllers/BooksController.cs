@@ -30,7 +30,6 @@ namespace Libratica.Controllers
                         .ThenInclude(bc => bc.Category)
                     .AsQueryable();
 
-                // Kategória szerinti szűrés
                 if (categoryId.HasValue)
                 {
                     query = query.Where(b => b.BookCategories.Any(bc => bc.CategoryId == categoryId.Value));
@@ -123,7 +122,6 @@ namespace Libratica.Controllers
         {
             try
             {
-                // Új könyv létrehozása
                 var book = new Libratica.DataContext.Entities.Book
                 {
                     ISBN = createBookDto.ISBN,
@@ -141,7 +139,6 @@ namespace Libratica.Controllers
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
 
-                // Kategóriák hozzárendelése
                 if (createBookDto.CategoryIds.Any())
                 {
                     var bookCategories = createBookDto.CategoryIds.Select(categoryId => new Libratica.DataContext.Entities.BookCategory
@@ -154,7 +151,6 @@ namespace Libratica.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                // Visszatöltés a kategóriákkal együtt
                 var createdBook = await _context.Books
                     .Include(b => b.BookCategories)
                         .ThenInclude(bc => bc.Category)
@@ -207,7 +203,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Könyv nem található" });
                 }
 
-                // Frissítés
                 if (updateBookDto.ISBN != null) book.ISBN = updateBookDto.ISBN;
                 if (updateBookDto.Title != null) book.Title = updateBookDto.Title;
                 if (updateBookDto.Author != null) book.Author = updateBookDto.Author;
@@ -218,13 +213,10 @@ namespace Libratica.Controllers
                 if (updateBookDto.CoverImageUrl != null) book.CoverImageUrl = updateBookDto.CoverImageUrl;
                 if (updateBookDto.PageCount.HasValue) book.PageCount = updateBookDto.PageCount;
 
-                // Kategóriák frissítése
                 if (updateBookDto.CategoryIds != null)
                 {
-                    // Régi kategóriák törlése
                     _context.BookCategories.RemoveRange(book.BookCategories);
 
-                    // Új kategóriák hozzáadása
                     var bookCategories = updateBookDto.CategoryIds.Select(categoryId => new Libratica.DataContext.Entities.BookCategory
                     {
                         BookId = book.Id,
@@ -236,7 +228,6 @@ namespace Libratica.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Visszatöltés frissített adatokkal
                 var updatedBook = await _context.Books
                     .Include(b => b.BookCategories)
                         .ThenInclude(bc => bc.Category)

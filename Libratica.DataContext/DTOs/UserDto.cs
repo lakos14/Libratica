@@ -15,7 +15,7 @@ namespace Libratica.DataContext.DTOs
         public string? PhoneNumber { get; set; }
         public string? ProfilePictureUrl { get; set; }
         public string? Bio { get; set; }
-        public string RoleName { get; set; } = string.Empty; // "user" vagy "admin"
+        public string RoleName { get; set; } = string.Empty;
         public bool IsVerified { get; set; }
         public decimal? Rating { get; set; }
         public DateTime CreatedAt { get; set; }

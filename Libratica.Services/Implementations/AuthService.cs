@@ -24,22 +24,18 @@ namespace Libratica.Services.Implementations
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
         {
-            // Ellenőrzés: email már létezik?
             if (await _context.Users.AnyAsync(u => u.Email == registerDto.Email))
             {
                 throw new Exception("Ez az email cím már regisztrálva van.");
             }
 
-            // Ellenőrzés: username már létezik?
             if (await _context.Users.AnyAsync(u => u.Username == registerDto.Username))
             {
                 throw new Exception("Ez a felhasználónév már foglalt.");
             }
 
-            // Jelszó hash-elése
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password);
 
-            // Új user létrehozása
             var user = new User
             {
                 Email = registerDto.Email,
@@ -47,7 +43,7 @@ namespace Libratica.Services.Implementations
                 PasswordHash = passwordHash,
                 FullName = registerDto.FullName,
                 PhoneNumber = registerDto.PhoneNumber,
-                RoleId = 1, // Default: "user" role
+                RoleId = 1,
                 IsVerified = false,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -57,13 +53,10 @@ namespace Libratica.Services.Implementations
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Role betöltése
             var role = await _context.Roles.FindAsync(user.RoleId);
 
-            // JWT token generálása
             var token = GenerateJwtToken(user.Id, user.Email, user.Username, role!.Name);
 
-            // UserDto mapping
             var userDto = new UserDto
             {
                 Id = user.Id,
@@ -89,7 +82,6 @@ namespace Libratica.Services.Implementations
 
         public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
         {
-            // Keresés email vagy username alapján
             var user = await _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Email == loginDto.EmailOrUsername || u.Username == loginDto.EmailOrUsername);
@@ -99,26 +91,21 @@ namespace Libratica.Services.Implementations
                 throw new Exception("Hibás email/felhasználónév vagy jelszó.");
             }
 
-            // Jelszó ellenőrzése
             if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
             {
                 throw new Exception("Hibás email/felhasználónév vagy jelszó.");
             }
 
-            // Aktív-e a felhasználó?
             if (!user.IsActive)
             {
                 throw new Exception("Ez a fiók le van tiltva.");
             }
 
-            // Last login frissítése
             user.LastLoginAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            // JWT token generálása
             var token = GenerateJwtToken(user.Id, user.Email, user.Username, user.Role.Name);
 
-            // UserDto mapping
             var userDto = new UserDto
             {
                 Id = user.Id,

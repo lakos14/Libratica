@@ -65,6 +65,8 @@ export const ordersAPI = {
   checkout: (data) => api.post('/orders/checkout', data),
   getPurchases: () => api.get('/orders/purchases'),
   getSales: () => api.get('/orders/sales'),
+  cancelOrder: (id) => api.delete(`/orders/${id}`),
+  updateStatus: (id, data) => api.put(`/orders/${id}/status`, data),
 };
 
 // Search API
@@ -72,5 +74,6 @@ export const searchAPI = {
   searchBooks: (params) => api.get('/search/books', { params }),
   searchListings: (params) => api.get('/search/listings', { params }),
 };
+
 
 export default api;

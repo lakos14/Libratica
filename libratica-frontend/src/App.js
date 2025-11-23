@@ -12,6 +12,7 @@ import Cart from './pages/Cart';
 import MyListings from './pages/MyListings';
 import CreateListing from './pages/CreateListing';
 import EditListing from './pages/EditListing';
+import Orders from './pages/Orders';
 
 function App() {
   return (
@@ -24,12 +25,13 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/books" element={<Books />} />
-            <Route path="/listings/:id" element={<ListingDetails />} />
             <Route path="/listings" element={<Listings />} />
-            <Route path="/listings/create" element={<CreateListing />} />
-            <Route path="/listings/:id/edit" element={<EditListing />} />
+            <Route path="/listings/:id" element={<ListingDetails />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/my-listings" element={<MyListings />} />
+            <Route path="/listings/create" element={<CreateListing />} />
+            <Route path="/listings/:id/edit" element={<EditListing />} />
+            <Route path="/orders" element={<Orders />} />
           </Routes>
         </div>
       </AuthProvider>

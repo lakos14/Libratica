@@ -24,10 +24,13 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/cart" className="hover:text-blue-200">
-                  🛒 Kosár
+                   Kosár
                 </Link>
                 <Link to="/my-listings" className="hover:text-blue-200">
                   Hirdetéseim
+                </Link>
+                <Link to="/orders" className="hover:text-blue-200">
+                   Rendeléseim
                 </Link>
                 <div className="flex items-center gap-4">
                   <span className="text-sm">👤 {user?.username}</span>

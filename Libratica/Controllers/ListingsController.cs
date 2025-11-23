@@ -340,8 +340,66 @@ namespace Libratica.Controllers
                     return Unauthorized(new { message = "Érvénytelen token" });
                 }
                 var userId = int.Parse(userIdClaim.Value);
+                var query = _context.Listings
+                    .Include(l => l.Book)
+                        .ThenInclude(b => b.BookCategories)
+                            .ThenInclude(bc => bc.Category)
+                    .Include(l => l.Seller)
+                        .ThenInclude(s => s.Role)
+                    .Where(l => l.SellerId == userId)
+                    .OrderByDescending(l => l.CreatedAt);
 
-                return await GetListings(sellerId: userId);
+                var listingsQuery = await query.ToListAsync();
+
+                var listings = listingsQuery.Select(l => new ListingDto
+                {
+                    Id = l.Id,
+                    Book = new BookDto
+                    {
+                        Id = l.Book.Id,
+                        ISBN = l.Book.ISBN,
+                        Title = l.Book.Title,
+                        Author = l.Book.Author,
+                        Publisher = l.Book.Publisher,
+                        PublicationYear = l.Book.PublicationYear,
+                        Language = l.Book.Language,
+                        Description = l.Book.Description,
+                        CoverImageUrl = l.Book.CoverImageUrl,
+                        PageCount = l.Book.PageCount,
+                        Categories = l.Book.BookCategories.Select(bc => new CategoryDto
+                        {
+                            Id = bc.Category.Id,
+                            Name = bc.Category.Name,
+                            Description = bc.Category.Description
+                        }).ToList(),
+                        CreatedAt = l.Book.CreatedAt
+                    },
+                    Seller = new UserDto
+                    {
+                        Id = l.Seller.Id,
+                        Username = l.Seller.Username,
+                        FullName = l.Seller.FullName,
+                        ProfilePictureUrl = l.Seller.ProfilePictureUrl,
+                        RoleName = l.Seller.Role.Name,
+                        Rating = l.Seller.Rating,
+                        CreatedAt = l.Seller.CreatedAt
+                    },
+                    Condition = l.Condition,
+                    ConditionDescription = l.ConditionDescription,
+                    Price = l.Price,
+                    Currency = l.Currency,
+                    Quantity = l.Quantity,
+                    IsAvailable = l.IsAvailable,
+                    Location = l.Location,
+                    Images = !string.IsNullOrEmpty(l.Images)
+                        ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
+                        : new List<string>(),
+                    CreatedAt = l.CreatedAt,
+                    UpdatedAt = l.UpdatedAt,
+                    ViewsCount = l.ViewsCount
+                }).ToList();
+
+                return Ok(listings);
             }
             catch (Exception ex)
             {

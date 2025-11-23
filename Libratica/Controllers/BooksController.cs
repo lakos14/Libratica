@@ -117,7 +117,7 @@ namespace Libratica.Controllers
         /// Új könyv létrehozása (csak admin)
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "admin")]
+        [Authorize]
         public async Task<ActionResult<BookDto>> CreateBook([FromBody] CreateBookDto createBookDto)
         {
             try

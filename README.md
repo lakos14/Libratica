@@ -2,8 +2,6 @@
 2025.11.11
 -frontend változni fog
 -nincs még:
-	-hírdetés létrehozása, szerkesztése oldal
-	-rendelések megtekintése oldal
 	-profil szerkesztése oldal
 	-képfeltöltés
 	-form validációk, toast értesítések

@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { searchAPI } from '../services/api';
 
 const Listings = () => {
-  const [searchParams] = useSearchParams(); // ← ÚJ!
+  const [searchParams] = useSearchParams();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,9 +17,14 @@ const Listings = () => {
 
   const bookIdFromUrl = searchParams.get('bookId');
 
+  // Debounced effect - csak 500ms után hív
   useEffect(() => {
-    loadListings();
-  }, [filters, bookIdFromUrl]); 
+    const timer = setTimeout(() => {
+      loadListings();
+    }, 500); // 500ms késleltetés
+
+    return () => clearTimeout(timer); // Cleanup
+  }, [filters, bookIdFromUrl]);
 
   const loadListings = async () => {
     try {
@@ -64,9 +69,9 @@ const Listings = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-    <h1 className="text-4xl font-bold mb-8">
-      {bookIdFromUrl ? 'Hirdetések ehhez a könyvhöz' : 'Hirdetések böngészése'}
-    </h1>
+      <h1 className="text-4xl font-bold mb-8">
+        {bookIdFromUrl ? 'Hirdetések ehhez a könyvhöz' : 'Hirdetések böngészése'}
+      </h1>
 
       {/* Keresés */}
       <form onSubmit={handleSearch} className="mb-8">
@@ -185,7 +190,6 @@ const Listings = () => {
                 </span>
               </div>
               <p className="text-xs text-gray-500">📍 {listing.location || 'Nincs megadva'}</p>
-              <p className="text-xs text-gray-500 mt-1">👁️ {listing.viewsCount} megtekintés</p>
             </Link>
           ))}
         </div>

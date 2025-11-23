@@ -190,9 +190,6 @@ const ListingDetails = () => {
           {listing.location && (
             <p className="text-gray-600 mb-2">📍 Helyszín: {listing.location}</p>
           )}
-
-          {/* Megtekintések */}
-          <p className="text-gray-500 text-sm">👁️ {listing.viewsCount} megtekintés</p>
         </div>
       </div>
 

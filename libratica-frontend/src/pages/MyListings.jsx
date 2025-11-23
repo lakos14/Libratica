@@ -5,17 +5,12 @@ import { useAuth } from '../context/AuthContext';
 
 const MyListings = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-    loadListings();
-  }, [isAuthenticated, navigate]);
+useEffect(() => {
+  loadListings();
+}, []);
 
   const loadListings = async () => {
     try {
@@ -34,7 +29,7 @@ const MyListings = () => {
     try {
       await listingsAPI.delete(id);
       alert('Hirdetés törölve!');
-      loadListings(); // Reload
+      loadListings();
     } catch (error) {
       alert(error.response?.data?.message || 'Hiba történt a törlés során');
     }
@@ -43,19 +38,11 @@ const MyListings = () => {
   const toggleAvailability = async (id, currentStatus) => {
     try {
       await listingsAPI.update(id, { isAvailable: !currentStatus });
-      loadListings(); // Reload
+      loadListings();
     } catch (error) {
       alert(error.response?.data?.message || 'Hiba történt');
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-2xl">Betöltés...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -118,7 +105,6 @@ const MyListings = () => {
                     <div>Állapot: <span className="font-semibold">{listing.condition}</span></div>
                     <div>Készlet: <span className="font-semibold">{listing.quantity} db</span></div>
                     <div>Helyszín: <span className="font-semibold">{listing.location || 'N/A'}</span></div>
-                    <div>Megtekintések: <span className="font-semibold">{listing.viewsCount}</span></div>
                   </div>
 
                   {listing.conditionDescription && (
@@ -129,12 +115,6 @@ const MyListings = () => {
 
                   {/* Műveletek */}
                   <div className="flex gap-3">
-                    <Link
-                      to={`/listings/${listing.id}`}
-                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
-                    >
-                      👁️ Megtekintés
-                    </Link>
                     <button
                       onClick={() => navigate(`/listings/${listing.id}/edit`)}
                       className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 text-sm"

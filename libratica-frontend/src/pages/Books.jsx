@@ -23,7 +23,11 @@ const Books = () => {
   }, []);
 
   useEffect(() => {
-    loadBooks();
+    const timer = setTimeout(() => {
+      loadBooks();
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [filters]);
 
   const loadCategories = async () => {

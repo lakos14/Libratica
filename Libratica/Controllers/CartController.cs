@@ -84,6 +84,11 @@ namespace Libratica.Controllers
                     return BadRequest(new { message = "Hirdetés nem elérhető" });
                 }
 
+                if (listing.SellerId == userId)
+                {
+                    return BadRequest(new { message = "Saját hirdetést nem vásárolhatsz meg!" });
+                }
+
                 if (listing.Quantity < addToCartDto.Quantity)
                 {
                     return BadRequest(new { message = $"Csak {listing.Quantity} db elérhető" });

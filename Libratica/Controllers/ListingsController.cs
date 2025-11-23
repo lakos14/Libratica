@@ -287,7 +287,7 @@ namespace Libratica.Controllers
         }
 
         /// <summary>
-        /// Saját hirdetés törlése (vagy admin bármit törölhet)
+        /// Hirdetés törlése
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize]
@@ -295,34 +295,67 @@ namespace Libratica.Controllers
         {
             try
             {
-                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim == null)
-                {
-                    return Unauthorized(new { message = "Érvénytelen token" });
-                }
-                var userId = int.Parse(userIdClaim.Value);
+                var userId = GetCurrentUserId();
 
-                var listing = await _context.Listings.FindAsync(id);
+                var listing = await _context.Listings
+                    .Include(l => l.OrderItems)
+                        .ThenInclude(oi => oi.Order)
+                    .FirstOrDefaultAsync(l => l.Id == id);
+
                 if (listing == null)
                 {
                     return NotFound(new { message = "Hirdetés nem található" });
                 }
 
-                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-                if (listing.SellerId != userId && userRole != "admin")
+                if (listing.SellerId != userId)
                 {
                     return Forbid();
+                }
+
+                var hasActiveOrders = listing.OrderItems.Any(oi =>
+                    oi.Order.Status != "cancelled" &&
+                    oi.Order.Status != "delivered");
+
+                if (hasActiveOrders)
+                {
+                    return BadRequest(new { message = "Nem törölhető aktív rendeléshez tartozó hirdetés! Várj, amíg a rendelések teljesülnek vagy lemondásra kerülnek." });
+                }
+
+                if (listing.OrderItems.Any())
+                {
+                    listing.IsAvailable = false;
+                    listing.Quantity = 0;
+                    await _context.SaveChangesAsync();
+
+                    return Ok(new { message = "Hirdetés inaktiválva (rendelési előzmények miatt nem törölhető teljesen)" });
+                }
+
+                var cartItems = await _context.CartItems
+                    .Where(ci => ci.ListingId == id)
+                    .ToListAsync();
+
+                if (cartItems.Any())
+                {
+                    _context.CartItems.RemoveRange(cartItems);
                 }
 
                 _context.Listings.Remove(listing);
                 await _context.SaveChangesAsync();
 
-                return NoContent();
+                return Ok(new { message = "Hirdetés sikeresen törölve" });
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = $"Hiba történt: {ex.InnerException?.Message ?? ex.Message}" });
             }
+        }
+
+        private int GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                throw new UnauthorizedAccessException("Érvénytelen token");
+            return int.Parse(userIdClaim.Value);
         }
 
         /// <summary>

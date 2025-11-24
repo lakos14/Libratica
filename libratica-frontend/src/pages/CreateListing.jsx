@@ -230,7 +230,7 @@ const CreateListing = () => {
       <div className="mb-8">
         <button
           onClick={() => navigate('/my-listings')}
-          className="text-blue-600 hover:text-blue-800 mb-4"
+          className="text-[#8b4513] hover:text-[#654321] mb-4"
         >
           ← Vissza a hirdetéseimhez
         </button>
@@ -249,7 +249,7 @@ const CreateListing = () => {
               onClick={() => setMode('new')}
               className={`flex-1 py-3 px-6 rounded-lg font-semibold transition ${
                 mode === 'new'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#8b4513] text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -260,7 +260,7 @@ const CreateListing = () => {
               onClick={() => setMode('existing')}
               className={`flex-1 py-3 px-6 rounded-lg font-semibold transition ${
                 mode === 'existing'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-[#8b4513] text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
@@ -287,7 +287,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="A könyv címe"
                     maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                     required
                   />
                   {errors.title && (
@@ -306,7 +306,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="Szerző neve"
                     maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                     required
                   />
                   {errors.author && (
@@ -325,7 +325,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="978-963-XXX-XXX-X"
                     maxLength="20"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
 
@@ -340,7 +340,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="Kiadó neve"
                     maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
 
@@ -356,7 +356,7 @@ const CreateListing = () => {
                     placeholder="2020"
                     min="1000"
                     max="2100"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
 
@@ -371,7 +371,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="magyar"
                     maxLength="50"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
 
@@ -387,7 +387,7 @@ const CreateListing = () => {
                     placeholder="350"
                     min="1"
                     max="10000"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
 
@@ -402,7 +402,7 @@ const CreateListing = () => {
                     onChange={handleBookDataChange}
                     placeholder="https://..."
                     maxLength="500"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
               </div>
@@ -418,7 +418,7 @@ const CreateListing = () => {
                   placeholder="Rövid leírás a könyvről..."
                   rows="3"
                   maxLength="2000"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   {bookData.description.length} / 2000 karakter
@@ -439,7 +439,7 @@ const CreateListing = () => {
                         onClick={() => handleCategoryToggle(category.id)}
                         className={`px-3 py-1 rounded-full text-sm transition ${
                           bookData.categoryIds.includes(category.id)
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-[#8b4513] text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                         }`}
                       >
@@ -467,13 +467,13 @@ const CreateListing = () => {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchBooks())}
                       placeholder="Cím, szerző vagy ISBN..."
-                      className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                     />
                     <button
                       type="button"
                       onClick={searchBooks}
                       disabled={searching}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                      className="bg-[#8b4513] text-white px-6 py-2 rounded-lg hover:bg-[#654321] disabled:bg-gray-400"
                     >
                       {searching ? '⏳' : '🔍'}
                     </button>
@@ -506,7 +506,7 @@ const CreateListing = () => {
                           </div>
                           <button
                             type="button"
-                            className="text-blue-600 hover:text-blue-800"
+                            className="text-[#8b4513] hover:text-[#654321]"
                           >
                             Kiválaszt →
                           </button>
@@ -523,7 +523,7 @@ const CreateListing = () => {
                       <button
                         type="button"
                         onClick={() => setMode('new')}
-                        className="text-blue-600 font-semibold hover:underline"
+                        className="text-[#8b4513] font-semibold hover:underline"
                       >
                         → Inkább add meg magad a könyv adatait
                       </button>
@@ -574,7 +574,7 @@ const CreateListing = () => {
               name="condition"
               value={formData.condition}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
               required
             >
               {conditionOptions.map((option) => (
@@ -599,7 +599,7 @@ const CreateListing = () => {
               placeholder="Pl: Minimális kopás a gerincen, egyébként hibátlan. Aláhúzások nincsenek."
               rows="3"
               maxLength="1000"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>{formData.conditionDescription.length} / 1000 karakter</span>
@@ -610,65 +610,67 @@ const CreateListing = () => {
           </div>
         </div>
 
-        {/* Ár és mennyiség */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold mb-4">3. Ár és mennyiség</h2>
+{/* Ár és mennyiség */}
+<div className="bg-white p-6 rounded-lg shadow-md">
+  <h2 className="text-2xl font-bold mb-4">3. Ár és mennyiség</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Ár * (100 - 1,000,000 Ft)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  min="100"
-                  max="1000000"
-                  step="100"
-                  placeholder="2500"
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <select
-                  name="currency"
-                  value={formData.currency}
-                  onChange={handleChange}
-                  className="px-4 py-2 border rounded-lg"
-                >
-                  <option value="HUF">HUF</option>
-                  <option value="EUR">EUR</option>
-                  <option value="USD">USD</option>
-                </select>
-              </div>
-              {errors.price && (
-                <p className="text-red-600 text-sm mt-1">{errors.price}</p>
-              )}
-            </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* Ár input */}
+    <div>
+      <label className="block text-sm font-medium mb-2">
+        Ár * (100 - 1,000,000 Ft)
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+          min="100"
+          max="1000000"
+          step="100"
+          placeholder="2500"
+          className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+          required
+        />
+        <select
+          name="currency"
+          value={formData.currency}
+          onChange={handleChange}
+          className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+        >
+          <option value="HUF">HUF</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+      {errors.price && (
+        <p className="text-red-600 text-sm mt-1">{errors.price}</p>
+      )}
+    </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Mennyiség * (1-100 db)
-              </label>
-              <input
-                type="number"
-                name="quantity"
-                value={formData.quantity}
-                onChange={handleChange}
-                min="1"
-                max="100"
-                placeholder="1"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              {errors.quantity && (
-                <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
-              )}
-            </div>
-          </div>
-        </div>
+    {/* Mennyiség input */}
+    <div>
+      <label className="block text-sm font-medium mb-2">
+        Mennyiség * (1-100 db)
+      </label>
+      <input
+        type="number"
+        name="quantity"
+        value={formData.quantity}
+        onChange={handleChange}
+        min="1"
+        max="100"
+        placeholder="1"
+        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+        required
+      />
+      {errors.quantity && (
+        <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
+      )}
+    </div>
+  </div>
+</div>
 
         {/* Helyszín */}
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -685,7 +687,7 @@ const CreateListing = () => {
               onChange={handleChange}
               placeholder="Pl: Budapest, XIII. kerület vagy Debrecen"
               maxLength="200"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
             />
             <p className="text-xs text-gray-500 mt-1">
               A konkrét cím megadása nem kötelező. Város vagy kerület is elég.
@@ -713,7 +715,7 @@ const CreateListing = () => {
       </form>
 
       {/* Tippek */}
-      <div className="mt-8 bg-blue-50 p-6 rounded-lg border border-blue-200">
+      <div className="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-300">
         <h3 className="font-bold text-lg mb-3">💡 Tippek a sikeres hirdetéshez</h3>
         <ul className="space-y-2 text-sm text-gray-700">
           <li>✓ Légy őszinte az állapot leírásakor</li>

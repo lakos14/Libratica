@@ -1,237 +1,266 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ordersAPI } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
-const Orders = () => {
-  const [activeTab, setActiveTab] = useState('purchases');
+function Orders() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('buyer'); // 'buyer' or 'seller'
 
   useEffect(() => {
-    fetchOrders();
+    loadOrders();
   }, [activeTab]);
 
-  const fetchOrders = async () => {
+  const loadOrders = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = activeTab === 'purchases' 
-        ? await ordersAPI.getPurchases()
-        : await ordersAPI.getSales();
+      const endpoint = activeTab === 'buyer' ? '/orders/purchases' : '/orders/sales';
+      const response = await api.get(endpoint);
       setOrders(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Hiba történt a rendelések betöltésekor');
+      setError(err.response?.data?.message || 'Hiba a rendelések betöltésekor');
     } finally {
       setLoading(false);
     }
   };
+  
 
-  const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    try {
+      await api.put(`/orders/${orderId}/status`, { status: newStatus });
+      alert('Státusz sikeresen frissítve!');
+      loadOrders();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Hiba a státusz frissítésekor');
     }
   };
 
-  const getStatusText = (status) => {
-    const statusMap = {
-      pending: 'Függőben',
-      confirmed: 'Megerősítve',
-      shipped: 'Szállítás alatt',
-      delivered: 'Kézbesítve',
-      cancelled: 'Lemondva'
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending: '⏳ Függőben',
+      confirmed: '✓ Megerősítve',
+      shipped: '🚚 Szállítás alatt',
+      delivered: '✅ Kézbesítve',
+      cancelled: '❌ Lemondva',
     };
-    return statusMap[status] || status;
+    return labels[status] || status;
   };
 
-  const handleCancelOrder = async (orderId) => {
-    if (!window.confirm('Biztosan lemondod a rendelést?')) return;
-
-    try {
-      await ordersAPI.cancelOrder(orderId);
-      fetchOrders();
-      alert('Rendelés sikeresen lemondva!');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Hiba történt a lemondás során');
-    }
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      confirmed: 'bg-blue-100 text-blue-800',
+      shipped: 'bg-purple-100 text-purple-800',
+      delivered: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800',
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
-    try {
-      await ordersAPI.updateStatus(orderId, { status: newStatus });
-      fetchOrders();
-      alert('Státusz frissítve!');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Hiba történt a státusz frissítése során');
-    }
+  const getConditionLabel = (condition) => {
+    const labels = {
+      mint: '⭐ Újszerű',
+      excellent: '⭐ Kiváló',
+      good: '👍 Jó',
+      fair: '👌 Elfogadható',
+      poor: '📦 Gyenge',
+    };
+    return labels[condition] || condition;
   };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('hu-HU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Rendeléseim</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6" style={{ color: '#8b4513' }}>
+          Rendelések
+        </h1>
 
-      {/* Tabok */}
-      <div className="flex border-b mb-6">
-        <button
-          className={`px-6 py-3 font-medium ${
-            activeTab === 'purchases'
-              ? 'border-b-2 border-blue-500 text-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('purchases')}
-        >
-          Vásárlásaim
-        </button>
-        <button
-          className={`px-6 py-3 font-medium ${
-            activeTab === 'sales'
-              ? 'border-b-2 border-blue-500 text-blue-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('sales')}
-        >
-          Eladásaim
-        </button>
-      </div>
-
-      {/* Tartalom */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Betöltés...</p>
-        </div>
-      ) : error ? (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      ) : orders.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
-          <p className="text-gray-600 text-lg">
-            {activeTab === 'purchases' 
-              ? 'Még nem vásároltál semmit.' 
-              : 'Még nem adtál el semmit.'}
-          </p>
-          <Link
-            to="/listings"
-            className="mt-4 inline-block bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+        {/* Tab navigáció */}
+        <div className="flex gap-4 mb-6 border-b border-gray-300">
+          <button
+            onClick={() => setActiveTab('buyer')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'buyer'
+                ? 'border-b-2'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            style={activeTab === 'buyer' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
-            Hirdetések böngészése
-          </Link>
+            🛒 Vásárlásaim
+          </button>
+          <button
+            onClick={() => setActiveTab('seller')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'seller'
+                ? 'border-b-2'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            style={activeTab === 'seller' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
+          >
+            💰 Eladásaim
+          </button>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="bg-white border rounded-lg p-6 shadow-sm hover:shadow-md transition">
-              {/* Rendelés fejléc */}
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold">
-                    Rendelés #{order.id}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleDateString('hu-HU', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {activeTab === 'purchases' ? (
-                      <>Eladó: <span className="font-medium">{order.seller.username}</span></>
-                    ) : (
-                      <>Vevő: <span className="font-medium">{order.buyer.username}</span></>
-                    )}
-                  </p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(order.status)}`}>
-                  {getStatusText(order.status)}
-                </span>
-              </div>
 
-              {/* Tételek */}
-              <div className="space-y-2 mb-4">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex justify-between items-center py-2 border-t">
-                    <div className="flex items-center space-x-3">
-                      {item.book.coverImageUrl && (
-                        <img
-                          src={item.book.coverImageUrl}
-                          alt={item.book.title}
-                          className="w-12 h-16 object-cover rounded"
-                        />
-                      )}
-                      <div>
-                        <p className="font-medium">{item.book.title}</p>
-                        <p className="text-sm text-gray-600">{item.book.author}</p>
-                        <p className="text-xs text-gray-500">Mennyiség: {item.quantity} db</p>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
+        {/* Rendelések lista */}
+        {orders.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded p-8 text-center">
+            <p className="text-gray-500 text-lg">
+              {activeTab === 'buyer' ? 'Még nincs vásárlásod' : 'Még nincs eladásod'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white border border-gray-200 rounded p-4">
+                {/* Rendelés fejléc */}
+                <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
+                  <div>
+                    <h3 className="font-bold text-lg" style={{ color: '#8b4513' }}>
+                      Rendelés #{order.id}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {formatDate(order.createdAt)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`inline-block px-3 py-1 rounded text-sm font-medium ${getStatusColor(
+                        order.status
+                      )}`}
+                    >
+                      {getStatusLabel(order.status)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Rendelés tételek */}
+                <div className="space-y-3 mb-4">
+                  {order.items?.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-4 p-3 bg-gray-50 rounded"
+                  >
+                    {/* Kép */}
+                    {item.book?.coverImageUrl ? (
+                      <img
+                        src={item.book.coverImageUrl}
+                        alt={item.book?.title}
+                        className="w-16 h-20 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center">
+                        <span className="text-gray-400 text-2xl">📚</span>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{item.priceAtPurchase.toLocaleString('hu-HU')} Ft</p>
-                      <p className="text-sm text-gray-600">
-                        Összesen: {item.subtotal.toLocaleString('hu-HU')} Ft
+                    )}
+
+                    {/* Részletek */}
+                    <div className="flex-1">
+                      <h4 className="font-bold text-sm text-gray-800">
+                        {item.book?.title}
+                      </h4>
+                      <p className="text-xs text-gray-600">
+                        {item.book?.author}
                       </p>
+                      <div className="flex gap-4 mt-2">
+                        <span className="text-sm text-gray-700">
+                          Mennyiség: {item.quantity} db
+                        </span>
+                        <span className="text-sm font-bold" style={{ color: '#8b4513' }}>
+                          {item.priceAtPurchase?.toLocaleString('hu-HU')} Ft
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Végösszeg és műveletek */}
-              <div className="flex justify-between items-center pt-4 border-t">
-                <div className="text-xl font-bold">
-                  Végösszeg: {order.totalAmount.toLocaleString('hu-HU')} Ft
                 </div>
-                <div className="flex space-x-2">
-                  {activeTab === 'purchases' && order.status === 'pending' && (
+
+                {/* Rendelés összesítő */}
+                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                  <div>
+                    {activeTab === 'buyer' ? (
+                      <p className="text-sm text-gray-600">
+                        Eladó: <span className="font-medium">{order.seller?.username}</span>
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-600">
+                        Vevő: <span className="font-medium">{order.buyer?.username}</span>
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Végösszeg:</p>
+                    <p className="text-xl font-bold" style={{ color: '#8b4513' }}>
+                      {order.totalAmount?.toLocaleString('hu-HU')} Ft
+                    </p>
+                  </div>
+                </div>
+
+                {/* Státusz frissítés (csak eladónak) */}
+                {activeTab === 'seller' && order.status === 'pending' && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2">
                     <button
-                      onClick={() => handleCancelOrder(order.id)}
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                      onClick={() => handleStatusUpdate(order.id, 'confirmed')}
+                      className="px-4 py-2 text-sm rounded text-white"
+                      style={{ backgroundColor: '#8b4513' }}
                     >
-                      Lemondás
+                      ✓ Megerősítés
                     </button>
-                  )}
-                  {activeTab === 'sales' && order.status !== 'cancelled' && order.status !== 'delivered' && (
-                    <select
-                      className="border rounded px-3 py-2"
-                      value={order.status}
-                      onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'cancelled')}
+                      className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-700"
                     >
-                      <option value="pending">Függőben</option>
-                      <option value="confirmed">Megerősítve</option>
-                      <option value="shipped">Szállítás alatt</option>
-                      <option value="delivered">Kézbesítve</option>
-                    </select>
-                  )}
-                </div>
-              </div>
+                      ❌ Lemondás
+                    </button>
+                  </div>
+                )}
 
-              {/* Szállítási cím */}
-              {order.shippingAddress && (
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Szállítási cím:</span> {order.shippingAddress}
-                  </p>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+                {activeTab === 'seller' && order.status === 'confirmed' && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'shipped')}
+                      className="px-4 py-2 text-sm rounded text-white"
+                      style={{ backgroundColor: '#8b4513' }}
+                    >
+                      🚚 Elküldve
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
-};
+}
 
 export default Orders;

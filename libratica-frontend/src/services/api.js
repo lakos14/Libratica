@@ -75,5 +75,13 @@ export const searchAPI = {
   searchListings: (params) => api.get('/search/listings', { params }),
 };
 
+// Admin API
+export const adminAPI = {
+  getStats: () => api.get('/admin/stats'),
+  getAllUsers: () => api.get('/admin/users'),
+  getUserDetails: (id) => api.get(`/admin/users/${id}`),
+  getAllListings: () => api.get('/admin/listings'),
+};
+
 
 export default api;

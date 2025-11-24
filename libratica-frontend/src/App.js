@@ -14,6 +14,8 @@ import MyListings from './pages/MyListings';
 import CreateListing from './pages/CreateListing';
 import EditListing from './pages/EditListing';
 import Orders from './pages/Orders';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 function App() {
   return (
@@ -70,6 +72,14 @@ function App() {
                   <Orders />
                 </ProtectedRoute>
               } 
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireAdmin={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
             />
           </Routes>
         </div>

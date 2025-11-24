@@ -1,3 +1,118 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Globális alapértelmezett stílusok */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+  color: #333333;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Egyszerű link stílusok */
+a {
+  color: #8b4513;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #654321;
+  text-decoration: underline;
+}
+
+/* Egyszerű gombok */
+button {
+  transition: all 0.2s ease;
+}
+
+/* Egyszerű shadow (nem túl fancy) */
+.simple-shadow {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Egyszerű card */
+.simple-card {
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+/* Barna primary szín */
+.bg-primary {
+  background-color: #8b4513;
+}
+
+.text-primary {
+  color: #8b4513;
+}
+
+.border-primary {
+  border-color: #8b4513;
+}
+
+.hover\:bg-primary:hover {
+  background-color: #654321;
+}
+
+/* Egyszerű input stílusok */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #8b4513;
+}
+
+/* Egyszerű gomb alapértelmezések */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #8b4513;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #654321;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333333;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e5e5;
+}

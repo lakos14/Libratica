@@ -198,7 +198,6 @@ namespace Libratica.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-
                 var order = await _context.Orders.FindAsync(id);
 
                 if (order == null)
@@ -209,6 +208,13 @@ namespace Libratica.Controllers
                 if (order.SellerId != userId)
                 {
                     return Forbid();
+                }
+
+                var allowedStatuses = new[] { "confirmed", "shipped", "delivered" };
+
+                if (!allowedStatuses.Contains(updateDto.Status))
+                {
+                    return BadRequest(new { message = "Érvénytelen státusz" });
                 }
 
                 order.Status = updateDto.Status;
@@ -266,6 +272,60 @@ namespace Libratica.Controllers
                 await _context.SaveChangesAsync();
 
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Rendelés elutasítása (eladó) - csak pending státusznál
+        /// </summary>
+        [HttpPost("{id}/reject")]
+        public async Task<IActionResult> RejectOrder(int id)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Listing)
+                    .FirstOrDefaultAsync(o => o.Id == id);
+
+                if (order == null)
+                {
+                    return NotFound(new { message = "Rendelés nem található" });
+                }
+
+                if (order.SellerId != userId)
+                {
+                    return Forbid();
+                }
+
+                if (order.Status != "pending")
+                {
+                    return BadRequest(new { message = "Csak függőben lévő rendelést lehet elutasítani" });
+                }
+
+                foreach (var orderItem in order.OrderItems)
+                {
+                    var listing = await _context.Listings.FindAsync(orderItem.ListingId);
+                    if (listing != null)
+                    {
+                        listing.Quantity += orderItem.Quantity;
+                        listing.IsAvailable = true;
+                        _context.Listings.Update(listing);
+                    }
+                }
+
+                order.Status = "rejected";
+                order.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Rendelés elutasítva" });
             }
             catch (Exception ex)
             {

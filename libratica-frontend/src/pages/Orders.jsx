@@ -40,6 +40,20 @@ function Orders() {
     }
   };
 
+  const handleRejectOrder = async (orderId) => {
+  if (!window.confirm('Biztosan elutasítod ezt a rendelést?')) {
+    return;
+  }
+
+  try {
+    await api.post(`/orders/${orderId}/reject`);
+    alert('Rendelés sikeresen elutasítva!');
+    loadOrders();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Hiba a rendelés elutasításakor');
+  }
+};
+
   const getStatusLabel = (status) => {
     const labels = {
       pending: '⏳ Függőben',
@@ -232,13 +246,13 @@ function Orders() {
                       className="px-4 py-2 text-sm rounded text-white"
                       style={{ backgroundColor: '#8b4513' }}
                     >
-                      ✓ Megerősítés
+                      ✅ Elfogadom
                     </button>
                     <button
-                      onClick={() => handleStatusUpdate(order.id, 'cancelled')}
+                      onClick={() => handleRejectOrder(order.id)}
                       className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-700"
                     >
-                      ❌ Lemondás
+                      ❌ Elutasítom
                     </button>
                   </div>
                 )}
@@ -250,7 +264,18 @@ function Orders() {
                       className="px-4 py-2 text-sm rounded text-white"
                       style={{ backgroundColor: '#8b4513' }}
                     >
-                      🚚 Elküldve
+                      📦 Elküldtem
+                    </button>
+                  </div>
+                )}
+
+                {activeTab === 'seller' && order.status === 'shipped' && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => handleStatusUpdate(order.id, 'delivered')}
+                      className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                    >
+                      ✅ Kézbesítve
                     </button>
                   </div>
                 )}

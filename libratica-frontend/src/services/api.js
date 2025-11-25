@@ -68,6 +68,7 @@ export const ordersAPI = {
   getSales: () => api.get('/orders/sales'),
   cancelOrder: (id) => api.delete(`/orders/${id}`),
   updateStatus: (id, data) => api.put(`/orders/${id}/status`, data),
+  rejectOrder: (id) => api.post(`/orders/${id}/reject`),
 };
 
 // Search API

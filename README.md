@@ -31,3 +31,11 @@
 	-események létrehozása, böngészése oldal
 	-admin CRUD
 	-sötét mód(?)
+
+
+Kérdések:
+	-Második félévben megvalósítsam e az escrow rendszert és ha igen akkor beleírjam-e a prezentációba?
+		-Jelenleg nem kezel pénzügyeket, a vásárlásnál, átverhetik egymást az emberek
+			-Ezért lesz majd kifejlesztve a Review rendszer a jövőben és akkor moderálással ki lehet szűrni az ilyen embereket
+		-Stripe teljesen ingyenes amíg nincsen valódi tranzakció
+		-Ez az egyetlen metódus amivel megvalósítható az eladói -és vevői védelem 100%-ig

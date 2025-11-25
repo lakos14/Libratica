@@ -33,6 +33,7 @@ export const authAPI = {
 // Books API
 export const booksAPI = {
   getAll: (params) => api.get('/books', { params }),
+  getWithAvailableListings: (params) => api.get('/books/with-available-listings', { params }),
   getById: (id) => api.get(`/books/${id}`),
   create: (data) => api.post('/books', data),
   update: (id, data) => api.put(`/books/${id}`, data),

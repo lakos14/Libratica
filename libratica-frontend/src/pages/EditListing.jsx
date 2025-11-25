@@ -158,7 +158,7 @@ const EditListing = () => {
         <h2 className="text-2xl font-bold mb-4">Hirdetés nem található</h2>
         <button
           onClick={() => navigate('/my-listings')}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+          className="bg-[#8b4513] text-white px-6 py-3 rounded-lg hover:bg-[#654321]"
         >
           Vissza a hirdetéseimhez
         </button>
@@ -171,7 +171,7 @@ const EditListing = () => {
       <div className="mb-8">
         <button
           onClick={() => navigate('/my-listings')}
-          className="text-blue-600 hover:text-blue-800 mb-4"
+          className="text-[#8b4513] hover:text-[#654321] mb-4"
         >
           ← Vissza a hirdetéseimhez
         </button>
@@ -180,8 +180,8 @@ const EditListing = () => {
       </div>
 
       {/* Könyv információ (nem szerkeszthető) */}
-      <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-bold mb-4 text-blue-900">
+      <div className="bg-[#f5ebe0] border border-gray-200 p-6 rounded-lg mb-6">
+        <h2 className="text-xl font-bold mb-4 text-[#8b4513]">
           📚 Könyv (nem szerkeszthető)
         </h2>
         <div className="flex gap-4">
@@ -224,7 +224,7 @@ const EditListing = () => {
                 onChange={handleChange}
                 className="sr-only peer"
               />
-              <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
+              <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
               <span className="ml-3 text-sm font-medium text-gray-900">
                 {formData.isAvailable ? '✅ Elérhető' : '⏸️ Inaktív'}
               </span>
@@ -244,7 +244,7 @@ const EditListing = () => {
               name="condition"
               value={formData.condition}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
               required
             >
               {conditionOptions.map((option) => (
@@ -269,7 +269,7 @@ const EditListing = () => {
               placeholder="Pl: Minimális kopás a gerincen, egyébként hibátlan."
               rows="3"
               maxLength="1000"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>{formData.conditionDescription.length} / 1000 karakter</span>
@@ -298,10 +298,10 @@ const EditListing = () => {
                   min="100"
                   max="1000000"
                   step="100"
-                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                   required
                 />
-                <span className="px-4 py-2 bg-gray-100 border rounded-lg text-gray-700">
+                <span className="w-1/3 px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 text-center">
                   {listing.currency}
                 </span>
               </div>
@@ -321,7 +321,7 @@ const EditListing = () => {
                 onChange={handleChange}
                 min="0"
                 max="100"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                 required
               />
               {errors.quantity && (
@@ -351,7 +351,7 @@ const EditListing = () => {
               onChange={handleChange}
               placeholder="Pl: Budapest, XIII. kerület vagy Debrecen"
               maxLength="200"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
             />
             <p className="text-xs text-gray-500 mt-1">
               A konkrét cím megadása nem kötelező. Város vagy kerület is elég.
@@ -371,7 +371,10 @@ const EditListing = () => {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold"
+            className="flex-1 text-white py-3 rounded-lg disabled:bg-gray-400 font-semibold"
+            style={{ backgroundColor: saving ? undefined : '#8b4513' }}
+            onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#654321')}
+            onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#8b4513')}
           >
             {saving ? 'Mentés...' : '✓ Módosítások mentése'}
           </button>

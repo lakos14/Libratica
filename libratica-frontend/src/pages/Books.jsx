@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchAPI } from '../services/api';
+import { searchAPI, booksAPI } from '../services/api';
 import { Link } from 'react-router-dom';
 
 function Books() {
@@ -35,7 +35,7 @@ function Books() {
         maxYear: filters.maxYear || undefined,
       };
 
-      const response = await searchAPI.searchBooks(params);
+      const response = await booksAPI.getWithAvailableListings(params);
       setBooks(response.data);
     } catch (error) {
       console.error('Hiba a könyvek betöltésekor:', error);

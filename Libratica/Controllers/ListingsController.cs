@@ -27,7 +27,7 @@ namespace Libratica.Controllers
             [FromQuery] int? bookId = null,
             [FromQuery] int? sellerId = null,
             [FromQuery] int? categoryId = null,
-            [FromQuery] bool? isAvailable = true)
+            [FromQuery] bool? isAvailable = null)
         {
             try
             {
@@ -50,6 +50,8 @@ namespace Libratica.Controllers
 
                 if (isAvailable.HasValue)
                     query = query.Where(l => l.IsAvailable == isAvailable.Value);
+                else
+                    query = query.Where(l => l.IsAvailable == true);
 
                 var listingsQuery = await query.OrderByDescending(l => l.CreatedAt).ToListAsync();
 
@@ -291,62 +293,53 @@ namespace Libratica.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteListing(int id)
+        public async Task<IActionResult> CancelOrder(int id)
         {
             try
             {
                 var userId = GetCurrentUserId();
 
-                var listing = await _context.Listings
-                    .Include(l => l.OrderItems)
-                        .ThenInclude(oi => oi.Order)
-                    .FirstOrDefaultAsync(l => l.Id == id);
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Listing)
+                    .FirstOrDefaultAsync(o => o.Id == id);
 
-                if (listing == null)
+                if (order == null)
                 {
-                    return NotFound(new { message = "Hirdetés nem található" });
+                    return NotFound(new { message = "Rendelés nem található" });
                 }
 
-                if (listing.SellerId != userId)
+                if (order.BuyerId != userId)
                 {
                     return Forbid();
                 }
 
-                var hasActiveOrders = listing.OrderItems.Any(oi =>
-                    oi.Order.Status != "cancelled" &&
-                    oi.Order.Status != "delivered");
-
-                if (hasActiveOrders)
+                if (order.Status != "pending")
                 {
-                    return BadRequest(new { message = "Nem törölhető aktív rendeléshez tartozó hirdetés! Várj, amíg a rendelések teljesülnek vagy lemondásra kerülnek." });
+                    return BadRequest(new { message = "Csak függőben lévő rendelést lehet lemondani" });
                 }
 
-                if (listing.OrderItems.Any())
+                foreach (var orderItem in order.OrderItems)
                 {
-                    listing.IsAvailable = false;
-                    listing.Quantity = 0;
-                    await _context.SaveChangesAsync();
-
-                    return Ok(new { message = "Hirdetés inaktiválva (rendelési előzmények miatt nem törölhető teljesen)" });
+                    var listing = await _context.Listings.FindAsync(orderItem.ListingId);
+                    if (listing != null)
+                    {
+                        listing.Quantity += orderItem.Quantity;
+                        listing.IsAvailable = true;
+                        _context.Listings.Update(listing);
+                    }
                 }
 
-                var cartItems = await _context.CartItems
-                    .Where(ci => ci.ListingId == id)
-                    .ToListAsync();
+                order.Status = "cancelled";
+                order.UpdatedAt = DateTime.UtcNow;
 
-                if (cartItems.Any())
-                {
-                    _context.CartItems.RemoveRange(cartItems);
-                }
-
-                _context.Listings.Remove(listing);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { message = "Hirdetés sikeresen törölve" });
+                return NoContent();
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = $"Hiba történt: {ex.InnerException?.Message ?? ex.Message}" });
+                return BadRequest(new { message = ex.Message });
             }
         }
 

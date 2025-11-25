@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { searchAPI } from '../services/api';
+import { listingsAPI } from '../services/api';
 
 function Listings() {
   const [listings, setListings] = useState([]);
@@ -9,7 +9,7 @@ function Listings() {
   const navigate = useNavigate();
 
   const [filters, setFilters] = useState({
-    query: searchParams.get('bookId') ? '' : '',
+    query: '',
     bookId: searchParams.get('bookId') || '',
     minPrice: '',
     maxPrice: '',
@@ -21,7 +21,16 @@ function Listings() {
     loadListings();
   }, []);
 
-  // Debounce timer
+  useEffect(() => {
+    const bookIdFromUrl = searchParams.get('bookId');
+    if (bookIdFromUrl && bookIdFromUrl !== filters.bookId) {
+      setFilters((prev) => ({
+        ...prev,
+        bookId: bookIdFromUrl,
+      }));
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       loadListings();
@@ -40,9 +49,10 @@ function Listings() {
         maxPrice: filters.maxPrice || undefined,
         condition: filters.condition || undefined,
         location: filters.location || undefined,
+        isAvailable: true,  // ⭐ KRITIKUS!
       };
 
-      const response = await searchAPI.searchListings(params);
+      const response = await listingsAPI.getAll(params);
       setListings(response.data);
     } catch (error) {
       console.error('Hiba a hirdetések betöltésekor:', error);

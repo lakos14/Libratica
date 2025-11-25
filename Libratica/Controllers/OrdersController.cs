@@ -155,11 +155,17 @@ namespace Libratica.Controllers
 
                         _context.OrderItems.Add(orderItem);
 
-                        cartItem.Listing.Quantity -= cartItem.Quantity;
-
-                        if (cartItem.Listing.Quantity == 0)
+                        var listing = await _context.Listings.FindAsync(cartItem.ListingId);
+                        if (listing != null)
                         {
-                            cartItem.Listing.IsAvailable = false;
+                            listing.Quantity -= cartItem.Quantity;
+
+                            if (listing.Quantity == 0)
+                            {
+                                listing.IsAvailable = false;
+                            }
+
+                            _context.Listings.Update(listing);
                         }
                     }
 

@@ -57,13 +57,13 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/listings/:id/edit" 
+            <Route
+              path="/edit-listing/:id"
               element={
                 <ProtectedRoute>
                   <EditListing />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route 
               path="/orders" 

@@ -263,6 +263,71 @@ namespace Libratica.Controllers
         }
 
         /// <summary>
+        /// Csak azok a könyvek, amelyekhez van elérhető hirdetés
+        /// </summary>
+        [HttpGet("with-available-listings")]
+        public async Task<ActionResult<IEnumerable<BookDto>>> GetBooksWithAvailableListings(
+            [FromQuery] string? query = null,
+            [FromQuery] string? author = null,
+            [FromQuery] int? minYear = null,
+            [FromQuery] int? maxYear = null)
+        {
+            try
+            {
+                var booksQuery = _context.Books
+                    .Include(b => b.BookCategories)
+                        .ThenInclude(bc => bc.Category)
+                    .Where(b => b.Listings.Any(l => l.IsAvailable == true))
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(query))
+                    booksQuery = booksQuery.Where(b =>
+                        b.Title.Contains(query) ||
+                        b.Author.Contains(query) ||
+                        b.ISBN.Contains(query));
+
+                if (!string.IsNullOrEmpty(author))
+                    booksQuery = booksQuery.Where(b => b.Author.Contains(author));
+
+                if (minYear.HasValue)
+                    booksQuery = booksQuery.Where(b => b.PublicationYear >= minYear.Value);
+
+                if (maxYear.HasValue)
+                    booksQuery = booksQuery.Where(b => b.PublicationYear <= maxYear.Value);
+
+                var books = await booksQuery
+                    .OrderByDescending(b => b.CreatedAt)
+                    .Select(b => new BookDto
+                    {
+                        Id = b.Id,
+                        ISBN = b.ISBN,
+                        Title = b.Title,
+                        Author = b.Author,
+                        Publisher = b.Publisher,
+                        PublicationYear = b.PublicationYear,
+                        Language = b.Language,
+                        Description = b.Description,
+                        CoverImageUrl = b.CoverImageUrl,
+                        PageCount = b.PageCount,
+                        Categories = b.BookCategories.Select(bc => new CategoryDto
+                        {
+                            Id = bc.Category.Id,
+                            Name = bc.Category.Name,
+                            Description = bc.Category.Description
+                        }).ToList(),
+                        CreatedAt = b.CreatedAt
+                    })
+                    .ToListAsync();
+
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Könyv törlése (csak admin)
         /// </summary>
         [HttpDelete("{id}")]

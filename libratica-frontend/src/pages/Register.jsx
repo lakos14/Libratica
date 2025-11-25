@@ -42,7 +42,9 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-center mb-6">Regisztráció</h2>
+        <h2 className="text-3xl font-bold text-center mb-6" style={{ color: '#8b4513' }}>
+          Regisztráció
+        </h2>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -58,7 +60,7 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
             />
           </div>
@@ -70,7 +72,7 @@ const Register = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
             />
           </div>
@@ -82,7 +84,7 @@ const Register = () => {
               name="fullName"
               value={formData.fullName}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
             />
           </div>
@@ -94,7 +96,7 @@ const Register = () => {
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               placeholder="+36301234567"
             />
           </div>
@@ -106,7 +108,7 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
               minLength="6"
             />
@@ -115,7 +117,8 @@ const Register = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+            className="w-full text-white py-3 rounded-lg disabled:bg-gray-400 font-semibold"
+            style={{ backgroundColor: '#8b4513' }}
           >
             {loading ? 'Regisztráció...' : 'Regisztráció'}
           </button>
@@ -123,7 +126,7 @@ const Register = () => {
 
         <p className="text-center mt-4 text-gray-600">
           Már van fiókod?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-[#8b4513] hover:underline">
             Jelentkezz be itt!
           </Link>
         </p>

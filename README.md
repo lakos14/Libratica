@@ -1,18 +1,33 @@
 # Libratica
-2025.11.11
--frontend változni fog
+2025.11.25
+-megvan már:
+	-regisztráció, bejelentkezés
+	-könyvek böngészése
+	-szűrés
+	-hírdetések megtekintése
+	-hírdetés létrehozása, szerkesztése, törlése
+	-saját hírdetések kezelése
+	-egy adott hírdetés részletes megtekintése
+	-kosár
+	-eladásaim
+	-rendelés
+	-rendelések megtekintése
+	-saját hírdetés vásárlásának tiltása
+	-admin szerepkör
+	-admin dashboard (összes felhasználó, összes hírdetés, felhasználó részletek megtekintése)
 -nincs még:
 	-profil szerkesztése oldal
-	-képfeltöltés
+	-képfeltöltés a hírdetéseknél mappából
 	-form validációk, toast értesítések
 	-email verification
-	-password reset
-	-user rating/review/report
-	-üzenetváltói felület (kérdéses hogy kell e)
-	-payment integration (kérdéses)
-	-AI
-	-könyvgyűjtemény nyilvántartás (collection, wishlist)
-	-neked ajánljuk / hasonló könyvek oldal
+	-új jelszó beállítása
+	-elfelejtett jelszó
+	-user rating/review
+	-hírdetés report (adminnak szükséges)
+	-üzenetváltói felület
+	-AI integráció
+	-könyv kollekció
+	-könyv kívánságlista
 	-események létrehozása, böngészése oldal
-	-admin felület
-	-logo
+	-admin CRUD
+	-sötét mód(?)

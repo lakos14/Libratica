@@ -1,6 +1,7 @@
 ﻿using Libratica.DataContext.Context;
 using Libratica.DataContext.DTOs;
 using Libratica.DataContext.Entities;
+using Libratica.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -89,104 +90,71 @@ namespace Libratica.Controllers
         /// Rendelés leadása (kosár alapján)
         /// </summary>
         [HttpPost("checkout")]
-        public async Task<ActionResult<OrderDto>> Checkout([FromBody] CreateOrderDto createOrderDto)
+        [Authorize]
+        public async Task<ActionResult> Checkout([FromBody] CheckoutDto dto)
         {
-            try
+            var userId = GetCurrentUserId();
+
+            // Validálás: minden tétel ugyanattól az eladótól kell származzon
+            foreach (var item in dto.Items)
             {
-                var userId = GetCurrentUserId();
+                var listing = await _context.Listings
+                    .Include(l => l.Book)
+                    .FirstOrDefaultAsync(l => l.Id == item.ListingId);
 
-                var cart = await _context.Carts
-                    .Include(c => c.CartItems)
-                        .ThenInclude(ci => ci.Listing)
-                            .ThenInclude(l => l.Book)
-                    .FirstOrDefaultAsync(c => c.UserId == userId);
+                if (listing == null)
+                    return NotFound(new { message = $"Hirdetés nem található: {item.ListingId}" });
 
-                if (cart == null || !cart.CartItems.Any())
-                {
-                    return BadRequest(new { message = "A kosár üres" });
-                }
+                if (!listing.IsAvailable)
+                    return BadRequest(new { message = $"A hirdetés már nem elérhető: {listing.Book.Title}" });
 
-                foreach (var cartItem in cart.CartItems)
-                {
-                    if (!cartItem.Listing.IsAvailable)
-                    {
-                        return BadRequest(new { message = $"{cartItem.Listing.Book.Title} már nem elérhető" });
-                    }
+                if (listing.SellerId != dto.SellerId)
+                    return BadRequest(new { message = "Nem minden tétel ugyanattól az eladótól származik" });
 
-                    if (cartItem.Listing.Quantity < cartItem.Quantity)
-                    {
-                        return BadRequest(new { message = $"{cartItem.Listing.Book.Title} - csak {cartItem.Listing.Quantity} db elérhető" });
-                    }
-                }
-
-                var ordersBySeller = cart.CartItems.GroupBy(ci => ci.Listing.SellerId);
-
-                var createdOrders = new List<Order>();
-
-                foreach (var sellerGroup in ordersBySeller)
-                {
-                    var sellerId = sellerGroup.Key;
-                    var items = sellerGroup.ToList();
-
-                    var order = new Order
-                    {
-                        BuyerId = userId,
-                        SellerId = sellerId,
-                        TotalAmount = items.Sum(ci => ci.Price * ci.Quantity),
-                        Status = "pending",
-                        ShippingAddress = createOrderDto.ShippingAddress,
-                        PaymentMethod = createOrderDto.PaymentMethod,
-                        CreatedAt = DateTime.UtcNow,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-
-                    _context.Orders.Add(order);
-                    await _context.SaveChangesAsync();
-
-                    foreach (var cartItem in items)
-                    {
-                        var orderItem = new OrderItem
-                        {
-                            OrderId = order.Id,
-                            ListingId = cartItem.ListingId,
-                            Quantity = cartItem.Quantity,
-                            PriceAtPurchase = cartItem.Price
-                        };
-
-                        _context.OrderItems.Add(orderItem);
-
-                        var listing = await _context.Listings.FindAsync(cartItem.ListingId);
-                        if (listing != null)
-                        {
-                            listing.Quantity -= cartItem.Quantity;
-
-                            if (listing.Quantity == 0)
-                            {
-                                listing.IsAvailable = false;
-                            }
-
-                            _context.Listings.Update(listing);
-                        }
-                    }
-
-                    createdOrders.Add(order);
-                }
-
-                _context.CartItems.RemoveRange(cart.CartItems);
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new
-                {
-                    message = "Rendelés sikeresen leadva!",
-                    orderIds = createdOrders.Select(o => o.Id).ToList(),
-                    totalOrders = createdOrders.Count
-                });
+                if (listing.Quantity < item.Quantity)
+                    return BadRequest(new { message = $"Nincs elegendő készlet: {listing.Book.Title}" });
             }
-            catch (Exception ex)
+
+            var order = new Order
             {
-                return BadRequest(new { message = ex.Message });
+                BuyerId = userId,
+                SellerId = dto.SellerId,
+                Status = "pending",
+                ShippingAddress = dto.ShippingAddress,
+                PaymentMethod = dto.PaymentMethod,
+                TotalAmount = dto.Items.Sum(x => x.Price * x.Quantity),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            foreach (var item in dto.Items)
+            {
+                var listing = await _context.Listings.FindAsync(item.ListingId);
+
+                var orderItem = new OrderItem
+                {
+                    OrderId = order.Id,
+                    ListingId = item.ListingId,
+                    Quantity = item.Quantity,
+                    PriceAtPurchase = item.Price
+                };
+
+                _context.OrderItems.Add(orderItem);
+
+                listing.Quantity -= item.Quantity;
+                if (listing.Quantity == 0)
+                    listing.IsAvailable = false;
             }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Rendelés sikeresen létrehozva!",
+                orderId = order.Id
+            });
         }
 
         /// <summary>

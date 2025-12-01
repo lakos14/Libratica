@@ -1,288 +1,251 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api, { cartAPI } from '../services/api';
+import api from '../services/api';
+import SellerGroup from '../components/cart/SellerGroup';
+import CheckoutModal from '../components/cart/CheckoutModal';
 
-function Cart() {
-  const navigate = useNavigate();
+const Cart = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [checkoutData, setCheckoutData] = useState({
-    shippingAddress: '',
-    paymentMethod: 'bank_transfer',
-  });
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [selectedSeller, setSelectedSeller] = useState(null);
+  const [checkoutAll, setCheckoutAll] = useState(false);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState(null); // ÚJ
+  const navigate = useNavigate();
+  
+  // Kosár betöltése
   useEffect(() => {
     loadCart();
   }, []);
-
+  
   const loadCart = async () => {
-    setLoading(true);
-    setError('');
     try {
-      const response = await cartAPI.getCart();
+      setLoading(true);
+      const response = await api.get('/cart');
       setCart(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a kosár betöltésekor');
+    } catch (error) {
+      console.error('Hiba a kosár betöltésekor:', error);
+      alert('Nem sikerült betölteni a kosarat');
     } finally {
       setLoading(false);
     }
   };
-
-  const handleUpdateQuantity = async (itemId, newQuantity) => {
-    if (newQuantity < 1) return;
-
+  
+  // Eladónkénti csoportosítás
+  const groupedBySeller = useMemo(() => {
+    if (!cart?.items || cart.items.length === 0) return {};
+    
+    return cart.items.reduce((acc, item) => {
+      const sellerId = item.listing.seller.id;
+      
+      if (!acc[sellerId]) {
+        acc[sellerId] = {
+          seller: item.listing.seller,
+          items: [],
+          subtotal: 0
+        };
+      }
+      
+      acc[sellerId].items.push(item);
+      acc[sellerId].subtotal += item.price * item.quantity;
+      
+      return acc;
+    }, {});
+  }, [cart]);
+  
+  // Törlés megerősítés megnyitása
+  const handleRemoveItem = (cartItemId) => {
+    setDeleteConfirmModal(cartItemId);
+  };
+  
+  // Törlés végrehajtása
+  const confirmRemoveItem = async () => {
     try {
-      await cartAPI.updateCartItem(itemId, { quantity: newQuantity });
-      loadCart();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a mennyiség frissítésekor');
+      await api.delete(`/cart/items/${deleteConfirmModal}`);
+      setDeleteConfirmModal(null);
+      await loadCart();
+    } catch (error) {
+      console.error('Hiba a tétel törlésekor:', error);
+      alert('Nem sikerült eltávolítani a tételt');
     }
   };
-
-  const handleRemoveItem = async (itemId) => {
+  
+  // Egy eladónak checkout indítása
+  const handleCheckoutSeller = (sellerId) => {
+    setSelectedSeller(sellerId);
+    setCheckoutAll(false);
+    setCheckoutModalOpen(true);
+  };
+  
+  // Összes eladónak checkout indítása
+  const handleCheckoutAllSellers = () => {
+    setSelectedSeller(null);
+    setCheckoutAll(true);
+    setCheckoutModalOpen(true);
+  };
+  
+  // Checkout végrehajtása
+  const handleCheckoutSubmit = async ({ shippingAddress, paymentMethod }) => {
     try {
-      await cartAPI.removeFromCart(itemId);
-      loadCart();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a törléskor');
+      if (checkoutAll) {
+        // Mindenkinek egyszerre
+        const sellerIds = Object.keys(groupedBySeller);
+        
+        for (const sellerId of sellerIds) {
+          const group = groupedBySeller[sellerId];
+          
+          await api.post('/orders/checkout', {
+            sellerId: parseInt(sellerId),
+            items: group.items.map(item => ({
+              listingId: item.listing.id,
+              quantity: item.quantity,
+              price: item.price
+            })),
+            shippingAddress,
+            paymentMethod
+          });
+          
+          // Kosárból törlés
+          for (const item of group.items) {
+            await api.delete(`/cart/items/${item.id}`);
+          }
+        }
+        
+        alert(`✅ ${sellerIds.length} rendelés sikeresen leadva!`);
+        navigate('/orders');
+        
+      } else {
+        // Egy eladónak
+        const group = groupedBySeller[selectedSeller];
+        
+        await api.post('/orders/checkout', {
+          sellerId: parseInt(selectedSeller),
+          items: group.items.map(item => ({
+            listingId: item.listing.id,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          shippingAddress,
+          paymentMethod
+        });
+        
+        // Kosárból törlés
+        for (const item of group.items) {
+          await api.delete(`/cart/items/${item.id}`);
+        }
+        
+        alert(`✅ Rendelés leadva: ${group.seller.username}`);
+        await loadCart();
+      }
+      
+      setCheckoutModalOpen(false);
+      
+    } catch (error) {
+      console.error('Checkout hiba:', error);
+      alert(error.response?.data?.message || 'Hiba történt a rendelés leadásakor');
     }
   };
-
-  const handleCheckout = async (e) => {
-    e.preventDefault();
-
-    if (!checkoutData.shippingAddress.trim()) {
-      alert('Kérlek add meg a szállítási címet!');
-      return;
-    }
-
-    setIsCheckingOut(true);
-    try {
-      await api.post('/orders/checkout', checkoutData);
-      alert('Rendelés sikeresen leadva!');
-      navigate('/orders');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a rendelés leadásakor');
-    } finally {
-      setIsCheckingOut(false);
-    }
-  };
-
-  const getConditionLabel = (condition) => {
-    const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '⭐ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
-    };
-    return labels[condition] || condition;
-  };
-
+  
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">Betöltés...</div>
       </div>
     );
   }
-
-  if (error) {
+  
+  if (!cart || !cart.items || cart.items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-600 mb-4">🛒 A kosarad üres</p>
+          <button
+            onClick={() => navigate('/listings')}
+            className="px-6 py-3 bg-[#8b4513] text-white rounded-lg hover:bg-[#654321] transition"
+          >
+            Böngészés a hirdetések között
+          </button>
         </div>
       </div>
     );
   }
-
-  const isEmpty = !cart || !cart.items || cart.items.length === 0;
-
+  
+  const sellerCount = Object.keys(groupedBySeller).length;
+  
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6" style={{ color: '#8b4513' }}>
-          🛒 Kosár
-        </h1>
-
-        {isEmpty ? (
-          <div className="bg-white border border-gray-200 rounded p-8 text-center">
-            <p className="text-gray-500 text-lg mb-4">A kosarad üres</p>
-            <button
-              onClick={() => navigate('/listings')}
-              className="px-6 py-2 rounded text-white font-medium"
-              style={{ backgroundColor: '#8b4513' }}
-            >
-              Böngészés indítása
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Bal oldal - Kosár tételek */}
-            <div className="lg:col-span-2 space-y-4">
-              {cart.items.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white border border-gray-200 rounded p-4 flex gap-4"
-                >
-                  {/* Kép */}
-                  {item.listing?.book?.coverImageUrl ? (
-                    <img
-                      src={item.listing.book.coverImageUrl}
-                      alt={item.listing.book?.title}
-                      className="w-20 h-28 object-cover rounded cursor-pointer"
-                      onClick={() => navigate(`/listings/${item.listing.id}`)}
-                    />
-                  ) : (
-                    <div className="w-20 h-28 bg-gray-200 rounded flex items-center justify-center">
-                      <span className="text-gray-400 text-3xl">📚</span>
-                    </div>
-                  )}
-
-                  {/* Részletek */}
-                  <div className="flex-1">
-                    <h3
-                      className="font-bold text-lg text-gray-800 cursor-pointer hover:underline"
-                      onClick={() => navigate(`/listings/${item.listing.id}`)}
-                    >
-                      {item.listing?.book?.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {item.listing?.book?.author}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {getConditionLabel(item.listing?.condition)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Eladó: {item.listing?.seller?.username}
-                    </p>
-
-                    {/* Ár és mennyiség */}
-                    <div className="flex items-center gap-4 mt-3">
-                      <span className="text-xl font-bold" style={{ color: '#8b4513' }}>
-                        {item.listing?.price?.toLocaleString('hu-HU')} Ft
-                      </span>
-
-                      {/* Mennyiség választó */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                          className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-                        >
-                          -
-                        </button>
-                        <span className="px-3 py-1 border border-gray-300 rounded">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                          className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Törlés gomb */}
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="ml-auto px-3 py-1 text-sm rounded bg-red-600 text-white hover:bg-red-700"
-                      >
-                        🗑️ Eltávolítás
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Jobb oldal - Összesítő és checkout */}
-            <div className="lg:col-span-1">
-              <div className="bg-white border border-gray-200 rounded p-6 sticky top-4">
-                <h2 className="text-xl font-bold mb-4" style={{ color: '#8b4513' }}>
-                  Összesítés
-                </h2>
-
-                <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tételek száma:</span>
-                    <span className="font-medium">
-                      {cart.items.reduce((sum, item) => sum + item.quantity, 0)} db
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-lg font-bold">Végösszeg:</span>
-                    <span className="text-2xl font-bold" style={{ color: '#8b4513' }}>
-                      {cart.totalAmount?.toLocaleString('hu-HU')} Ft
-                    </span>
-                  </div>
-                </div>
-
-                {/* Checkout form */}
-                <form onSubmit={handleCheckout} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Szállítási cím *
-                    </label>
-                    <textarea
-                      value={checkoutData.shippingAddress}
-                      onChange={(e) =>
-                        setCheckoutData((prev) => ({
-                          ...prev,
-                          shippingAddress: e.target.value,
-                        }))
-                      }
-                      placeholder="Cím, irányítószám, város..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                      rows="3"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Fizetési mód
-                    </label>
-                    <select
-                      value={checkoutData.paymentMethod}
-                      onChange={(e) =>
-                        setCheckoutData((prev) => ({
-                          ...prev,
-                          paymentMethod: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                    >
-                      <option value="bank_transfer">Banki átutalás</option>
-                      <option value="cash_on_delivery">Utánvét</option>
-                      <option value="card">Bankkártya</option>
-                    </select>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isCheckingOut}
-                    className="w-full px-6 py-3 rounded text-white font-semibold disabled:opacity-50"
-                    style={{ backgroundColor: '#8b4513' }}
-                  >
-                    {isCheckingOut ? 'Rendelés leadása...' : '✓ Rendelés leadása'}
-                  </button>
-                </form>
-
-                <p className="text-xs text-gray-500 mt-4 text-center">
-                  A rendelés leadása után az eladó kapcsolatba fog veled lépni.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">🛒 Kosár</h1>
+      
+      {/* Eladónkénti csoportok */}
+      <div className="mb-6">
+        {Object.entries(groupedBySeller).map(([sellerId, group]) => (
+          <SellerGroup
+            key={sellerId}
+            seller={group.seller}
+            items={group.items}
+            subtotal={group.subtotal}
+            onCheckout={() => handleCheckoutSeller(sellerId)}
+            onRemoveItem={handleRemoveItem}
+          />
+        ))}
       </div>
+      
+      {/* Összesítő */}
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="flex justify-between items-center mb-4">
+          <span className="text-xl font-bold">Végösszeg:</span>
+          <span className="text-2xl font-bold text-[#8b4513]">
+            {cart.totalAmount?.toLocaleString('hu-HU')} Ft
+          </span>
+        </div>
+        
+        <button
+          onClick={handleCheckoutAllSellers}
+          className="w-full py-3 bg-[#8b4513] text-white rounded-lg font-semibold hover:bg-[#654321] transition"
+        >
+          ✅ Összes megrendelése ({sellerCount} eladónak)
+        </button>
+        
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          {sellerCount} különböző rendelés jön létre
+        </p>
+      </div>
+      
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        onSubmit={handleCheckoutSubmit}
+        sellerName={selectedSeller ? groupedBySeller[selectedSeller]?.seller.username : null}
+      />
+      
+      {/* Törlés megerősítő modal */}
+      {deleteConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-xl font-bold mb-4">Megerősítés</h3>
+            <p className="text-gray-600 mb-6">
+              Biztosan eltávolítod ezt a tételt a kosárból?
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmModal(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50 transition"
+              >
+                Mégse
+              </button>
+              <button
+                onClick={confirmRemoveItem}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+              >
+                Törlés
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default Cart;

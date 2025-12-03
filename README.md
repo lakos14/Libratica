@@ -60,6 +60,8 @@
 #### Alternatíva (jelenlegi megoldás): 
 - Review rendszer + moderálás a report rendszer alapján
 - Platform csak közvetít, nem kezel pénzügyeket
+### Kik lesznek bent a prezentáció során?
+### AI vagy plágiumellenőrzés lesz-e ebben a félévben is?
 
 ## Technológiák
 

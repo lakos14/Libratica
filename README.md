@@ -29,8 +29,8 @@
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
 - AI integráció
-- profil szerkesztése oldal
-- új jelszó beállítása
+- profil szerkesztése oldal ✅
+- új jelszó beállítása ✅
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - képfeltöltés a hírdetéseknél mappából

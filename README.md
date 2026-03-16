@@ -37,7 +37,7 @@
 - form validációk, toast értesítések
 - email verification
 ### Bővítések:
-- user rating/review rendszer
+- user rating/review rendszer ✅
 - hírdetés report (adminnak)
 - üzenetváltói felület
 - admin CRUD

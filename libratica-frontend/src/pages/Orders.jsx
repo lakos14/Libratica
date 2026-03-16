@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import api, { reviewsAPI } from '../services/api';
 
 function Orders() {
   const { user } = useAuth();
@@ -10,6 +10,10 @@ function Orders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('buyer'); // 'buyer' or 'seller'
+  const [reviewModal, setReviewModal] = useState(null); // { orderId, reviewedUsername }
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewedOrders, setReviewedOrders] = useState([]); // orderId-k amiket már értékeltél
 
   useEffect(() => {
     loadOrders();
@@ -22,11 +26,24 @@ function Orders() {
       const endpoint = activeTab === 'buyer' ? '/orders/purchases' : '/orders/sales';
       const response = await api.get(endpoint);
       setOrders(response.data);
+      await loadReviewedOrders(response.data);
     } catch (err) {
       setError(err.response?.data?.message || 'Hiba a rendelések betöltésekor');
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadReviewedOrders = async (orders) => {
+    const reviewed = [];
+    for (const order of orders) {
+      try {
+        const response = await reviewsAPI.getOrderReviews(order.id);
+        const alreadyReviewed = response.data.some(r => r.reviewer.id === user?.id);
+        if (alreadyReviewed) reviewed.push(order.id);
+      } catch {}
+    }
+    setReviewedOrders(reviewed);
   };
   
 
@@ -51,6 +68,25 @@ function Orders() {
     loadOrders();
   } catch (err) {
     alert(err.response?.data?.message || 'Hiba a rendelés elutasításakor');
+  }
+};
+
+const handleSubmitReview = async () => {
+  setReviewLoading(true);
+  try {
+    await reviewsAPI.createReview({
+      orderId: reviewModal.orderId,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+    });
+    alert('Értékelés elküldve!');
+    setReviewModal(null);
+    setReviewData({ rating: 5, comment: '' });
+    loadOrders();
+  } catch (err) {
+    alert(err.response?.data?.message || 'Hiba az értékelés elküldésekor');
+  } finally {
+    setReviewLoading(false);
   }
 };
 
@@ -279,11 +315,118 @@ function Orders() {
                     </button>
                   </div>
                 )}
+                {/* Értékelés gomb - vevőnek */}
+                {activeTab === 'buyer' && order.status === 'delivered' && !reviewedOrders.includes(order.id) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setReviewModal({ 
+                        orderId: order.id, 
+                        reviewedUsername: order.seller?.username 
+                      })}
+                      className="px-4 py-2 text-sm rounded text-white"
+                      style={{ backgroundColor: '#8b4513' }}
+                    >
+                      ⭐ Eladó értékelése
+                    </button>
+                  </div>
+                )}
+
+                {/* Értékelés gomb - eladónak */}
+                {activeTab === 'seller' && order.status === 'delivered' && !reviewedOrders.includes(order.id) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => setReviewModal({ 
+                        orderId: order.id, 
+                        reviewedUsername: order.buyer?.username 
+                      })}
+                      className="px-4 py-2 text-sm rounded text-white"
+                      style={{ backgroundColor: '#8b4513' }}
+                    >
+                      ⭐ Vevő értékelése
+                    </button>
+                  </div>
+                )}
+                {activeTab === 'buyer' && order.status === 'delivered' && reviewedOrders.includes(order.id) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-green-600">✓ Már értékelted ezt a rendelést</p>
+                  </div>
+                )}
+
+                {activeTab === 'seller' && order.status === 'delivered' && reviewedOrders.includes(order.id) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-green-600">✓ Már értékelted ezt a rendelést</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
       </div>
+      {/* Review modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold mb-4">
+              Értékelés: {reviewModal.reviewedUsername}
+            </h3>
+
+            {/* Csillagok */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Értékelés
+              </label>
+              <div className="flex gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewData({ ...reviewData, rating: star })}
+                    className="text-3xl transition-transform hover:scale-110"
+                  >
+                    {star <= reviewData.rating ? '⭐' : '☆'}
+                  </button>
+                ))}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">{reviewData.rating}/5 csillag</p>
+            </div>
+
+            {/* Megjegyzés */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Megjegyzés (opcionális)
+              </label>
+              <textarea
+                value={reviewData.comment}
+                onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                placeholder="Írd le a tapasztalatod..."
+                rows="3"
+                maxLength="1000"
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+              />
+            </div>
+
+            {/* Gombok */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setReviewModal(null);
+                  setReviewData({ rating: 5, comment: '' });
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Mégse
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={reviewLoading}
+                className="flex-1 px-4 py-2 text-white rounded disabled:bg-gray-400 font-semibold"
+                style={{ backgroundColor: '#8b4513' }}
+              >
+                {reviewLoading ? 'Küldés...' : 'Értékelés elküldése'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

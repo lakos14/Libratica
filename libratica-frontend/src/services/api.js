@@ -91,5 +91,12 @@ export const profileAPI = {
     changePassword: (data) => api.put('/profile/change-password', data),
 };
 
+// Reviews API
+export const reviewsAPI = {
+  createReview: (data) => api.post('/reviews', data),
+  getUserReviews: (userId) => api.get(`/reviews/user/${userId}`),
+  getOrderReviews: (orderId) => api.get(`/reviews/order/${orderId}`),
+};
+
 
 export default api;

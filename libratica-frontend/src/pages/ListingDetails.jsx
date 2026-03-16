@@ -184,11 +184,11 @@ function ListingDetails() {
               </h3>
               <p className="text-gray-700">
                 <span className="font-medium">{listing.seller?.username}</span>
-                {listing.seller?.rating && (
-                  <span className="ml-2 text-sm text-gray-500">
-                    ⭐ {listing.seller.rating.toFixed(1)}
-                  </span>
-                )}
+                <span className="ml-2 text-sm text-gray-500">
+                  {listing.seller?.rating 
+                    ? `⭐ ${listing.seller.rating.toFixed(1)}`
+                    : '⭐ Még nincs értékelés'}
+                </span>
               </p>
             </div>
 

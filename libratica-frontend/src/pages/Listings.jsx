@@ -247,6 +247,12 @@ function Listings() {
                       📍 {listing.location}
                     </span>
                   )}
+                  <span className="text-xs text-gray-500">
+                    👤 {listing.seller?.username}
+                    {listing.seller?.rating 
+                      ? ` ⭐ ${listing.seller.rating.toFixed(1)}`
+                      : ''}
+                  </span>
                 </div>
               </div>
             ))}

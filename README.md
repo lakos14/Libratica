@@ -34,7 +34,7 @@
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - képfeltöltés a hírdetéseknél mappából
-- form validációk, toast értesítések
+- form validációk, toast értesítések ✅
 - email verification
 ### Bővítések:
 - user rating/review rendszer ✅

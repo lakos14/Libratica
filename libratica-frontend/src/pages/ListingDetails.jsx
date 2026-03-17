@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api, { cartAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 function ListingDetails() {
   const { id } = useParams();
@@ -42,9 +43,9 @@ function ListingDetails() {
         listingId: listing.id,
         quantity: quantity,
       });
-      alert('Sikeresen hozzáadva a kosárhoz!');
+      toast.success('Sikeresen hozzáadva a kosárhoz!');
     } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a kosárba helyezéskor');
+      toast.error(err.response?.data?.message || 'Hiba a kosárba helyezéskor');
     } finally {
       setAddingToCart(false);
     }

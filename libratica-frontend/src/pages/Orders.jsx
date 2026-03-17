@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { reviewsAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 function Orders() {
   const { user } = useAuth();
@@ -50,10 +51,10 @@ function Orders() {
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
       await api.put(`/orders/${orderId}/status`, { status: newStatus });
-      alert('Státusz sikeresen frissítve!');
+      toast.success('Státusz sikeresen frissítve!');
       loadOrders();
     } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a státusz frissítésekor');
+      toast.error(err.response?.data?.message || 'Hiba a státusz frissítésekor');
     }
   };
 
@@ -64,10 +65,10 @@ function Orders() {
 
   try {
     await api.post(`/orders/${orderId}/reject`);
-    alert('Rendelés sikeresen elutasítva!');
+    toast.success('Rendelés sikeresen elutasítva!');
     loadOrders();
   } catch (err) {
-    alert(err.response?.data?.message || 'Hiba a rendelés elutasításakor');
+    toast.error(err.response?.data?.message || 'Hiba a rendelés elutasításakor');
   }
 };
 
@@ -79,12 +80,12 @@ const handleSubmitReview = async () => {
       rating: reviewData.rating,
       comment: reviewData.comment,
     });
-    alert('Értékelés elküldve!');
+    toast.success('Értékelés elküldve!');
     setReviewModal(null);
     setReviewData({ rating: 5, comment: '' });
     loadOrders();
   } catch (err) {
-    alert(err.response?.data?.message || 'Hiba az értékelés elküldésekor');
+    toast.error(err.response?.data?.message || 'Hiba az értékelés elküldésekor');
   } finally {
     setReviewLoading(false);
   }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 
 const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
   const [shippingAddress, setShippingAddress] = useState('');
@@ -8,7 +9,7 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
   
   const handleSubmit = () => {
     if (!shippingAddress.trim()) {
-      alert('Kérlek add meg a szállítási címet!');
+      toast.warning('Kérlek add meg a szállítási címet!');
       return;
     }
     onSubmit({ shippingAddress, paymentMethod });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { listingsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const EditListing = () => {
   const { id } = useParams();
@@ -40,7 +41,7 @@ const EditListing = () => {
 
       // Ellenőrizzük, hogy a felhasználó tulajdonosa-e
       if (listingData.seller.id !== user?.id && user?.roleName !== 'admin') {
-        alert('Nincs jogosultságod szerkeszteni ezt a hirdetést!');
+        toast.error('Nincs jogosultságod szerkeszteni ezt a hirdetést!');
         navigate('/my-listings');
         return;
       }
@@ -59,7 +60,7 @@ const EditListing = () => {
       });
     } catch (error) {
       console.error('Failed to load listing:', error);
-      alert('Hirdetés nem található');
+      toast.error('Hirdetés nem található');
       navigate('/my-listings');
     } finally {
       setLoading(false);
@@ -126,11 +127,11 @@ const EditListing = () => {
       };
 
       await listingsAPI.update(id, submitData);
-      alert('✅ Hirdetés sikeresen frissítve!');
+      toast.success('✅ Hirdetés sikeresen frissítve!');
       navigate('/my-listings');
     } catch (error) {
       console.error('Failed to update listing:', error);
-      alert(error.response?.data?.message || 'Hiba történt a hirdetés frissítésekor');
+      toast.error(error.response?.data?.message || 'Hiba történt a hirdetés frissítésekor');
     } finally {
       setSaving(false);
     }

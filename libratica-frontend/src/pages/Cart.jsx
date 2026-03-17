@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import api from '../services/api';
 import SellerGroup from '../components/cart/SellerGroup';
 import CheckoutModal from '../components/cart/CheckoutModal';
+
 
 const Cart = () => {
   const [cart, setCart] = useState(null);
@@ -25,7 +27,7 @@ const Cart = () => {
       setCart(response.data);
     } catch (error) {
       console.error('Hiba a kosár betöltésekor:', error);
-      alert('Nem sikerült betölteni a kosarat');
+      toast.error('Nem sikerült betölteni a kosarat');
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ const Cart = () => {
       await loadCart();
     } catch (error) {
       console.error('Hiba a tétel törlésekor:', error);
-      alert('Nem sikerült eltávolítani a tételt');
+      toast.error('Nem sikerült eltávolítani a tételt');
     }
   };
   
@@ -111,7 +113,7 @@ const Cart = () => {
           }
         }
         
-        alert(`✅ ${sellerIds.length} rendelés sikeresen leadva!`);
+        toast.success(`✅ ${sellerIds.length} rendelés sikeresen leadva!`);
         navigate('/orders');
         
       } else {
@@ -134,7 +136,7 @@ const Cart = () => {
           await api.delete(`/cart/items/${item.id}`);
         }
         
-        alert(`✅ Rendelés leadva: ${group.seller.username}`);
+        toast.success(`✅ Rendelés leadva: ${group.seller.username}`);
         await loadCart();
       }
       
@@ -142,7 +144,7 @@ const Cart = () => {
       
     } catch (error) {
       console.error('Checkout hiba:', error);
-      alert(error.response?.data?.message || 'Hiba történt a rendelés leadásakor');
+      toast.error(error.response?.data?.message || 'Hiba történt a rendelés leadásakor');
     }
   };
   

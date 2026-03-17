@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listingsAPI, booksAPI, searchAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -207,11 +208,11 @@ const CreateListing = () => {
       };
 
       await listingsAPI.create(submitData);
-      alert('✅ Hirdetés sikeresen létrehozva!');
+      toast.success('✅ Hirdetés sikeresen létrehozva!');
       navigate('/my-listings');
     } catch (error) {
       console.error('Failed to create listing:', error);
-      alert(error.response?.data?.message || 'Hiba történt a hirdetés létrehozásakor');
+      toast.error(error.response?.data?.message || 'Hiba történt a hirdetés létrehozásakor');
     } finally {
       setLoading(false);
     }

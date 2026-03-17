@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { profileAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   const { user, login } = useAuth();
@@ -19,15 +20,9 @@ const Profile = () => {
 
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [profileError, setProfileError] = useState('');
-  const [profileSuccess, setProfileSuccess] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordSuccess, setPasswordSuccess] = useState('');
 
  const handleProfileSubmit = async (e) => {
    e.preventDefault();
-   setProfileError('');
-   setProfileSuccess('');
    setProfileLoading(true);
  
    try {
@@ -36,9 +31,9 @@ const Profile = () => {
        fullName: profileData.fullName || null,
        phoneNumber: profileData.phoneNumber || null,  // üres string helyett null
      });
-     window.location.reload();
+     toast.success('Profil sikeresen mentve!');
+     setTimeout(() => window.location.reload(), 1500);
    } catch (err) {
-     setProfileError(err.response?.data?.message || 'Hiba a profil mentésekor');
    } finally {
      setProfileLoading(false);
    }
@@ -46,16 +41,14 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
-    setPasswordError('');
-    setPasswordSuccess('');
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('A két jelszó nem egyezik meg.');
+      toast.error('A két jelszó nem egyezik meg.');
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      setPasswordError('Az új jelszó minimum 6 karakter.');
+      toast.error('Az új jelszó minimum 6 karakter.');
       return;
     }
 
@@ -65,10 +58,9 @@ const Profile = () => {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-      setPasswordSuccess('Jelszó sikeresen megváltoztatva!');
+      toast.success('Jelszó sikeresen megváltoztatva!');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPasswordError(err.response?.data?.message || 'Hiba a jelszó módosításakor');
     } finally {
       setPasswordLoading(false);
     }
@@ -84,17 +76,6 @@ const Profile = () => {
         {/* Profil adatok */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Alapadatok</h2>
-
-          {profileError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {profileError}
-            </div>
-          )}
-          {profileSuccess && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              {profileSuccess}
-            </div>
-          )}
 
           <form onSubmit={handleProfileSubmit} className="space-y-4">
             {/* Email (nem szerkeszthető) */}
@@ -168,17 +149,6 @@ const Profile = () => {
         {/* Jelszóváltoztatás */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-6">Jelszó megváltoztatása</h2>
-
-          {passwordError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {passwordError}
-            </div>
-          )}
-          {passwordSuccess && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              {passwordSuccess}
-            </div>
-          )}
 
           <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>

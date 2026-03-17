@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-toastify';
 
 function MyListings() {
   const { user } = useAuth();
@@ -34,10 +35,10 @@ function MyListings() {
 
     try {
       await api.delete(`/listings/${id}`);
-      alert('Hirdetés sikeresen törölve!');
+      toast.success('Hirdetés sikeresen törölve!');
       loadMyListings();
     } catch (err) {
-      alert(err.response?.data?.message || 'Hiba a hirdetés törlésekor');
+      toast.error(err.response?.data?.message || 'Hiba a hirdetés törlésekor');
     }
   };
 

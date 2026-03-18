@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api, { cartAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import api, { cartAPI, reportsAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 function ListingDetails() {
@@ -13,6 +13,9 @@ function ListingDetails() {
   const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [reportModal, setReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportLoading, setReportLoading] = useState(false);
 
   useEffect(() => {
     loadListing();
@@ -48,6 +51,27 @@ function ListingDetails() {
       toast.error(err.response?.data?.message || 'Hiba a kosárba helyezéskor');
     } finally {
       setAddingToCart(false);
+    }
+  };
+
+  const handleReport = async () => {
+    if (!reportReason.trim()) {
+      toast.error('Az ok megadása kötelező!');
+      return;
+    }
+    setReportLoading(true);
+    try {
+      await reportsAPI.createReport({
+        listingId: listing.id,
+        reason: reportReason,
+      });
+      toast.success('Jelentés elküldve, köszönjük!');
+      setReportModal(false);
+      setReportReason('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba a jelentés elküldésekor');
+    } finally {
+      setReportLoading(false);
     }
   };
 
@@ -254,6 +278,63 @@ function ListingDetails() {
                 <p className="text-gray-700 text-sm">
                   Ez a hirdetés jelenleg nem elérhető.
                 </p>
+              </div>
+            )}
+            {/* Jelentés gomb - csak bejelentkezett, nem saját hirdetés aki nem admin*/}
+            {user && !isOwnListing && user.roleName !== 'admin' && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setReportModal(true)}
+                  className="text-sm text-red-500 hover:text-red-700"
+                >
+                  🚩 Hirdetés jelentése
+                </button>
+              </div>
+            )}
+
+            {/* Report modal */}
+            {reportModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                  <h3 className="text-xl font-bold mb-4">Hirdetés jelentése</h3>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Válassz okot
+                    </label>
+                    <select
+                      value={reportReason}
+                      onChange={(e) => setReportReason(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+                    >
+                      <option value="">Válassz...</option>
+                      <option value="Hamis hirdetés">Hamis hirdetés</option>
+                      <option value="Nem megfelelő tartalom">Nem megfelelő tartalom</option>
+                      <option value="Spam">Spam</option>
+                      <option value="Félrevezető ár">Félrevezető ár</option>
+                      <option value="Egyéb">Egyéb</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        setReportModal(false);
+                        setReportReason('');
+                      }}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+                    >
+                      Mégse
+                    </button>
+                    <button
+                      onClick={handleReport}
+                      disabled={reportLoading}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 font-semibold"
+                    >
+                      {reportLoading ? 'Küldés...' : 'Jelentés elküldése'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

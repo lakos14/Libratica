@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI } from '../services/api';
+import { adminAPI, reportsAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('stats');
@@ -7,6 +8,7 @@ function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [reports, setReports] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -16,7 +18,9 @@ function AdminDashboard() {
       loadUsers();
     } else if (activeTab === 'listings') {
       loadListings();
-    }
+    } else if (activeTab === 'reports') {
+      loadReports();
+    } 
   }, [activeTab]);
 
   const loadStats = async () => {
@@ -58,6 +62,29 @@ function AdminDashboard() {
     }
   };
 
+  const loadReports = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await reportsAPI.getReports();
+      setReports(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Hiba a reportok betöltésekor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReportStatus = async (id, status) => {
+    try {
+      await reportsAPI.updateReportStatus(id, { status });
+      toast.success(status === 'resolved' ? 'Report elfogadva, intézkedés megtörtént!' : 'Report elvetve!');
+      loadReports();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba a report kezelésekor');
+    }
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('hu-HU', {
       year: 'numeric',
@@ -85,6 +112,16 @@ function AdminDashboard() {
           📊 Statisztikák
         </button>
         <button
+          onClick={() => setActiveTab('reports')}
+          className={`px-4 py-2 font-semibold ${
+            activeTab === 'reports'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          🚩 Reportok
+        </button>
+        <button
           onClick={() => setActiveTab('users')}
           className={`px-4 py-2 font-semibold ${
             activeTab === 'users'
@@ -105,6 +142,7 @@ function AdminDashboard() {
           📚 Hirdetések
         </button>
       </div>
+
 
       {/* Error message */}
       {error && (
@@ -407,6 +445,94 @@ function AdminDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+      {activeTab === 'reports' && !loading && (
+        <div>
+          <h2 className="text-2xl font-bold mb-6">
+            Reportok ({reports.length})
+          </h2>
+
+          {reports.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded p-8 text-center">
+              <p className="text-gray-500">Nincsenek reportok</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reports.map((report) => (
+                <div key={report.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {report.status === 'pending' ? '⏳ Függőben' :
+                        report.status === 'resolved' ? '✓ Megoldva' : '✗ Elvetve'}
+                      </span>
+                      <span className="ml-2 text-sm text-gray-500">
+                        {formatDate(report.createdAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bejelentő */}
+                  <p className="text-sm text-gray-600 mb-2">
+                    Bejelentő: <span className="font-medium">{report.reporter?.username}</span>
+                  </p>
+
+                  {/* Hirdetés report */}
+                  {report.listing && (
+                    <div className="bg-gray-50 rounded p-3 mb-2">
+                      <a 
+                        href={`/listings/${report.listing.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-[#8b4513] hover:underline"
+                      >
+                        📚 Hirdetés: {report.listing.title}
+                      </a>
+                      <p className="text-sm text-gray-600">Szerző: {report.listing.author}</p>
+                      <p className="text-sm text-gray-600">Eladó: {report.listing.seller?.username}</p>
+                      <p className="text-sm text-gray-600">Ár: {report.listing.price?.toLocaleString('hu-HU')} Ft</p>
+                    </div>
+                  )}
+
+                  {/* Felhasználó report */}
+                  {report.reportedUser && (
+                    <div className="bg-gray-50 rounded p-3 mb-2">
+                      <p className="text-sm font-medium">👤 Jelentett felhasználó: {report.reportedUser?.username}</p>
+                      <p className="text-sm text-gray-600">Email: {report.reportedUser?.email}</p>
+                    </div>
+                  )}
+
+                  {/* Ok */}
+                  <p className="text-sm mb-3">
+                    Ok: <span className="font-medium">{report.reason}</span>
+                  </p>
+
+                  {/* Gombok */}
+                  {report.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleReportStatus(report.id, 'resolved')}
+                        className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                      >
+                        ✓ Elfogad {report.listing ? '(hirdetés inaktiválása)' : '(felhasználó tiltása)'}
+                      </button>
+                      <button
+                        onClick={() => handleReportStatus(report.id, 'dismissed')}
+                        className="px-4 py-2 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
+                      >
+                        ✗ Elvet
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

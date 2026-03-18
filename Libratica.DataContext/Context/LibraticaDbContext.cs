@@ -21,6 +21,7 @@ namespace Libratica.DataContext.Context
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
+        public DbSet<Report> Reports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -187,6 +188,28 @@ namespace Libratica.DataContext.Context
                 entity.HasOne(ci => ci.Listing)
                     .WithMany()
                     .HasForeignKey(ci => ci.ListingId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            //Report configuration
+            modelBuilder.Entity<Report>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Status);
+
+                entity.HasOne(r => r.Reporter)
+                    .WithMany()
+                    .HasForeignKey(r => r.ReporterId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.Listing)
+                    .WithMany()
+                    .HasForeignKey(r => r.ListingId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(r => r.ReportedUser)
+                    .WithMany()
+                    .HasForeignKey(r => r.ReportedUserId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
             // Seed reference data

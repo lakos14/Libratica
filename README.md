@@ -6,6 +6,10 @@
 - regisztráció, bejelentkezés (JWT)
 - admin szerepkör
 - admin dashboard (összes felhasználó, összes hírdetés, felhasználó részletek megtekintése)
+- profil szerkesztése oldal
+- új jelszó beállítása
+- user rating/review rendszer
+- felhasználói profil oldal 
 ### Könyvek és hírdetések:
 - könyvek böngészése, szűrése és keresése
 - hírdetés létrehozása, szerkesztése, törlése
@@ -22,30 +26,26 @@
 - rendelés lemondása
 - rendelések megtekintése
 - saját hírdetés vásárlásának tiltása
+- hírdetés report (adminnak)
 ### UI:
 - responsive design
+- form validációk, toast értesítések
 
   
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
 - AI integráció
-- profil szerkesztése oldal ✅
-- új jelszó beállítása ✅
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - képfeltöltés a hírdetéseknél mappából
-- form validációk, toast értesítések ✅
 - email verification
 - szűrő javítása hírdetéseknél
 ### Bővítések:
-- user rating/review rendszer ✅
-- hírdetés report (adminnak)
 - üzenetváltói felület
+- Keresés fejlesztése
 - admin CRUD
 ### Jó, ha van:
-- könyv kollekció
 - könyv kívánságlista
-- sötét mód
 
 
 # Kérdések:

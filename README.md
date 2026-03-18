@@ -36,6 +36,7 @@
 - képfeltöltés a hírdetéseknél mappából
 - form validációk, toast értesítések ✅
 - email verification
+- szűrő javítása hírdetéseknél
 ### Bővítések:
 - user rating/review rendszer ✅
 - hírdetés report (adminnak)

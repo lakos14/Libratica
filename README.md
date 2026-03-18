@@ -45,7 +45,6 @@
 - Keresés fejlesztése
 - admin CRUD
 ### Jó, ha van:
-- könyv kollekció
 - könyv kívánságlista
 
 

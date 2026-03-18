@@ -39,13 +39,14 @@
 - képfeltöltés a hírdetéseknél mappából
 - email verification
 - szűrő javítása hírdetéseknél
+- Felhasználói profil oldal 
 ### Bővítések:
 - üzenetváltói felület
+- Keresés fejlesztése
 - admin CRUD
 ### Jó, ha van:
 - könyv kollekció
 - könyv kívánságlista
-- sötét mód
 
 
 # Kérdések:

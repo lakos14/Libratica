@@ -1,0 +1,240 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { usersAPI } from '../services/api';
+
+function UserProfile() {
+  const { username } = useParams();
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('listings');
+
+  useEffect(() => {
+    loadProfile();
+  }, [username]);
+
+  const loadProfile = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await usersAPI.getPublicProfile(username);
+      setProfile(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Felhasználó nem található');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getConditionLabel = (condition) => {
+    const labels = {
+      mint: '⭐ Újszerű',
+      excellent: '✨ Kiváló',
+      good: '👍 Jó',
+      fair: '👌 Elfogadható',
+      poor: '📦 Gyenge',
+    };
+    return labels[condition] || condition;
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('hu-HU', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const renderStars = (rating) => {
+    return [1, 2, 3, 4, 5].map((star) => (
+      <span key={star} className={star <= rating ? 'text-yellow-400' : 'text-gray-300'}>
+        ★
+      </span>
+    ));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+
+        {/* Profil fejléc */}
+        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <div className="flex items-center gap-6">
+            {/* Avatar */}
+            <div className="w-20 h-20 rounded-full bg-[#8b4513] text-white flex items-center justify-center text-3xl font-bold flex-shrink-0">
+              {profile.username.charAt(0).toUpperCase()}
+            </div>
+
+            {/* Adatok */}
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold" style={{ color: '#8b4513' }}>
+                {profile.username}
+              </h1>
+              {profile.fullName && (
+                <p className="text-gray-600">{profile.fullName}</p>
+              )}
+
+              {/* Rating */}
+              <div className="flex items-center gap-2 mt-1">
+                {profile.rating ? (
+                  <>
+                    <span className="text-lg">{renderStars(Math.round(profile.rating))}</span>
+                    <span className="text-gray-600 text-sm">
+                      {profile.rating.toFixed(1)} / 5.0
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-gray-400 text-sm">Még nincs értékelés</span>
+                )}
+              </div>
+
+              {/* Meta */}
+              <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                <span>📚 {profile.activeListingsCount} aktív hirdetés</span>
+                <span>📅 Regisztrált: {formatDate(profile.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bio */}
+          {profile.bio && (
+            <p className="mt-4 text-gray-600 border-t pt-4">{profile.bio}</p>
+          )}
+        </div>
+
+        {/* Tab navigáció */}
+        <div className="flex gap-4 mb-6 border-b border-gray-300">
+          <button
+            onClick={() => setActiveTab('listings')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'listings'
+                ? 'border-b-2'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            style={activeTab === 'listings' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
+          >
+            📚 Hirdetések ({profile.listings?.length || 0})
+          </button>
+          <button
+            onClick={() => setActiveTab('reviews')}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'reviews'
+                ? 'border-b-2'
+                : 'text-gray-600 hover:text-gray-800'
+            }`}
+            style={activeTab === 'reviews' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
+          >
+            ⭐ Értékelések ({profile.reviews?.length || 0})
+          </button>
+        </div>
+
+        {/* Hirdetések tab */}
+        {activeTab === 'listings' && (
+          <div>
+            {profile.listings?.length === 0 ? (
+              <div className="bg-white border border-gray-200 rounded p-8 text-center">
+                <p className="text-gray-500">Nincsenek aktív hirdetések</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {profile.listings?.map((listing) => (
+                  <Link
+                    key={listing.id}
+                    to={`/listings/${listing.id}`}
+                    className="bg-white border border-gray-200 rounded p-3 hover:border-gray-400 transition-colors flex flex-col"
+                  >
+                    {listing.book?.coverImageUrl ? (
+                      <img
+                        src={listing.book.coverImageUrl}
+                        alt={listing.book.title}
+                        className="w-full h-48 object-cover rounded mb-3"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                        <span className="text-gray-400 text-4xl">📚</span>
+                      </div>
+                    )}
+                    <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
+                      {listing.book?.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 mb-2">
+                      {listing.book?.author}
+                    </p>
+                    <div className="mt-auto">
+                      <p className="font-bold text-sm" style={{ color: '#8b4513' }}>
+                        {listing.price?.toLocaleString('hu-HU')} {listing.currency}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {getConditionLabel(listing.condition)}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Értékelések tab */}
+        {activeTab === 'reviews' && (
+          <div>
+            {profile.reviews?.length === 0 ? (
+              <div className="bg-white border border-gray-200 rounded p-8 text-center">
+                <p className="text-gray-500">Még nincsenek értékelések</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {profile.reviews?.map((review) => (
+                  <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-800">
+                          {review.reviewer?.username}
+                        </span>
+                        <span className="text-yellow-400 text-lg">
+                          {renderStars(review.rating)}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {review.rating}/5
+                        </span>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {formatDate(review.createdAt)}
+                      </span>
+                    </div>
+                    {review.comment && (
+                      <p className="text-gray-700 text-sm">{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default UserProfile;

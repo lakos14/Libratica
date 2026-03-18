@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { cartAPI, reportsAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -207,8 +207,21 @@ function ListingDetails() {
               <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
                 Eladó
               </h3>
-              <p className="text-gray-700">
-                <span className="font-medium">{listing.seller?.username}</span>
+                <p className="text-gray-700">
+                  <p className="text-gray-700">
+                  <Link 
+                    to={`/users/${listing.seller?.username}`}
+                    className="font-medium hover:underline"
+                    style={{ color: '#8b4513' }}
+                  >
+                    {listing.seller?.username}
+                  </Link>
+                  <span className="ml-2 text-sm text-gray-500">
+                    {listing.seller?.rating
+                      ? `⭐ ${listing.seller.rating.toFixed(1)}`
+                      : '⭐ Még nincs értékelés'}
+                  </span>
+                </p>
                 <span className="ml-2 text-sm text-gray-500">
                   {listing.seller?.rating 
                     ? `⭐ ${listing.seller.rating.toFixed(1)}`

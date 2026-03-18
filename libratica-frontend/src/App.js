@@ -17,6 +17,7 @@ import EditListing from './pages/EditListing';
 import Orders from './pages/Orders';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 
 
 function App() {
@@ -96,6 +97,12 @@ function App() {
                 <ProtectedRoute>
                   <Profile />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users/:username"
+              element={
+                <UserProfile />
               }
             />
           </Routes>

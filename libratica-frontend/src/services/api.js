@@ -105,5 +105,9 @@ export const reportsAPI = {
   updateReportStatus: (id, data) => api.put(`/reports/${id}/status`, data),
 };
 
+// Users API
+export const usersAPI = {
+  getPublicProfile: (username) => api.get(`/users/${username}`),
+};
 
 export default api;

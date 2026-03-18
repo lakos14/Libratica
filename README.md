@@ -9,6 +9,7 @@
 - profil szerkesztése oldal
 - új jelszó beállítása
 - user rating/review rendszer
+- felhasználói profil oldal 
 ### Könyvek és hírdetések:
 - könyvek böngészése, szűrése és keresése
 - hírdetés létrehozása, szerkesztése, törlése
@@ -39,7 +40,6 @@
 - képfeltöltés a hírdetéseknél mappából
 - email verification
 - szűrő javítása hírdetéseknél
-- Felhasználói profil oldal 
 ### Bővítések:
 - üzenetváltói felület
 - Keresés fejlesztése

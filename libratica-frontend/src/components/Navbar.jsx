@@ -54,6 +54,15 @@ function Navbar() {
             >
               Hirdetések
             </Link>
+            <Link
+              to="/ai-search"
+              className="text-gray-700"
+              style={navLinkStyle}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            >
+              AI Keresés
+            </Link>
 
             {user ? (
               <>

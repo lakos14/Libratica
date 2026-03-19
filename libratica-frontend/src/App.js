@@ -18,6 +18,8 @@ import Orders from './pages/Orders';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
+import AISearch from './pages/AISearch';
+
 
 
 function App() {
@@ -105,6 +107,12 @@ function App() {
                 <UserProfile />
               }
             />
+            <Route 
+              path="/ai-search" 
+              element={
+                <AISearch />
+              }
+           />
           </Routes>
         </div>
       </AuthProvider>

@@ -110,4 +110,9 @@ export const usersAPI = {
   getPublicProfile: (username) => api.get(`/users/${username}`),
 };
 
+// AI API
+export const aiAPI = {
+  search: (query) => api.post('/ai/search', { query }),
+};
+
 export default api;

@@ -38,7 +38,7 @@
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - képfeltöltés a hírdetéseknél mappából
-- email verification
+- email verification (ha marad idő)
 - szűrő javítása hírdetéseknél
 ### Bővítések:
 - üzenetváltói felület

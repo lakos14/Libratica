@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { aiAPI, listingsAPI } from '../services/api';
+import { aiAPI, searchAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
@@ -30,14 +30,13 @@ function AISearch() {
 
       // 2. Hirdetések lekérése az AI által visszaadott paraméterekkel
       // Ha az AI nem ismert fel semmit, használjuk az eredeti query-t
-      const searchKeywords = params.keywords || query;
 
-      const listingsResponse = await listingsAPI.getAll({
-      query: searchKeywords,
-      minPrice: params.minPrice || undefined,
-      maxPrice: params.maxPrice || undefined,
-      condition: params.condition || undefined,
-      isAvailable: true,
+      const listingsResponse = await searchAPI.searchListings({
+        query: params.keywords || query,
+        minPrice: params.minPrice || undefined,
+        maxPrice: params.maxPrice || undefined,
+        condition: params.condition || undefined,
+        isAvailable: true,
       });
 
       setListings(listingsResponse.data);

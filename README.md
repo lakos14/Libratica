@@ -17,6 +17,10 @@
 - saját hírdetések kezelése
 - egy adott hírdetés részletes megtekintése
 - új könyv vagy meglévő könyv hírdetésének feltöltése
+- AI integráció
+- könyv kívánságlista
+- Google Books API
+- könyvgyütemény
 ### Vásárlások és rendelések:
 - kosár
 - checkout
@@ -34,7 +38,6 @@
   
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
-- AI integráció
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - képfeltöltés a hírdetéseknél mappából
@@ -44,8 +47,6 @@
 - üzenetváltói felület
 - Keresés fejlesztése
 - admin CRUD
-### Jó, ha van:
-- könyv kívánságlista
 
 
 # Kérdések:

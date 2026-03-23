@@ -19,6 +19,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
 import AISearch from './pages/AISearch';
+import Wishlist from './pages/Wishlist';
+import BookCollection from './pages/BookCollection';
 
 
 
@@ -112,6 +114,22 @@ function App() {
               element={
                 <AISearch />
               }
+           />
+           <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <Wishlist />
+              </ProtectedRoute>
+            }
+           />
+           <Route
+            path="/collection"
+            element={
+              <ProtectedRoute>
+                <BookCollection />
+              </ProtectedRoute>
+            }
            />
           </Routes>
         </div>

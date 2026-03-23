@@ -4,6 +4,7 @@ using Libratica.DataContext.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Libratica.DataContext.Migrations
 {
     [DbContext(typeof(LibraticaDbContext))]
-    partial class LibraticaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323105453_AddWishlist")]
+    partial class AddWishlist
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,53 +105,6 @@ namespace Libratica.DataContext.Migrations
                         .IsUnique();
 
                     b.ToTable("BookCategories");
-                });
-
-            modelBuilder.Entity("Libratica.DataContext.Entities.BookCollection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Author")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("CoverImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("GoogleBooksId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("PublicationYear")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Publisher")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId", "GoogleBooksId")
-                        .IsUnique();
-
-                    b.ToTable("BookCollections");
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Cart", b =>
@@ -640,33 +596,6 @@ namespace Libratica.DataContext.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Libratica.DataContext.Entities.Wishlist", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("UserId", "BookId")
-                        .IsUnique();
-
-                    b.ToTable("Wishlists");
-                });
-
             modelBuilder.Entity("Libratica.DataContext.Entities.BookCategory", b =>
                 {
                     b.HasOne("Libratica.DataContext.Entities.Book", "Book")
@@ -684,17 +613,6 @@ namespace Libratica.DataContext.Migrations
                     b.Navigation("Book");
 
                     b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Libratica.DataContext.Entities.BookCollection", b =>
-                {
-                    b.HasOne("Libratica.DataContext.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Cart", b =>
@@ -855,25 +773,6 @@ namespace Libratica.DataContext.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Libratica.DataContext.Entities.Wishlist", b =>
-                {
-                    b.HasOne("Libratica.DataContext.Entities.Book", "Book")
-                        .WithMany()
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Libratica.DataContext.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Book", b =>

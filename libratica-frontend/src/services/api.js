@@ -115,4 +115,30 @@ export const aiAPI = {
   search: (query) => api.post('/ai/search', { query }),
 };
 
+// Wishlist API
+export const wishlistAPI = {
+  getWishlist: () => api.get('/wishlist'),
+  addToWishlist: (bookId) => api.post(`/wishlist/${bookId}`),
+  removeFromWishlist: (bookId) => api.delete(`/wishlist/${bookId}`),
+  checkWishlist: (bookId) => api.get(`/wishlist/check/${bookId}`),
+};
+
+// Google Books API
+export const googleBooksAPI = {
+  searchByISBN: (isbn) => 
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
+      .then(res => res.json()),
+  searchByTitle: (query) => 
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=hu&maxResults=5`)
+      .then(res => res.json()),
+};
+
+// Book collection API
+export const bookCollectionAPI = {
+  getCollection: () => api.get('/bookcollection'),
+  addToCollection: (data) => api.post('/bookcollection', data),
+  removeFromCollection: (id) => api.delete(`/bookcollection/${id}`),
+  checkCollection: (googleBooksId) => api.get(`/bookcollection/check/${googleBooksId}`),
+};
+
 export default api;

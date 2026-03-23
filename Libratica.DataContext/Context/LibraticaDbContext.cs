@@ -1,5 +1,6 @@
 ﻿using Libratica.DataContext.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Libratica.DataContext.Context
 {
@@ -22,6 +23,8 @@ namespace Libratica.DataContext.Context
         public DbSet<Cart> Carts { get; set; }
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<BookCollection> BookCollections { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -212,6 +215,36 @@ namespace Libratica.DataContext.Context
                     .HasForeignKey(r => r.ReportedUserId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
+            //Wishlist configuration
+            modelBuilder.Entity<Wishlist>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.BookId }).IsUnique();
+
+                entity.HasOne(w => w.User)
+                    .WithMany()
+                    .HasForeignKey(w => w.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(w => w.Book)
+                    .WithMany()
+                    .HasForeignKey(w => w.BookId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            //Book collection configuration
+            modelBuilder.Entity<BookCollection>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.UserId, e.GoogleBooksId }).IsUnique();
+
+                entity.HasOne(bc => bc.User)
+                    .WithMany()
+                    .HasForeignKey(bc => bc.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
             // Seed reference data
             SeedReferenceData(modelBuilder);
         }

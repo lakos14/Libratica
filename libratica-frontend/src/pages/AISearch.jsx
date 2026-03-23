@@ -39,8 +39,20 @@ function AISearch() {
         isAvailable: true,
       });
 
-      setListings(listingsResponse.data);
-      setResults(true);
+      if (listingsResponse.data.length === 0 && params.keywords) {
+        const fallbackResponse = await searchAPI.searchListings({
+          query: query,
+          minPrice: params.minPrice || undefined,
+          maxPrice: params.maxPrice || undefined,
+          condition: params.condition || undefined,
+          isAvailable: true,
+        });
+        setListings(fallbackResponse.data);
+      } else {
+        setListings(listingsResponse.data);
+      }
+
+      setResults(true); 
     } catch (err) {
       toast.error(err.response?.data?.message || 'Hiba a keresés során');
     } finally {
@@ -63,7 +75,7 @@ function AISearch() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-3xl font-bold mb-2" style={{ color: '#8b4513' }}>
-          🤖 AI Könyvkereső
+          AI Könyvkereső
         </h1>
         <p className="text-gray-600 mb-8">
           Írd le természetes nyelven milyen könyvet keresel, és az AI megtalálja neked!

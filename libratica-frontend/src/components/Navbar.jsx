@@ -66,41 +66,23 @@ function Navbar() {
 
             {user ? (
               <>
-                <Link 
-                  to="/cart" 
-                  className="text-gray-700"
-                  style={navLinkStyle}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
-                  🛒 Kosár
+                <Link to="/cart" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  Kosár
                 </Link>
-                <Link 
-                  to="/my-listings" 
-                  className="text-gray-700"
-                  style={navLinkStyle}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <Link to="/my-listings" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Hirdetéseim
                 </Link>
-                <Link 
-                  to="/orders" 
-                  className="text-gray-700"
-                  style={navLinkStyle}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <Link to="/orders" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Rendeléseim
                 </Link>
+                <Link to="/wishlist" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  Kívánságlista
+                </Link>
+                <Link to="/collection" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  Gyűjteményem
+                </Link>
                 {user.roleName === 'admin' && (
-                  <Link 
-                    to="/admin" 
-                    className="text-gray-700"
-                    style={navLinkStyle}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                  >
+                  <Link to="/admin" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                     ⚙️ Admin
                   </Link>
                 )}

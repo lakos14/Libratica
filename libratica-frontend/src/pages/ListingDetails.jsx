@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api, { cartAPI, reportsAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { wishlistAPI } from '../services/api';
 
 function ListingDetails() {
   const { id } = useParams();
@@ -16,6 +17,7 @@ function ListingDetails() {
   const [reportModal, setReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   useEffect(() => {
     loadListing();
@@ -33,7 +35,38 @@ function ListingDetails() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+  if (listing && user) {
+    checkWishlist();
+  }
+}, [listing, user]);
 
+  const checkWishlist = async () => {
+    try {
+      const response = await wishlistAPI.checkWishlist(listing.book?.id);
+      setIsInWishlist(response.data.isInWishlist);
+    } catch {}
+  };
+
+  const handleWishlist = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    try {
+      if (isInWishlist) {
+        await wishlistAPI.removeFromWishlist(listing.book?.id);
+        toast.success('Eltávolítva a kívánságlistából!');
+        setIsInWishlist(false);
+      } else {
+        await wishlistAPI.addToWishlist(listing.book?.id);
+        toast.success('Hozzáadva a kívánságlistához!');
+        setIsInWishlist(true);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba történt');
+    }
+  };
   const handleAddToCart = async () => {
     if (!user) {
       navigate('/login');
@@ -257,7 +290,21 @@ function ListingDetails() {
                 >
                   {addingToCart ? 'Hozzáadás...' : '🛒 Kosárba rakom'}
                 </button>
+                  {user && (
+                  <button
+                    onClick={handleWishlist}
+                    className="w-full px-6 py-3 rounded font-semibold border mt-2"
+                    style={{
+                      borderColor: '#8b4513',
+                      color: isInWishlist ? 'white' : '#8b4513',
+                      backgroundColor: isInWishlist ? '#8b4513' : 'white'
+                    }}
+                  >
+                    {isInWishlist ? '❤️ Kívánságlistán van' : '🤍 Kívánságlistához adás'}
+                  </button>
+                )}
               </div>
+              
             )}
 
             {/* Saját hirdetés */}

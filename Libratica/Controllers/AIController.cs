@@ -31,15 +31,19 @@ namespace Libratica.Controllers
                 A felhasználó keresése: ""{dto.Query}""
 
                 Elemezd a keresést és adj vissza egy JSON objektumot az alábbi mezőkkel:
-                - keywords: string (csak a legfontosabb 1-3 szó, pl. szerző neve vagy könyv témája, NE az egész mondat)
+                - keywords: string (csak 1-2 legfontosabb szó a témából, pl. 'emberiség', 'Harry Potter', 'programozás' - NE teljes mondatot!)
                 - category: string (ha felismerhető: Sci-Fi, Fantasy, Romantikus, Krimi, Ismeretterjesztő, Történelem, Informatika, Gyerekkönyv - vagy null)
                 - minPrice: number vagy null
                 - maxPrice: number vagy null  
                 - condition: string (mint, excellent, good, fair, poor) vagy null
 
-                Fontos: a keywords mező csak rövid kulcsszavakat tartalmazzon, ne mondatokat!
+                Fontos szabályok:
+                - keywords legyen minél rövidebb, csak 1-2 szó!
+                - Ha szerző nevét ismered fel, csak a vezetéknevét add vissza (pl. 'Rowling', 'Orwell', 'Harari')
+                - Ha témát ismersz fel, csak a legfontosabb főnevet add vissza (pl. 'emberiség', 'programozás', 'sárkány')
+
                 Csak a JSON objektumot add vissza, semmi mást!
-                Példa: {{""keywords"": ""Rowling"", ""category"": ""Fantasy"", ""minPrice"": null, ""maxPrice"": null, ""condition"": null}}";
+                Példa: {{""keywords"": ""emberiség"", ""category"": ""Történelem"", ""minPrice"": null, ""maxPrice"": null, ""condition"": null}}";
 
                 var response = await client.CompleteChatAsync(prompt);
                 var content = response.Value.Content[0].Text;

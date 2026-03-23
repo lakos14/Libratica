@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listingsAPI, booksAPI, searchAPI } from '../services/api';
+import { searchAPI, booksAPI, listingsAPI, googleBooksAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+
+
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -13,6 +15,9 @@ const CreateListing = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [googleSearchQuery, setGoogleSearchQuery] = useState('');
+  const [googleSearching, setGoogleSearching] = useState(false);
+  const [googleResults, setGoogleResults] = useState([]);
 
   // Választható mód: meglévő könyv VAGY új könyv
   const [mode, setMode] = useState('new'); // 'new' vagy 'existing'
@@ -60,6 +65,53 @@ const CreateListing = () => {
     } catch (error) {
       console.error('Failed to load categories:', error);
     }
+  };
+  const searchGoogleBooks = async () => {
+    if (!googleSearchQuery.trim()) return;
+    
+    setGoogleSearching(true);
+    try {
+      let data;
+      // Ha számokból áll, ISBN keresés
+      if (/^\d+$/.test(googleSearchQuery.replace(/-/g, ''))) {
+        data = await googleBooksAPI.searchByISBN(googleSearchQuery);
+      } else {
+        data = await googleBooksAPI.searchByTitle(googleSearchQuery);
+      }
+      
+      if (data.items) {
+        setGoogleResults(data.items);
+      } else {
+        setGoogleResults([]);
+        toast.info('Nem található könyv ezzel a kereséssel');
+      }
+    } catch (err) {
+      toast.error('Hiba a Google Books keresés során');
+    } finally {
+      setGoogleSearching(false);
+    }
+  };
+
+  const fillFromGoogleBooks = (item) => {
+    const info = item.volumeInfo;
+    setBookData({
+      ...bookData,
+      title: info.title || '',
+      author: info.authors ? info.authors.join(', ') : '',
+      isbn: info.industryIdentifiers 
+        ? (info.industryIdentifiers.find(i => i.type === 'ISBN_13')?.identifier || 
+          info.industryIdentifiers.find(i => i.type === 'ISBN_10')?.identifier || '')
+        : '',
+      publisher: info.publisher || '',
+      publicationYear: info.publishedDate ? info.publishedDate.substring(0, 4) : '',
+      language: info.language === 'hu' ? 'magyar' : info.language || '',
+      description: info.description || '',
+      coverImageUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
+      pageCount: info.pageCount || '',
+    });
+    setGoogleResults([]);
+    setGoogleSearchQuery('');
+    toast.success('Könyv adatai betöltve!');
   };
 
   const searchBooks = async () => {
@@ -275,7 +327,67 @@ const CreateListing = () => {
               <p className="text-sm text-gray-600 mb-4">
                 Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
               </p>
+              {/* Google Books keresés */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-sm font-medium text-blue-800 mb-2">
+                  🔍 Automatikus kitöltés Google Books alapján
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={googleSearchQuery}
+                    onChange={(e) => setGoogleSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchGoogleBooks())}
+                    placeholder="ISBN vagy könyvcím..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={searchGoogleBooks}
+                    disabled={googleSearching}
+                    className="px-4 py-2 text-white rounded disabled:bg-gray-400"
+                    style={{ backgroundColor: '#8b4513' }}
+                  >
+                    {googleSearching ? '⏳' : '🔍'}
+                  </button>
+                </div>
 
+                {/* Google keresési eredmények */}
+                {googleResults.length > 0 && (
+                  <div className="mt-3 border rounded-lg max-h-64 overflow-y-auto bg-white">
+                    {googleResults.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => fillFromGoogleBooks(item)}
+                        className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      >
+                        {item.volumeInfo.imageLinks?.thumbnail ? (
+                          <img
+                            src={item.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')}
+                            alt={item.volumeInfo.title}
+                            className="w-10 h-14 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">📚</span>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{item.volumeInfo.title}</p>
+                          <p className="text-xs text-gray-600">
+                            {item.volumeInfo.authors?.join(', ')}
+                          </p>
+                          {item.volumeInfo.publishedDate && (
+                            <p className="text-xs text-gray-400">
+                              {item.volumeInfo.publishedDate.substring(0, 4)}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">

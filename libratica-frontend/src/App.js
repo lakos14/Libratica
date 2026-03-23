@@ -21,7 +21,7 @@ import UserProfile from './pages/UserProfile';
 import AISearch from './pages/AISearch';
 import Wishlist from './pages/Wishlist';
 import BookCollection from './pages/BookCollection';
-
+import Recommendations from './pages/Recommendations';
 
 
 function App() {
@@ -128,6 +128,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BookCollection />
+              </ProtectedRoute>
+            }
+           />
+           <Route
+            path="/recommendations"
+            element={
+              <ProtectedRoute>
+                <Recommendations />
               </ProtectedRoute>
             }
            />

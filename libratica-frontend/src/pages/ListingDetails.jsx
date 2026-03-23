@@ -240,27 +240,28 @@ function ListingDetails() {
               <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
                 Eladó
               </h3>
-                <p className="text-gray-700">
-                  <p className="text-gray-700">
-                  <Link 
-                    to={`/users/${listing.seller?.username}`}
-                    className="font-medium hover:underline"
-                    style={{ color: '#8b4513' }}
-                  >
-                    {listing.seller?.username}
-                  </Link>
-                  <span className="ml-2 text-sm text-gray-500">
-                    {listing.seller?.rating
-                      ? `⭐ ${listing.seller.rating.toFixed(1)}`
-                      : '⭐ Még nincs értékelés'}
-                  </span>
-                </p>
+              <p className="text-gray-700">
+                <Link 
+                  to={`/users/${listing.seller?.username}`}
+                  className="font-medium hover:underline"
+                  style={{ color: '#8b4513' }}
+                >
+                  {listing.seller?.username}
+                </Link>
                 <span className="ml-2 text-sm text-gray-500">
-                  {listing.seller?.rating 
+                  {listing.seller?.rating
                     ? `⭐ ${listing.seller.rating.toFixed(1)}`
                     : '⭐ Még nincs értékelés'}
                 </span>
               </p>
+              <a 
+                href={`https://mail.google.com/mail/?view=cm&to=${listing.seller?.email}&su=Érdeklődés a hirdetésről: ${encodeURIComponent(listing.book?.title)}&body=Szia ${listing.seller?.username},%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(listing.book?.title)} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block mt-2 text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+              >
+                ✉️ Kapcsolatfelvétel az eladóval
+              </a>
             </div>
 
             {/* Kosárba rakás */}

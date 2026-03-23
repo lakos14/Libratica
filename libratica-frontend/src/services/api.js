@@ -141,4 +141,9 @@ export const bookCollectionAPI = {
   checkCollection: (googleBooksId) => api.get(`/bookcollection/check/${googleBooksId}`),
 };
 
+// Recommendations API
+export const recommendationsAPI = {
+  getRecommendations: () => api.get('/recommendations'),
+};
+
 export default api;

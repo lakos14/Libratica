@@ -36,58 +36,26 @@ function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/books" 
-              className="text-gray-700"
-              style={navLinkStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+            <Link to="/books" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
               Könyvek
             </Link>
-            <Link 
-              to="/listings" 
-              className="text-gray-700"
-              style={navLinkStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
+            <Link to="/listings" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
               Hirdetések
-            </Link>
-            <Link
-              to="/ai-search"
-              className="text-gray-700"
-              style={navLinkStyle}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              AI Keresés
             </Link>
 
             {user ? (
               <>
+                <Link to="/recommendations" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  Ajánlott
+                </Link>
+                <Link to="/ai-search" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  AI Keresés
+                </Link>
                 <Link to="/cart" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Kosár
                 </Link>
-                <Link to="/my-listings" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  Hirdetéseim
-                </Link>
-                <Link to="/orders" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  Rendeléseim
-                </Link>
-                <Link to="/wishlist" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  Kívánságlista
-                </Link>
-                <Link to="/collection" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  Gyűjteményem
-                </Link>
-                {user.roleName === 'admin' && (
-                  <Link to="/admin" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                    ⚙️ Admin
-                  </Link>
-                )}
-                
-                {/* User dropdown */}
+
+                {/* Dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -96,7 +64,6 @@ function Navbar() {
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                   >
-                    {/* User SVG ikon - barna szín */}
                     <svg className="w-5 h-5" fill="none" stroke="#8b4513" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -105,19 +72,30 @@ function Navbar() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
+
                   {isMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded shadow-lg">
-                      <Link
-                        to="/profile"
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
+                      <Link to="/my-listings" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
+                        Hirdetéseim
+                      </Link>
+                      <Link to="/orders" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
+                        Rendeléseim
+                      </Link>
+                      <Link to="/wishlist" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
+                        Kívánságlista
+                      </Link>
+                      <Link to="/collection" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
+                        Gyűjteményem
+                      </Link>
+                      <Link to="/profile" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
                         Profil szerkesztése
                       </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
+                      {user.roleName === 'admin' && (
+                        <Link to="/admin" className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={() => setIsMenuOpen(false)}>
+                          Admin
+                        </Link>
+                      )}
+                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Kijelentkezés
                       </button>
                     </div>
@@ -126,22 +104,13 @@ function Navbar() {
               </>
             ) : (
               <>
-                <Link 
-                  to="/login" 
-                  className="text-gray-700"
-                  style={navLinkStyle}
-                  onMouseEnter={handleMouseEnter}
-                  onMouseLeave={handleMouseLeave}
-                >
+                <Link to="/ai-search" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  AI Keresés
+                </Link>
+                <Link to="/login" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Bejelentkezés
                 </Link>
-                <Link
-                  to="/register"
-                  className="px-4 py-2 rounded text-white"
-                  style={{ backgroundColor: '#8b4513', transition: 'background-color 0.2s' }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#654321'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#8b4513'}
-                >
+                <Link to="/register" className="px-4 py-2 rounded text-white" style={{ backgroundColor: '#8b4513' }}>
                   Regisztráció
                 </Link>
               </>
@@ -170,8 +139,11 @@ function Navbar() {
             </Link>
             {user ? (
               <>
+                <Link to="/recommendations" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  Ajánlott
+                </Link>
                 <Link to="/cart" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
-                  🛒 Kosár
+                  Kosár
                 </Link>
                 <Link to="/my-listings" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                   Hirdetéseim
@@ -181,7 +153,7 @@ function Navbar() {
                 </Link>
                 {user.roleName === 'admin' && (
                   <Link to="/admin" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
-                    ⚙️ Admin
+                    Admin
                   </Link>
                 )}
                 <button

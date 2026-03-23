@@ -163,6 +163,7 @@ namespace Libratica.Controllers
                     {
                         Id = listing.Seller.Id,
                         Username = listing.Seller.Username,
+                        Email = listing.Seller.Email,
                         FullName = listing.Seller.FullName,
                         ProfilePictureUrl = listing.Seller.ProfilePictureUrl,
                         RoleName = listing.Seller.Role.Name,

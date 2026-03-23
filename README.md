@@ -22,6 +22,8 @@
 - Google Books API
 - könyvgyütemény
 ### Vásárlások és rendelések:
+- kapcsolatfelvétel gomb
+- ajánlórendszer
 - kosár
 - checkout
 - vásárlások és eladások kezelése
@@ -44,7 +46,6 @@
 - email verification (ha marad idő)
 - szűrő javítása hírdetéseknél
 ### Bővítések:
-- üzenetváltói felület
 - Keresés fejlesztése
 - admin CRUD
 

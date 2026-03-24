@@ -31,9 +31,6 @@ namespace Libratica.Controllers
                 var activeListings = await _context.Listings.CountAsync(l => l.IsAvailable);
                 var totalOrders = await _context.Orders.CountAsync();
                 var pendingOrders = await _context.Orders.CountAsync(o => o.Status == "pending");
-                var totalRevenue = await _context.Orders
-                    .Where(o => o.Status != "cancelled")
-                    .SumAsync(o => o.TotalAmount);
 
                 // Mai statisztikák
                 var today = DateTime.UtcNow.Date;
@@ -49,7 +46,6 @@ namespace Libratica.Controllers
                     activeListings,
                     totalOrders,
                     pendingOrders,
-                    totalRevenue,
                     today = new
                     {
                         users = todayUsers,
@@ -197,6 +193,213 @@ namespace Libratica.Controllers
                             .Sum(o => o.TotalAmount)
                     }
                 });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Felhasználó tiltása / aktiválása
+        /// </summary>
+        [HttpPut("users/{id}/toggle-active")]
+        public async Task<ActionResult> ToggleUserActive(int id)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                    return NotFound(new { message = "Felhasználó nem található" });
+
+                user.IsActive = !user.IsActive;
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = user.IsActive ? "Felhasználó aktiválva" : "Felhasználó tiltva",
+                    isActive = user.IsActive
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Szerepkör változtatás (user <-> admin)
+        /// </summary>
+        [HttpPut("users/{id}/toggle-role")]
+        public async Task<ActionResult> ToggleUserRole(int id)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.Role)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                    return NotFound(new { message = "Felhasználó nem található" });
+
+                var adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "admin");
+                var userRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "user");
+
+                user.RoleId = user.Role.Name == "admin" ? userRole!.Id : adminRole!.Id;
+                user.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = user.RoleId == adminRole!.Id ? "Admin szerepkör adva" : "User szerepkörre visszaállítva"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Hirdetés inaktiválása / aktiválása
+        /// </summary>
+        [HttpPut("listings/{id}/toggle-available")]
+        public async Task<ActionResult> ToggleListingAvailable(int id)
+        {
+            try
+            {
+                var listing = await _context.Listings.FindAsync(id);
+                if (listing == null)
+                    return NotFound(new { message = "Hirdetés nem található" });
+
+                listing.IsAvailable = !listing.IsAvailable;
+                listing.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    message = listing.IsAvailable ? "Hirdetés aktiválva" : "Hirdetés inaktiválva",
+                    isAvailable = listing.IsAvailable
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Hirdetés törlése
+        /// </summary>
+        [HttpDelete("listings/{id}")]
+        public async Task<ActionResult> DeleteListing(int id)
+        {
+            try
+            {
+                var listing = await _context.Listings
+                    .Include(l => l.OrderItems)
+                    .FirstOrDefaultAsync(l => l.Id == id);
+
+                if (listing == null)
+                    return NotFound(new { message = "Hirdetés nem található" });
+
+                // Ha tartoznak hozzá rendelés tételek, csak inaktiváljuk
+                if (listing.OrderItems.Any())
+                {
+                    listing.IsAvailable = false;
+                    listing.UpdatedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                    return Ok(new { message = "Hirdetés inaktiválva (rendelések tartoznak hozzá, nem törölhető)" });
+                }
+
+                // Kosár tételek törlése először
+                var cartItems = await _context.CartItems
+                    .Where(ci => ci.ListingId == id)
+                    .ToListAsync();
+                _context.CartItems.RemoveRange(cartItems);
+
+                _context.Listings.Remove(listing);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Hirdetés törölve" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Kategóriák lekérése
+        /// </summary>
+        [HttpGet("categories")]
+        public async Task<ActionResult> GetCategories()
+        {
+            try
+            {
+                var categories = await _context.Categories
+                    .OrderBy(c => c.Name)
+                    .Select(c => new { c.Id, c.Name, c.Description })
+                    .ToListAsync();
+
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Új kategória hozzáadása
+        /// </summary>
+        [HttpPost("categories")]
+        public async Task<ActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
+        {
+            try
+            {
+                var exists = await _context.Categories.AnyAsync(c => c.Name == dto.Name);
+                if (exists)
+                    return BadRequest(new { message = "Ez a kategória már létezik" });
+
+                var category = new Libratica.DataContext.Entities.Category
+                {
+                    Name = dto.Name,
+                    Description = dto.Description,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Kategória létrehozva", id = category.Id });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Kategória törlése
+        /// </summary>
+        [HttpDelete("categories/{id}")]
+        public async Task<ActionResult> DeleteCategory(int id)
+        {
+            try
+            {
+                var category = await _context.Categories.FindAsync(id);
+                if (category == null)
+                    return NotFound(new { message = "Kategória nem található" });
+
+                var hasBooks = await _context.BookCategories.AnyAsync(bc => bc.CategoryId == id);
+                if (hasBooks)
+                    return BadRequest(new { message = "Nem törölhető, könyvek tartoznak hozzá" });
+
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Kategória törölve" });
             }
             catch (Exception ex)
             {

@@ -119,7 +119,13 @@ namespace Libratica.Controllers
                     } : null,
                     r.Reason,
                     r.Status,
-                    r.CreatedAt
+                    r.CreatedAt,
+                    TotalReportsOnUser = r.ReportedUserId != null
+                        ? _context.Reports.Count(x => x.ReportedUserId == r.ReportedUserId)
+                        : (int?)null,
+                    TotalReportsOnListing = r.ListingId != null
+                        ? _context.Reports.Count(x => x.ListingId == r.ListingId)
+                        : (int?)null,
                 });
 
                 return Ok(result);

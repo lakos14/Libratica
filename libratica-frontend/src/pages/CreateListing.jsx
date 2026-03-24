@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchAPI, booksAPI, listingsAPI, googleBooksAPI } from '../services/api';
+import { booksAPI, listingsAPI, openLibraryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
@@ -11,17 +11,10 @@ const CreateListing = () => {
   const { isAuthenticated } = useAuth();
 
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching] = useState(false);
   const [categories, setCategories] = useState([]);
   const [googleSearchQuery, setGoogleSearchQuery] = useState('');
   const [googleSearching, setGoogleSearching] = useState(false);
   const [googleResults, setGoogleResults] = useState([]);
-
-  // Választható mód: meglévő könyv VAGY új könyv
-  const [mode, setMode] = useState('new'); // 'new' vagy 'existing'
-  const [selectedBook, setSelectedBook] = useState(null);
 
   // Könyv adatok (új könyv esetén)
   const [bookData, setBookData] = useState({
@@ -66,76 +59,63 @@ const CreateListing = () => {
       console.error('Failed to load categories:', error);
     }
   };
-  const searchGoogleBooks = async () => {
+  const searchOpenLibrary = async () => {
     if (!googleSearchQuery.trim()) return;
     
     setGoogleSearching(true);
     try {
-      let data;
-      // Ha számokból áll, ISBN keresés
+      let results;
       if (/^\d+$/.test(googleSearchQuery.replace(/-/g, ''))) {
-        data = await googleBooksAPI.searchByISBN(googleSearchQuery);
+        const data = await openLibraryAPI.searchByISBN(googleSearchQuery);
+        results = data ? [{ isISBN: true, data, isbn: googleSearchQuery }] : [];
       } else {
-        data = await googleBooksAPI.searchByTitle(googleSearchQuery);
+        const docs = await openLibraryAPI.searchByTitle(googleSearchQuery);
+        results = docs.map(doc => ({ isISBN: false, data: doc }));
       }
       
-      if (data.items) {
-        setGoogleResults(data.items);
-      } else {
-        setGoogleResults([]);
-        toast.info('Nem található könyv ezzel a kereséssel');
+      if (results.length === 0) {
+        toast.info('Nem található könyv');
       }
+      setGoogleResults(results);
     } catch (err) {
-      toast.error('Hiba a Google Books keresés során');
+      toast.error('Hiba a keresés során');
     } finally {
       setGoogleSearching(false);
     }
   };
 
-  const fillFromGoogleBooks = (item) => {
-    const info = item.volumeInfo;
-    setBookData({
-      ...bookData,
-      title: info.title || '',
-      author: info.authors ? info.authors.join(', ') : '',
-      isbn: info.industryIdentifiers 
-        ? (info.industryIdentifiers.find(i => i.type === 'ISBN_13')?.identifier || 
-          info.industryIdentifiers.find(i => i.type === 'ISBN_10')?.identifier || '')
-        : '',
-      publisher: info.publisher || '',
-      publicationYear: info.publishedDate ? info.publishedDate.substring(0, 4) : '',
-      language: info.language === 'hu' ? 'magyar' : info.language || '',
-      description: info.description || '',
-      coverImageUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
-      pageCount: info.pageCount || '',
-    });
+  const fillFromOpenLibrary = (item) => {
+    if (item.isISBN) {
+      const d = item.data;
+      setBookData({
+        ...bookData,
+        title: d.title || '',
+        author: d.authors?.map(a => a.name).join(', ') || '',
+        isbn: item.isbn || '',
+        publisher: d.publishers?.[0]?.name || '',
+        publicationYear: d.publish_date ? d.publish_date.slice(-4) : '',
+        description: d.notes || '',
+        coverImageUrl: d.cover?.large || d.cover?.medium || '',
+        pageCount: d.number_of_pages || '',
+      });
+    } else {
+      const d = item.data;
+      setBookData({
+        ...bookData,
+        title: d.title || '',
+        author: d.author_name?.join(', ') || '',
+        isbn: d.isbn?.[0] || '',
+        publisher: d.publisher?.[0] || '',
+        publicationYear: d.first_publish_year?.toString() || '',
+        coverImageUrl: d.cover_i 
+          ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` 
+          : '',
+        pageCount: d.number_of_pages_median || '',
+      });
+    }
     setGoogleResults([]);
     setGoogleSearchQuery('');
     toast.success('Könyv adatai betöltve!');
-  };
-
-  const searchBooks = async () => {
-    if (!searchQuery.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    try {
-      setSearching(true);
-      const response = await searchAPI.searchBooks({ query: searchQuery });
-      setSearchResults(response.data);
-    } catch (error) {
-      console.error('Failed to search books:', error);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const selectExistingBook = (book) => {
-    setSelectedBook(book);
-    setMode('existing');
-    setSearchResults([]);
-    setSearchQuery('');
   };
 
   const handleBookDataChange = (e) => {
@@ -175,19 +155,12 @@ const CreateListing = () => {
     const newErrors = {};
 
     // Könyv validáció
-    if (mode === 'new') {
-
       if (!bookData.title.trim()) {
         newErrors.title = 'Cím kötelező';
       }
       if (!bookData.author.trim()) {
         newErrors.author = 'Szerző kötelező';
       }
-    } else {
-      if (!selectedBook) {
-        newErrors.book = 'Válassz ki egy könyvet';
-      }
-    }
 
     // Hirdetés validáció
     if (!formData.condition) {
@@ -210,7 +183,7 @@ const CreateListing = () => {
       newErrors.conditionDescription = 'Maximum 1000 karakter';
     }
 
-    if (mode === 'new' && bookData.categoryIds.length === 0) {
+    if (bookData.categoryIds.length === 0) {
       newErrors.categoryIds = 'Legalább egy kategória kiválasztása kötelező';
     }
 
@@ -231,7 +204,6 @@ const CreateListing = () => {
       let bookId;
 
       // Ha új könyvet adunk meg, először létrehozzuk
-      if (mode === 'new') {
         const bookSubmitData = {
           title: bookData.title,
           author: bookData.author,
@@ -247,10 +219,6 @@ const CreateListing = () => {
 
         const bookResponse = await booksAPI.create(bookSubmitData);
         bookId = bookResponse.data.id;
-      } else {
-        // Meglévő könyv ID-ja
-        bookId = selectedBook.id;
-      }
 
       // Hirdetés létrehozása
       const submitData = {
@@ -300,34 +268,8 @@ const CreateListing = () => {
         {/* Mód választás */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">1. Könyv megadása</h2>
-          
-          <div className="flex gap-4 mb-6">
-            <button
-              type="button"
-              onClick={() => setMode('new')}
-              className={`flex-1 py-3 px-6 rounded-lg font-semibold transition ${
-                mode === 'new'
-                  ? 'bg-[#8b4513] text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              ✍️ Új könyv megadása
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('existing')}
-              className={`flex-1 py-3 px-6 rounded-lg font-semibold transition ${
-                mode === 'existing'
-                  ? 'bg-[#8b4513] text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              🔍 Meglévő könyv keresése
-            </button>
-          </div>
 
           {/* ÚJ KÖNYV MÓD */}
-          {mode === 'new' && (
             <div className="space-y-4 border-t pt-6">
               <p className="text-sm text-gray-600 mb-4">
                 Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
@@ -342,13 +284,13 @@ const CreateListing = () => {
                     type="text"
                     value={googleSearchQuery}
                     onChange={(e) => setGoogleSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchGoogleBooks())}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())}
                     placeholder="ISBN vagy könyvcím..."
                     className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
                   />
                   <button
                     type="button"
-                    onClick={searchGoogleBooks}
+                    onClick={searchOpenLibrary}
                     disabled={googleSearching}
                     className="px-4 py-2 text-white rounded disabled:bg-gray-400"
                     style={{ backgroundColor: '#8b4513' }}
@@ -357,39 +299,42 @@ const CreateListing = () => {
                   </button>
                 </div>
 
-                {/* Google keresési eredmények */}
+                {/* Open Books API keresési eredmények */}
                 {googleResults.length > 0 && (
                   <div className="mt-3 border rounded-lg max-h-64 overflow-y-auto bg-white">
-                    {googleResults.map((item) => (
-                      <div
-                        key={item.id}
-                        onClick={() => fillFromGoogleBooks(item)}
-                        className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                      >
-                        {item.volumeInfo.imageLinks?.thumbnail ? (
-                          <img
-                            src={item.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')}
-                            alt={item.volumeInfo.title}
-                            className="w-10 h-14 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
-                            <span className="text-gray-400 text-xs">📚</span>
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="font-medium text-sm">{item.volumeInfo.title}</p>
-                          <p className="text-xs text-gray-600">
-                            {item.volumeInfo.authors?.join(', ')}
-                          </p>
-                          {item.volumeInfo.publishedDate && (
-                            <p className="text-xs text-gray-400">
-                              {item.volumeInfo.publishedDate.substring(0, 4)}
-                            </p>
+                    {googleResults.map((item, index) => {
+                      const title = item.isISBN ? item.data.title : item.data.title;
+                      const author = item.isISBN 
+                        ? item.data.authors?.map(a => a.name).join(', ')
+                        : item.data.author_name?.join(', ');
+                      const cover = item.isISBN
+                        ? item.data.cover?.medium
+                        : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
+                      const year = item.isISBN
+                        ? item.data.publish_date?.slice(-4)
+                        : item.data.first_publish_year;
+
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => fillFromOpenLibrary(item)}
+                          className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                        >
+                          {cover ? (
+                            <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
+                          ) : (
+                            <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
+                              <span className="text-gray-400 text-xs">📚</span>
+                            </div>
                           )}
+                          <div className="flex-1">
+                            <p className="font-medium text-sm">{title}</p>
+                            <p className="text-xs text-gray-600">{author}</p>
+                            {year && <p className="text-xs text-gray-400">{year}</p>}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -571,116 +516,6 @@ const CreateListing = () => {
                 </div>
               )}
             </div>
-          )}
-
-          {/* MEGLÉVŐ KÖNYV MÓD */}
-          {mode === 'existing' && (
-            <div className="border-t pt-6">
-              {!selectedBook ? (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Keress rá a könyvre
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchBooks())}
-                      placeholder="Cím, szerző vagy ISBN..."
-                      className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={searchBooks}
-                      disabled={searching}
-                      className="bg-[#8b4513] text-white px-6 py-2 rounded-lg hover:bg-[#654321] disabled:bg-gray-400"
-                    >
-                      {searching ? '⏳' : '🔍'}
-                    </button>
-                  </div>
-
-                  {errors.book && (
-                    <p className="text-red-600 text-sm mt-1">{errors.book}</p>
-                  )}
-
-                  {/* Keresési eredmények */}
-                  {searchResults.length > 0 && (
-                    <div className="mt-4 border rounded-lg max-h-96 overflow-y-auto">
-                      {searchResults.map((book) => (
-                        <div
-                          key={book.id}
-                          onClick={() => selectExistingBook(book)}
-                          className="flex gap-4 p-4 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                        >
-                          <img
-                            src={book.coverImageUrl || 'https://via.placeholder.com/60x90?text=📖'}
-                            alt={book.title}
-                            className="w-12 h-18 object-cover rounded"
-                          />
-                          <div className="flex-1">
-                            <h3 className="font-bold">{book.title}</h3>
-                            <p className="text-sm text-gray-600">{book.author}</p>
-                            {book.isbn && (
-                              <p className="text-xs text-gray-500">ISBN: {book.isbn}</p>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            className="text-[#8b4513] hover:text-[#654321]"
-                          >
-                            Kiválaszt →
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {searchQuery && searchResults.length === 0 && !searching && (
-                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                      <p className="text-sm mb-2">
-                        Nem található könyv ezzel a keresőszóval.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => setMode('new')}
-                        className="text-[#8b4513] font-semibold hover:underline"
-                      >
-                        → Inkább add meg magad a könyv adatait
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="border rounded-lg p-4 bg-green-50">
-                  <div className="flex gap-4">
-                    <img
-                      src={selectedBook.coverImageUrl || 'https://via.placeholder.com/80x120?text=📖'}
-                      alt={selectedBook.title}
-                      className="w-20 h-30 object-cover rounded"
-                    />
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold">{selectedBook.title}</h3>
-                      <p className="text-gray-600">{selectedBook.author}</p>
-                      {selectedBook.publisher && (
-                        <p className="text-sm text-gray-500">📚 {selectedBook.publisher}</p>
-                      )}
-                      {selectedBook.publicationYear && (
-                        <p className="text-sm text-gray-500">📅 {selectedBook.publicationYear}</p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedBook(null)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      ✗ Másik könyv
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Állapot */}

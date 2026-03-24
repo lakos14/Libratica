@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { bookCollectionAPI, googleBooksAPI } from '../services/api';
+import { bookCollectionAPI, openLibraryAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 function BookCollection() {
@@ -28,19 +28,19 @@ function BookCollection() {
     if (!searchQuery.trim()) return;
     setSearching(true);
     try {
-      let data;
+      let results;
       if (/^\d+$/.test(searchQuery.replace(/-/g, ''))) {
-        data = await googleBooksAPI.searchByISBN(searchQuery);
+        const data = await openLibraryAPI.searchByISBN(searchQuery);
+        results = data ? [{ isISBN: true, data, isbn: searchQuery }] : [];
       } else {
-        data = await googleBooksAPI.searchByTitle(searchQuery);
+        const docs = await openLibraryAPI.searchByTitle(searchQuery);
+        results = docs.map(doc => ({ isISBN: false, data: doc }));
       }
 
-      if (data.items) {
-        setSearchResults(data.items);
-      } else {
-        setSearchResults([]);
+      if (results.length === 0) {
         toast.info('Nem található könyv');
       }
+      setSearchResults(results);
     } catch (err) {
       toast.error('Hiba a keresés során');
     } finally {
@@ -49,15 +49,31 @@ function BookCollection() {
   };
 
   const handleAdd = async (item) => {
-    const info = item.volumeInfo;
     try {
+      const title = item.isISBN ? item.data.title : item.data.title;
+      const author = item.isISBN
+        ? item.data.authors?.map(a => a.name).join(', ')
+        : item.data.author_name?.join(', ');
+      const cover = item.isISBN
+        ? item.data.cover?.large || item.data.cover?.medium
+        : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-L.jpg` : null;
+      const publisher = item.isISBN
+        ? item.data.publishers?.[0]?.name
+        : item.data.publisher?.[0];
+      const year = item.isISBN
+        ? item.data.publish_date?.slice(-4)
+        : item.data.first_publish_year?.toString();
+      const googleBooksId = item.isISBN
+        ? `isbn_${item.isbn}`
+        : `ol_${item.data.key?.replace('/works/', '')}`;
+
       await bookCollectionAPI.addToCollection({
-        googleBooksId: item.id,
-        title: info.title,
-        author: info.authors?.join(', ') || null,
-        coverImageUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || null,
-        publisher: info.publisher || null,
-        publicationYear: info.publishedDate ? parseInt(info.publishedDate.substring(0, 4)) : null,
+        googleBooksId,
+        title,
+        author: author || null,
+        coverImageUrl: cover || null,
+        publisher: publisher || null,
+        publicationYear: year ? parseInt(year) : null,
       });
       toast.success('Könyv hozzáadva a gyűjteményhez!');
       setSearchResults([]);
@@ -118,38 +134,42 @@ function BookCollection() {
           {/* Keresési eredmények */}
           {searchResults.length > 0 && (
             <div className="border rounded-lg max-h-72 overflow-y-auto">
-              {searchResults.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-3 p-3 border-b last:border-b-0 hover:bg-gray-50"
-                >
-                  {item.volumeInfo.imageLinks?.thumbnail ? (
-                    <img
-                      src={item.volumeInfo.imageLinks.thumbnail.replace('http://', 'https://')}
-                      alt={item.volumeInfo.title}
-                      className="w-10 h-14 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
-                      <span className="text-xs text-gray-400">📚</span>
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{item.volumeInfo.title}</p>
-                    <p className="text-xs text-gray-600">{item.volumeInfo.authors?.join(', ')}</p>
-                    {item.volumeInfo.publishedDate && (
-                      <p className="text-xs text-gray-400">{item.volumeInfo.publishedDate.substring(0, 4)}</p>
+              {searchResults.map((item, index) => {
+                const title = item.isISBN ? item.data.title : item.data.title;
+                const author = item.isISBN
+                  ? item.data.authors?.map(a => a.name).join(', ')
+                  : item.data.author_name?.join(', ');
+                const cover = item.isISBN
+                  ? item.data.cover?.medium
+                  : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
+                const year = item.isISBN
+                  ? item.data.publish_date?.slice(-4)
+                  : item.data.first_publish_year;
+
+                return (
+                  <div key={index} className="flex gap-3 p-3 border-b last:border-b-0 hover:bg-gray-50">
+                    {cover ? (
+                      <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
+                    ) : (
+                      <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
+                        <span className="text-xs text-gray-400">📚</span>
+                      </div>
                     )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{title}</p>
+                      <p className="text-xs text-gray-600">{author}</p>
+                      {year && <p className="text-xs text-gray-400">{year}</p>}
+                    </div>
+                    <button
+                      onClick={() => handleAdd(item)}
+                      className="px-3 py-1 text-sm text-white rounded self-center"
+                      style={{ backgroundColor: '#8b4513' }}
+                    >
+                      + Hozzáadás
+                    </button>
                   </div>
-                  <button
-                    onClick={() => handleAdd(item)}
-                    className="px-3 py-1 text-sm text-white rounded self-center"
-                    style={{ backgroundColor: '#8b4513' }}
-                  >
-                    + Hozzáadás
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

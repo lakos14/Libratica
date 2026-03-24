@@ -83,6 +83,13 @@ export const adminAPI = {
   getAllUsers: () => api.get('/admin/users'),
   getUserDetails: (id) => api.get(`/admin/users/${id}`),
   getAllListings: () => api.get('/admin/listings'),
+  toggleUserActive: (id) => api.put(`/admin/users/${id}/toggle-active`),
+  toggleUserRole: (id) => api.put(`/admin/users/${id}/toggle-role`),
+  toggleListingAvailable: (id) => api.put(`/admin/listings/${id}/toggle-available`),
+  deleteListing: (id) => api.delete(`/admin/listings/${id}`),
+  getCategories: () => api.get('/admin/categories'),
+  createCategory: (data) => api.post('/admin/categories', data),
+  deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
 };
 
 // Profile API
@@ -123,14 +130,19 @@ export const wishlistAPI = {
   checkWishlist: (bookId) => api.get(`/wishlist/check/${bookId}`),
 };
 
-// Google Books API
-export const googleBooksAPI = {
-  searchByISBN: (isbn) => 
-    fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
-      .then(res => res.json()),
-  searchByTitle: (query) => 
-    fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&langRestrict=hu&maxResults=5`)
-      .then(res => res.json()),
+// Open Library API
+export const openLibraryAPI = {
+  searchByISBN: async (isbn) => {
+    const res = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+    const data = await res.json();
+    const key = `ISBN:${isbn}`;
+    return data[key] || null;
+  },
+  searchByTitle: async (query) => {
+    const res = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`);
+    const data = await res.json();
+    return data.docs || [];
+  },
 };
 
 // Book collection API

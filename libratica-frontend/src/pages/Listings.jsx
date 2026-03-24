@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { listingsAPI } from '../services/api';
+import { listingsAPI, searchAPI } from '../services/api';
 
 function Listings() {
   const [listings, setListings] = useState([]);
@@ -42,17 +42,15 @@ function Listings() {
   const loadListings = async () => {
     setLoading(true);
     try {
-      const params = {
+      const response = await searchAPI.searchListings({
         query: filters.query || undefined,
         bookId: filters.bookId || undefined,
         minPrice: filters.minPrice || undefined,
         maxPrice: filters.maxPrice || undefined,
         condition: filters.condition || undefined,
         location: filters.location || undefined,
-        isAvailable: true,  // ⭐ KRITIKUS!
-      };
-
-      const response = await listingsAPI.getAll(params);
+        isAvailable: true,
+      });
       setListings(response.data);
     } catch (error) {
       console.error('Hiba a hirdetések betöltésekor:', error);

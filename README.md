@@ -1,6 +1,14 @@
 # Libratica
 2026.03.24
 
+## Tervezett funkciók a második félévre:
+### Alapfunkciók:
+- elfelejtett jelszó
+- események létrehozása, böngészése oldal
+- email verification (ha marad idő)
+### Bővítések:
+- Keresés fejlesztése
+
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:
 - regisztráció, bejelentkezés (JWT)
@@ -38,16 +46,6 @@
 ### UI:
 - responsive design
 - form validációk, toast értesítések
-
-  
-## Tervezett funkciók a második félévre:
-### Alapfunkciók:
-- elfelejtett jelszó
-- események létrehozása, böngészése oldal
-- email verification (ha marad idő)
-### Bővítések:
-- Keresés fejlesztése
-
 
 # Kérdések:
 ### Kik lesznek bent a prezentáció során?

@@ -1,5 +1,5 @@
 # Libratica
-2025.11.26
+2026.03.24
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:
@@ -9,7 +9,8 @@
 - profil szerkesztése oldal
 - új jelszó beállítása
 - user rating/review rendszer
-- felhasználói profil oldal 
+- felhasználói profil oldal
+- admin funkciók
 ### Könyvek és hírdetések:
 - könyvek böngészése, szűrése és keresése
 - hírdetés létrehozása, szerkesztése, törlése
@@ -47,7 +48,6 @@
 - szűrő javítása hírdetéseknél
 ### Bővítések:
 - Keresés fejlesztése
-- admin CRUD
 
 
 # Kérdések:

@@ -45,34 +45,22 @@
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
 - email verification (ha marad idő)
-- szűrő javítása hírdetéseknél
 ### Bővítések:
 - Keresés fejlesztése
 
 
 # Kérdések:
-### Második félévben megvalósítsam e az escrow rendszert és ha igen akkor beleírjam-e a prezentációba?
-- Jelenleg nem kezel pénzügyeket, a vásárlásnál, átverhetik egymást az emberek
-  - Ezért lesz majd kifejlesztve a Review rendszer a jövőben és akkor moderálással ki lehet szűrni az ilyen embereket
-	##### Mellette szól szerintem:
-	- Stripe teljesen ingyenes amíg nincsen valódi tranzakció
-	- Ez az egyetlen metódus amivel megvalósítható az eladói -és vevői védelem 100%-ig
-	##### Ellene szól szerintem:
-	- Komplex implementációval jár
-	- Nehéz tesztelni
-#### Alternatíva (jelenlegi megoldás): 
-- Review rendszer + moderálás a report rendszer alapján
-- Platform csak közvetít, nem kezel pénzügyeket
 ### Kik lesznek bent a prezentáció során?
-### AI vagy plágiumellenőrzés lesz-e ebben a félévben is?
+- Tóth Bálint, Ábrahám Gyula, Pulai Gábor
 
 ## Technológiák
 
 ### Backend
 - ASP.NET Core 8.0
-- Entity Framework Core
-- SQL Server
+- Entity Framework Core 9
+- SQL Server Express
 - JWT Authentication
+- BCrypt.Net (jelszó hash-elés)
 - Swagger/OpenAPI
 
 ### Frontend
@@ -80,4 +68,9 @@
 - React Router v7
 - Axios
 - Tailwind CSS
-- Context API
+- Context API (auth kezelés)
+- React Toastify (értesítések)
+
+### Külső API-k és szolgáltatások
+- Open Library API (könyv adatok automatikus kitöltése)
+- OpenAI GPT-3.5-turbo (AI alapú könyvkereső)

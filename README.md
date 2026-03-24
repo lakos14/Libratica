@@ -22,6 +22,7 @@
 - könyv kívánságlista
 - Open Library API
 - könyvgyütemény
+- képfeltöltés a hírdetéseknél mappából
 ### Vásárlások és rendelések:
 - kapcsolatfelvétel gomb
 - ajánlórendszer
@@ -43,7 +44,6 @@
 ### Alapfunkciók:
 - elfelejtett jelszó
 - események létrehozása, böngészése oldal
-- képfeltöltés a hírdetéseknél mappából
 - email verification (ha marad idő)
 - szűrő javítása hírdetéseknél
 ### Bővítések:

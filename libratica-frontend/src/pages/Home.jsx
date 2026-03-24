@@ -82,13 +82,23 @@ function Home() {
                 to={`/listings/${listing.id}`}
                 className="bg-white border border-gray-200 rounded p-3 hover:border-gray-400 transition-colors"
               >
-                {listing.book?.coverImageUrl && (
-                  <img
-                    src={listing.book.coverImageUrl}
-                    alt={listing.book?.title}
-                    className="w-full h-64 object-cover rounded mb-3"
-                  />
-                )}
+              {listing.images?.length > 0 ? (
+                <img
+                  src={`http://localhost:5102${listing.images[0]}`}
+                  alt={listing.book?.title}
+                  className="w-full h-64 object-cover rounded mb-3"
+                />
+              ) : listing.book?.coverImageUrl ? (
+                <img
+                  src={listing.book.coverImageUrl}
+                  alt={listing.book?.title}
+                  className="w-full h-64 object-cover rounded mb-3"
+                />
+              ) : (
+                <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                  <span className="text-gray-400 text-4xl">📚</span>
+                </div>
+              )}
                 <h3 className="font-bold text-gray-800 mb-1 text-sm">
                   {listing.book?.title}
                 </h3>

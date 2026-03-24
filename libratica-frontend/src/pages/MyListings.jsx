@@ -102,7 +102,13 @@ function MyListings() {
                 className="bg-white border border-gray-200 rounded p-4 flex flex-col"
               >
                 {/* Kép */}
-                {listing.book?.coverImageUrl ? (
+                {listing.images?.length > 0 ? (
+                  <img
+                    src={`http://localhost:5102${listing.images[0]}`}
+                    alt={listing.book?.title}
+                    className="w-full h-64 object-cover rounded mb-3"
+                  />
+                ) : listing.book?.coverImageUrl ? (
                   <img
                     src={listing.book.coverImageUrl}
                     alt={listing.book?.title}

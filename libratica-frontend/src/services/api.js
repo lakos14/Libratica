@@ -158,4 +158,12 @@ export const recommendationsAPI = {
   getRecommendations: () => api.get('/recommendations'),
 };
 
+// Images API
+export const imagesAPI = {
+  upload: (formData) => api.post('/images/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  delete: (url) => api.delete(`/images?url=${encodeURIComponent(url)}`),
+};
+
 export default api;

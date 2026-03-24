@@ -18,6 +18,7 @@ function ListingDetails() {
   const [reportReason, setReportReason] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     loadListing();
@@ -163,20 +164,45 @@ function ListingDetails() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Bal oldal - Kép */}
-          <div className="bg-white border border-gray-200 rounded p-6 flex items-center justify-center">
-            {listing.book?.coverImageUrl ? (
+        {/* Bal oldal - Kép */}
+        <div className="bg-white border border-gray-200 rounded p-6 flex items-start justify-center">
+          {listing.images?.length > 0 ? (
+            <div className="w-full flex flex-col items-center justify-between h-full">
               <img
-                src={listing.book.coverImageUrl}
+                src={`http://localhost:5102${listing.images[selectedImage]}`}
                 alt={listing.book?.title}
                 className="max-w-full max-h-96 object-contain rounded"
               />
-            ) : (
-              <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
-                <span className="text-gray-400 text-6xl">📚</span>
-              </div>
-            )}
-          </div>
+              {listing.images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto mt-4">
+                  {listing.images.map((img, index) => (
+                    <img
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      src={`http://localhost:5102${img}`}
+                      alt={`Kép ${index + 1}`}
+                      className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${
+                        selectedImage === index 
+                          ? 'border-[#8b4513]' 
+                          : 'border-gray-200 hover:border-gray-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : listing.book?.coverImageUrl ? (
+            <img
+              src={listing.book.coverImageUrl}
+              alt={listing.book?.title}
+              className="max-w-full max-h-96 object-contain rounded"
+            />
+          ) : (
+            <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
+              <span className="text-gray-400 text-6xl">📚</span>
+            </div>
+          )}
+        </div>
 
           {/* Jobb oldal - Részletek */}
           <div className="bg-white border border-gray-200 rounded p-6">

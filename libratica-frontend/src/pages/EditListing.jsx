@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listingsAPI } from '../services/api';
+import { listingsAPI, imagesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
@@ -12,6 +12,7 @@ const EditListing = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [listing, setListing] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [formData, setFormData] = useState({
     condition: 'good',
@@ -144,6 +145,43 @@ const EditListing = () => {
     { value: 'fair', label: '👌 Elfogadható - Látható kopás, de olvasható' },
     { value: 'poor', label: '📖 Gyenge - Sok használat nyoma, de funkcionális' },
   ];
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    if (formData.images.length + files.length > 5) {
+      toast.error('Maximum 5 kép tölthető fel!');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const response = await imagesAPI.upload(fd);
+        uploadedUrls.push(response.data.url);
+      }
+      setFormData({ ...formData, images: [...formData.images, ...uploadedUrls] });
+      toast.success('Kép(ek) sikeresen feltöltve!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba a feltöltés során');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleImageRemove = async (url) => {
+    try {
+      await imagesAPI.delete(url);
+      setFormData({ ...formData, images: formData.images.filter(img => img !== url) });
+      toast.success('Kép eltávolítva!');
+    } catch (err) {
+      toast.error('Hiba a kép eltávolításakor');
+    }
+  };
 
   if (loading) {
     return (
@@ -358,6 +396,49 @@ const EditListing = () => {
               A konkrét cím megadása nem kötelező. Város vagy kerület is elég.
             </p>
           </div>
+        </div>
+        
+        {/* Képek */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-4">4. Képek</h2>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">
+              Képek feltöltése (max. 5 db, max. 5MB/kép, JPG/PNG/WEBP)
+            </label>
+            <input
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              multiple
+              onChange={handleImageUpload}
+              disabled={uploadingImage || formData.images.length >= 5}
+              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 disabled:bg-gray-100"
+            />
+            {uploadingImage && (
+              <p className="text-sm text-gray-500 mt-1">⏳ Feltöltés folyamatban...</p>
+            )}
+          </div>
+
+          {formData.images.length > 0 && (
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+              {formData.images.map((url, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={`http://localhost:5102${url}`}
+                    alt={`Kép ${index + 1}`}
+                    className="w-full h-24 object-cover rounded border border-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleImageRemove(url)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Submit gombok */}

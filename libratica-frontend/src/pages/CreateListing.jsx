@@ -176,6 +176,7 @@ const CreateListing = () => {
 
     // Könyv validáció
     if (mode === 'new') {
+
       if (!bookData.title.trim()) {
         newErrors.title = 'Cím kötelező';
       }
@@ -207,6 +208,10 @@ const CreateListing = () => {
 
     if (formData.conditionDescription && formData.conditionDescription.length > 1000) {
       newErrors.conditionDescription = 'Maximum 1000 karakter';
+    }
+
+    if (mode === 'new' && bookData.categoryIds.length === 0) {
+      newErrors.categoryIds = 'Legalább egy kategória kiválasztása kötelező';
     }
 
     setErrors(newErrors);
@@ -542,7 +547,7 @@ const CreateListing = () => {
               {categories.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium mb-2">
-                    Kategóriák (opcionális)
+                      Kategória * (kötelező)
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {categories.map((category) => (
@@ -560,6 +565,9 @@ const CreateListing = () => {
                       </button>
                     ))}
                   </div>
+                  {errors.categoryIds && (
+                    <p className="text-red-600 text-sm mt-1">{errors.categoryIds}</p>
+                  )}
                 </div>
               )}
             </div>

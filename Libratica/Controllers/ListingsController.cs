@@ -294,46 +294,21 @@ namespace Libratica.Controllers
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> CancelOrder(int id)
+        public async Task<IActionResult> DeleteListing(int id)
         {
             try
             {
                 var userId = GetCurrentUserId();
+                var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
-                var order = await _context.Orders
-                    .Include(o => o.OrderItems)
-                        .ThenInclude(oi => oi.Listing)
-                    .FirstOrDefaultAsync(o => o.Id == id);
+                var listing = await _context.Listings.FindAsync(id);
+                if (listing == null)
+                    return NotFound(new { message = "Hirdetés nem található" });
 
-                if (order == null)
-                {
-                    return NotFound(new { message = "Rendelés nem található" });
-                }
-
-                if (order.BuyerId != userId)
-                {
+                if (listing.SellerId != userId && userRole != "admin")
                     return Forbid();
-                }
 
-                if (order.Status != "pending")
-                {
-                    return BadRequest(new { message = "Csak függőben lévő rendelést lehet lemondani" });
-                }
-
-                foreach (var orderItem in order.OrderItems)
-                {
-                    var listing = await _context.Listings.FindAsync(orderItem.ListingId);
-                    if (listing != null)
-                    {
-                        listing.Quantity += orderItem.Quantity;
-                        listing.IsAvailable = true;
-                        _context.Listings.Update(listing);
-                    }
-                }
-
-                order.Status = "cancelled";
-                order.UpdatedAt = DateTime.UtcNow;
-
+                _context.Listings.Remove(listing);
                 await _context.SaveChangesAsync();
 
                 return NoContent();

@@ -19,7 +19,7 @@
 - új könyv vagy meglévő könyv hírdetésének feltöltése
 - AI integráció
 - könyv kívánságlista
-- Google Books API
+- Open Library API
 - könyvgyütemény
 ### Vásárlások és rendelések:
 - kapcsolatfelvétel gomb

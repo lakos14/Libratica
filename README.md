@@ -11,6 +11,7 @@
 - code review 
 - tesztelés
 - ha valamiből 0db elérhető vegye ki a hirdetésekből
+- ai keresőnél kategóriára nem találja meg a könyveket, ha azt írom mindent dobjon ki az se működik
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:

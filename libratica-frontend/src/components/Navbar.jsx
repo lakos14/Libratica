@@ -54,6 +54,9 @@ function Navbar() {
                 <Link to="/cart" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Kosár
                 </Link>
+                <Link to="/events" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                  Események
+                </Link>
 
                 {/* Dropdown */}
                 <div className="relative">
@@ -144,6 +147,9 @@ function Navbar() {
                 </Link>
                 <Link to="/cart" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                   Kosár
+                </Link>
+                <Link to="/events" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  Események
                 </Link>
                 <Link to="/my-listings" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                   Hirdetéseim

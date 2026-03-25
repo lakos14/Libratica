@@ -6,6 +6,10 @@ function Listings() {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 12;
   const navigate = useNavigate();
 
   const [filters, setFilters] = useState({
@@ -18,10 +22,6 @@ function Listings() {
   });
 
   useEffect(() => {
-    loadListings();
-  }, []);
-
-  useEffect(() => {
     const bookIdFromUrl = searchParams.get('bookId');
     if (bookIdFromUrl && bookIdFromUrl !== filters.bookId) {
       setFilters((prev) => ({
@@ -32,12 +32,17 @@ function Listings() {
   }, [searchParams]);
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       loadListings();
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [filters]);
+  }, [currentPage, filters]);
+  
 
   const loadListings = async () => {
     setLoading(true);
@@ -50,8 +55,12 @@ function Listings() {
         condition: filters.condition || undefined,
         location: filters.location || undefined,
         isAvailable: true,
+        page: currentPage,
+        pageSize,
       });
-      setListings(response.data);
+      setListings(response.data.items);
+      setTotalPages(response.data.totalPages);
+      setTotalCount(response.data.totalCount);
     } catch (error) {
       console.error('Hiba a hirdetések betöltésekor:', error);
     } finally {
@@ -194,11 +203,9 @@ function Listings() {
         </div>
 
         {/* Találatok száma */}
-        <div className="mb-4">
-          <p className="text-gray-600">
-            {loading ? 'Betöltés...' : `${listings.length} hirdetés találat`}
-          </p>
-        </div>
+        <p className="text-gray-600">
+          {loading ? 'Betöltés...' : `${totalCount} hirdetés találat`}
+        </p>
 
         {/* Loading */}
         {loading && (
@@ -260,6 +267,65 @@ function Listings() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <button
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >
+              «
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => prev - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >
+              ‹
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) => p === '...' ? (
+                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setCurrentPage(p)}
+                  className={`px-3 py-2 text-sm rounded border font-medium ${
+                    currentPage === p
+                      ? 'text-white border-transparent'
+                      : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
+                >
+                  {p}
+                </button>
+              ))}
+
+            <button
+              onClick={() => setCurrentPage(prev => prev + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >
+              ›
+            </button>
+            <button
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >
+              »
+            </button>
           </div>
         )}
 

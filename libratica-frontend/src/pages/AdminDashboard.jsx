@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { adminAPI, reportsAPI } from '../services/api';
+import { adminAPI, reportsAPI, eventsAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { Link } from 'react-router-dom';
 
@@ -13,6 +13,11 @@ function AdminDashboard() {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
   const [error, setError] = useState('');
+  const [events, setEvents] = useState([]);
+  const [usersPage, setUsersPage] = useState(1);
+  const [listingsPage, setListingsPage] = useState(1);
+  const adminPageSize = 15;
+  
 
   useEffect(() => {
     if (activeTab === 'stats') {
@@ -25,6 +30,8 @@ function AdminDashboard() {
       loadReports();
     } else if (activeTab === 'categories') {
       loadCategories();
+    } else if (activeTab === 'events') {
+      loadEvents();
     }
   }, [activeTab]);
 
@@ -191,6 +198,40 @@ function AdminDashboard() {
     });
   };
 
+  const loadEvents = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await adminAPI.getAllEvents();
+      setEvents(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Hiba az események betöltésekor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEventStatus = async (id, status) => {
+    try {
+      await adminAPI.updateEventStatus(id, { status });
+      toast.success(status === 'approved' ? 'Esemény jóváhagyva!' : 'Esemény elutasítva!');
+      loadEvents();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba történt');
+    }
+  };
+
+  const handleDeleteEvent = async (id) => {
+    if (!window.confirm('Biztosan törlöd ezt az eseményt?')) return;
+    try {
+      await adminAPI.deleteEvent(id);
+      toast.success('Esemény törölve!');
+      loadEvents();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba történt');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">⚙️ Admin Dashboard</h1>
@@ -246,6 +287,16 @@ function AdminDashboard() {
           }`}
         >
           🏷️ Kategóriák
+        </button>
+        <button
+          onClick={() => setActiveTab('events')}
+          className={`px-4 py-2 font-semibold ${
+            activeTab === 'events'
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          📅 Események
         </button>
       </div>
 
@@ -323,7 +374,7 @@ function AdminDashboard() {
           </div>
         </div>
       )}
-
+      
       {/* TAB 2: Felhasználók */}
       {activeTab === 'users' && !loading && (
         <div>
@@ -351,7 +402,14 @@ function AdminDashboard() {
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{user.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                        <a href={`/users/${user.username}`}
+                        className="text-sm font-medium hover:underline"
+                        style={{ color: '#8b4513' }}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {user.username}
+                      </a>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.fullName || '-'}</td>
@@ -646,6 +704,74 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* TAB 6: Események*/}
+      {activeTab === 'events' && !loading && (
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Események ({events.length})</h2>
+
+        {events.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded p-8 text-center">
+            <p className="text-gray-500">Nincsenek események</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {events.map((event) => (
+              <div key={event.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-bold text-lg">{event.title}</h3>
+                    <p className="text-sm text-gray-600">
+                      {event.type === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    event.status === 'approved' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {event.status === 'pending' ? '⏳ Függőben' :
+                    event.status === 'approved' ? '✓ Jóváhagyva' : '✗ Elutasítva'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-3 text-sm text-gray-600">
+                  <p>📅 {formatDate(event.eventDate)}</p>
+                  <p>📍 {event.location}</p>
+                  <p>👤 Szervező: {event.organizer?.username}</p>
+                  <p>👥 {event.attendeesCount} résztvevő</p>
+                </div>
+
+                <div className="flex gap-2">
+                  {event.status === 'pending' && (
+                    <>
+                      <button
+                        onClick={() => handleEventStatus(event.id, 'approved')}
+                        className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                      >
+                        ✓ Jóváhagyás
+                      </button>
+                      <button
+                        onClick={() => handleEventStatus(event.id, 'rejected')}
+                        className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
+                      >
+                        ✗ Elutasítás
+                      </button>
+                    </>
+                  )}
+                  <button
+                    onClick={() => handleDeleteEvent(event.id)}
+                    className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
+                  >
+                    Törlés
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )}
     </div>
   );
 }

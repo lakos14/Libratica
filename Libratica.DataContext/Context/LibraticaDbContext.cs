@@ -25,6 +25,9 @@ namespace Libratica.DataContext.Context
         public DbSet<Report> Reports { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
         public DbSet<BookCollection> BookCollections { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<EventAttendee> EventAttendees { get; set; }
+        public DbSet<EventComment> EventComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -243,6 +246,52 @@ namespace Libratica.DataContext.Context
                     .WithMany()
                     .HasForeignKey(bc => bc.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Event configuration
+            modelBuilder.Entity<Event>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => e.Status);
+                entity.HasIndex(e => e.EventDate);
+
+                entity.HasOne(e => e.Organizer)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrganizerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // EventAttendee configuration
+            modelBuilder.Entity<EventAttendee>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasIndex(e => new { e.EventId, e.UserId }).IsUnique();
+
+                entity.HasOne(ea => ea.Event)
+                    .WithMany(e => e.Attendees)
+                    .HasForeignKey(ea => ea.EventId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ea => ea.User)
+                    .WithMany()
+                    .HasForeignKey(ea => ea.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // EventComment configuration
+            modelBuilder.Entity<EventComment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(ec => ec.Event)
+                    .WithMany(e => e.Comments)
+                    .HasForeignKey(ec => ec.EventId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ec => ec.User)
+                    .WithMany()
+                    .HasForeignKey(ec => ec.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             // Seed reference data

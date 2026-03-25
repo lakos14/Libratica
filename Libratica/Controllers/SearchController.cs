@@ -28,7 +28,9 @@ namespace Libratica.Controllers
             [FromQuery] int? maxYear = null,
             [FromQuery] string? language = null,
             [FromQuery] string? sortBy = "relevance",
-            [FromQuery] string? sortOrder = "asc")
+            [FromQuery] string? sortOrder = "asc",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12)
         {
             try
             {
@@ -99,7 +101,21 @@ namespace Libratica.Controllers
                     CreatedAt = b.CreatedAt
                 }).ToList();
 
-                return Ok(bookDtos);
+                var totalCount = bookDtos.Count;
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+                var pagedBooks = bookDtos
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Ok(new
+                {
+                    items = pagedBooks,
+                    totalCount,
+                    totalPages,
+                    currentPage = page,
+                    pageSize
+                });
             }
             catch (Exception ex)
             {
@@ -121,7 +137,9 @@ namespace Libratica.Controllers
             [FromQuery] string? location = null,
             [FromQuery] bool? isAvailable = null,
             [FromQuery] string? sortBy = "date",
-            [FromQuery] string? sortOrder = "desc")
+            [FromQuery] string? sortOrder = "desc",
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12)
         {
             try
             {
@@ -236,7 +254,21 @@ namespace Libratica.Controllers
                     ViewsCount = l.ViewsCount
                 }).ToList();
 
-                return Ok(listingDtos);
+                var totalCount = listingDtos.Count;
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+                var pagedListings = listingDtos
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Ok(new
+                {
+                    items = pagedListings,
+                    totalCount,
+                    totalPages,
+                    currentPage = page,
+                    pageSize
+                });
             }
             catch (Exception ex)
             {

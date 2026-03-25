@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Libratica.DataContext.DTOs;
 
 namespace Libratica.Controllers
 {
@@ -400,6 +401,86 @@ namespace Libratica.Controllers
                 await _context.SaveChangesAsync();
 
                 return Ok(new { message = "Kategória törölve" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        /// <summary>
+        /// Összes esemény lekérése (admin nézet)
+        /// </summary>
+        [HttpGet("events")]
+        public async Task<ActionResult> GetAllEvents()
+        {
+            try
+            {
+                var events = await _context.Events
+                    .Include(e => e.Organizer)
+                    .Include(e => e.Attendees)
+                    .OrderByDescending(e => e.CreatedAt)
+                    .Select(e => new
+                    {
+                        e.Id,
+                        e.Title,
+                        e.Type,
+                        e.EventDate,
+                        e.Location,
+                        e.Status,
+                        e.CreatedAt,
+                        Organizer = new { e.Organizer.Id, e.Organizer.Username },
+                        AttendeesCount = e.Attendees.Count
+                    })
+                    .ToListAsync();
+
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Esemény jóváhagyása / elutasítása
+        /// </summary>
+        [HttpPut("events/{id}/status")]
+        public async Task<ActionResult> UpdateEventStatus(int id, [FromBody] UpdateEventStatusDto dto)
+        {
+            try
+            {
+                var ev = await _context.Events.FindAsync(id);
+                if (ev == null)
+                    return NotFound(new { message = "Esemény nem található" });
+
+                ev.Status = dto.Status;
+                ev.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = dto.Status == "approved" ? "Esemény jóváhagyva!" : "Esemény elutasítva!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Esemény törlése (admin)
+        /// </summary>
+        [HttpDelete("events/{id}")]
+        public async Task<ActionResult> DeleteEvent(int id)
+        {
+            try
+            {
+                var ev = await _context.Events.FindAsync(id);
+                if (ev == null)
+                    return NotFound(new { message = "Esemény nem található" });
+
+                _context.Events.Remove(ev);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { message = "Esemény törölve" });
             }
             catch (Exception ex)
             {

@@ -90,6 +90,9 @@ export const adminAPI = {
   getCategories: () => api.get('/admin/categories'),
   createCategory: (data) => api.post('/admin/categories', data),
   deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
+  getAllEvents: () => api.get('/admin/events'),
+  updateEventStatus: (id, data) => api.put(`/admin/events/${id}/status`, data),
+  deleteEvent: (id) => api.delete(`/admin/events/${id}`),
 };
 
 // Profile API
@@ -164,6 +167,17 @@ export const imagesAPI = {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
   delete: (url) => api.delete(`/images?url=${encodeURIComponent(url)}`),
+};
+
+// Events API
+export const eventsAPI = {
+  getAll: () => api.get('/events'),
+  getById: (id) => api.get(`/events/${id}`),
+  create: (data) => api.post('/events', data),
+  toggleAttend: (id) => api.post(`/events/${id}/attend`),
+  addComment: (id, data) => api.post(`/events/${id}/comments`, data),
+  deleteComment: (id, commentId) => api.delete(`/events/${id}/comments/${commentId}`),
+  getMyEvents: () => api.get('/events/my-events'),
 };
 
 export default api;

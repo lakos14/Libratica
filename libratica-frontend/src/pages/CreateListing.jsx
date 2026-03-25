@@ -312,10 +312,10 @@ const CreateListing = () => {
               <p className="text-sm text-gray-600 mb-4">
                 Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
               </p>
-              {/* Google Books keresés */}
+              {/* Open Books keresés */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                 <p className="text-sm font-medium text-blue-800 mb-2">
-                  🔍 Automatikus kitöltés Google Books alapján
+                  🔍 Automatikus kitöltés Open Books alapján
                 </p>
                 <div className="flex gap-2">
                   <input

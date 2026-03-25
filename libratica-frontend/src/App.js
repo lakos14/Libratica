@@ -22,6 +22,8 @@ import AISearch from './pages/AISearch';
 import Wishlist from './pages/Wishlist';
 import BookCollection from './pages/BookCollection';
 import Recommendations from './pages/Recommendations';
+import Events from './pages/Events';
+import EventDetails from './pages/EventDetails';
 
 
 function App() {
@@ -136,6 +138,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Recommendations />
+              </ProtectedRoute>
+            }
+           />
+           <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <Events />
+              </ProtectedRoute>
+            }
+           />
+           <Route
+            path="/events/:id"
+            element={
+              <ProtectedRoute>
+                <EventDetails />
               </ProtectedRoute>
             }
            />

@@ -270,7 +270,9 @@ namespace Libratica.Controllers
             [FromQuery] string? query = null,
             [FromQuery] string? author = null,
             [FromQuery] int? minYear = null,
-            [FromQuery] int? maxYear = null)
+            [FromQuery] int? maxYear = null,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 12)
         {
             try
             {
@@ -319,7 +321,21 @@ namespace Libratica.Controllers
                     })
                     .ToListAsync();
 
-                return Ok(books);
+                var totalCount = books.Count;
+                var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+                var pagedBooks = books
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
+                return Ok(new
+                {
+                    items = pagedBooks,
+                    totalCount,
+                    totalPages,
+                    currentPage = page,
+                    pageSize
+                });
             }
             catch (Exception ex)
             {

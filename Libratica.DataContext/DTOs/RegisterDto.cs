@@ -19,7 +19,7 @@ namespace Libratica.DataContext.DTOs
         public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Jelszó kötelező")]
-        [MinLength(6, ErrorMessage = "Minimum 6 karakter")]
+        [MinLength(8, ErrorMessage = "Minimum 8 karakter")]
         public string Password { get; set; } = string.Empty;
 
         [MaxLength(100)]

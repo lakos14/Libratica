@@ -39,7 +39,7 @@ function AISearch() {
         isAvailable: true,
       });
 
-      if (listingsResponse.data.length === 0 && params.keywords) {
+      if (listingsResponse.data.items.length === 0 && params.keywords) {
         const fallbackResponse = await searchAPI.searchListings({
           query: query,
           minPrice: params.minPrice || undefined,
@@ -47,9 +47,9 @@ function AISearch() {
           condition: params.condition || undefined,
           isAvailable: true,
         });
-        setListings(fallbackResponse.data);
+        setListings(fallbackResponse.data.items);
       } else {
-        setListings(listingsResponse.data);
+        setListings(listingsResponse.data.items);
       }
 
       setResults(true); 

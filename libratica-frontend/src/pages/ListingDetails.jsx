@@ -458,6 +458,20 @@ function ListingDetails() {
                   <span className="ml-2 font-medium">{listing.book.language}</span>
                 </div>
               )}
+              {listing.book.pageCount && (
+                <div>
+                  <span className="text-sm text-gray-600">Oldalszám:</span>
+                  <span className="ml-2 font-medium">{listing.book.pageCount} oldal</span>
+                </div>
+              )}
+              {listing.book.categories?.length > 0 && (
+                <div>
+                  <span className="text-sm text-gray-600">Kategória:</span>
+                  <span className="ml-2 font-medium">
+                    {listing.book.categories.map(c => c.name).join(', ')}
+                  </span>
+                </div>
+              )}
             </div>
             {listing.book.description && (
               <div className="mt-4">

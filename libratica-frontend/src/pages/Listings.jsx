@@ -11,6 +11,7 @@ function Listings() {
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12;
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
 
   const [filters, setFilters] = useState({
     query: '',
@@ -19,6 +20,7 @@ function Listings() {
     maxPrice: '',
     condition: '',
     location: '',
+    categoryId: '',
   });
 
   useEffect(() => {
@@ -31,6 +33,19 @@ function Listings() {
     }
   }, [searchParams]);
 
+    useEffect(() => {
+      const loadCategories = async () => {
+        try {
+          const response = await fetch('http://localhost:5102/api/categories');
+          const data = await response.json();
+          setCategories(data);
+        } catch (error) {
+          console.error('Hiba a kategóriák betöltésekor:', error);
+        }
+      };
+      loadCategories();
+    }, []);
+
   useEffect(() => {
     setCurrentPage(1);
   }, [filters]);
@@ -39,7 +54,6 @@ function Listings() {
     const timer = setTimeout(() => {
       loadListings();
     }, 500);
-
     return () => clearTimeout(timer);
   }, [currentPage, filters]);
   
@@ -54,6 +68,7 @@ function Listings() {
         maxPrice: filters.maxPrice || undefined,
         condition: filters.condition || undefined,
         location: filters.location || undefined,
+        categoryId: filters.categoryId || undefined,
         isAvailable: true,
         page: currentPage,
         pageSize,
@@ -84,6 +99,7 @@ function Listings() {
       maxPrice: '',
       condition: '',
       location: '',
+      categoryId: '', // ÚJ
     });
   };
 
@@ -107,7 +123,7 @@ function Listings() {
 
         {/* Keresés és szűrők */}
         <div className="bg-white border border-gray-200 rounded p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {/* Keresés */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -186,6 +202,25 @@ function Listings() {
                 onChange={handleFilterChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Kategória
+              </label>
+              <select
+                name="categoryId"
+                value={filters.categoryId}
+                onChange={handleFilterChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+              >
+                <option value="">Összes kategória</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

@@ -491,21 +491,6 @@ const CreateListing = () => {
                     className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Borítókép URL (opcionális)
-                  </label>
-                  <input
-                    type="url"
-                    name="coverImageUrl"
-                    value={bookData.coverImageUrl}
-                    onChange={handleBookDataChange}
-                    placeholder="https://..."
-                    maxLength="500"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
-                </div>
               </div>
 
               <div>
@@ -627,16 +612,9 @@ const CreateListing = () => {
           className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
           required
         />
-        <select
-          name="currency"
-          value={formData.currency}
-          onChange={handleChange}
-          className="w-1/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
-        >
-          <option value="HUF">HUF</option>
-          <option value="EUR">EUR</option>
-          <option value="USD">USD</option>
-        </select>
+        <span className="px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 flex items-center">
+          Ft
+        </span>
       </div>
       {errors.price && (
         <p className="text-red-600 text-sm mt-1">{errors.price}</p>

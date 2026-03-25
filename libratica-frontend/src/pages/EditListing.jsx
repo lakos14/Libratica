@@ -340,8 +340,8 @@ const EditListing = () => {
                   className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                   required
                 />
-                <span className="w-1/3 px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 text-center">
-                  {listing.currency}
+                <span className="px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 flex items-center">
+                  Ft
                 </span>
               </div>
               {errors.price && (

@@ -271,6 +271,7 @@ namespace Libratica.Controllers
             [FromQuery] string? author = null,
             [FromQuery] int? minYear = null,
             [FromQuery] int? maxYear = null,
+            [FromQuery] int? categoryId = null,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 12)
         {
@@ -296,6 +297,9 @@ namespace Libratica.Controllers
 
                 if (maxYear.HasValue)
                     booksQuery = booksQuery.Where(b => b.PublicationYear <= maxYear.Value);
+
+                if (categoryId.HasValue)
+                    booksQuery = booksQuery.Where(b => b.BookCategories.Any(bc => bc.CategoryId == categoryId.Value));
 
                 var books = await booksQuery
                     .OrderByDescending(b => b.CreatedAt)

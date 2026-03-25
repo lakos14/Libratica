@@ -3,9 +3,8 @@
 
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
-- regisztáció frissítése
-- elfelejtett jelszó
-- email verification (ha marad idő)
+- regisztáció frissítése (placeholderek, jelszó megtekintése)
+- elfelejtett jelszó, email verification (ha marad idő)
 ### Bővítések:
 - Keresés fejlesztése
 

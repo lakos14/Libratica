@@ -181,6 +181,8 @@ namespace Libratica.Controllers
                     listingsQuery = listingsQuery.Where(l => l.IsAvailable == isAvailable.Value);
                 }
 
+                listingsQuery = listingsQuery.Where(l => l.Quantity > 0);
+
                 var listings = await listingsQuery.ToListAsync();
 
                 if (!string.IsNullOrWhiteSpace(query))

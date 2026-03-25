@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { aiAPI, searchAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -10,6 +10,13 @@ function AISearch() {
   const [results, setResults] = useState(null);
   const [listings, setListings] = useState([]);
   const [aiParams, setAiParams] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:5102/api/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data));
+  }, []);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -26,16 +33,29 @@ function AISearch() {
       const aiResponse = await aiAPI.search(query);
       const params = aiResponse.data;
       setAiParams(params);
+      const matchedCategory = categories.find(
+        c => c.name.toLowerCase() === params.category?.toLowerCase()
+      );
 
       const listingsResponse = await searchAPI.searchListings({
-        query: params.keywords || query,
+        query: params.keywords && params.keywords !== 'könyv' ? params.keywords : undefined,
+        categoryId: matchedCategory?.id || undefined,
         minPrice: params.minPrice || undefined,
         maxPrice: params.maxPrice || undefined,
         condition: params.condition || undefined,
         isAvailable: true,
       });
 
-      if (listingsResponse.data.items.length === 0 && params.keywords) {
+      if (listingsResponse.data.items.length === 0 && matchedCategory) {
+        const fallbackResponse = await searchAPI.searchListings({
+          categoryId: matchedCategory.id,
+          minPrice: params.minPrice || undefined,
+          maxPrice: params.maxPrice || undefined,
+          condition: params.condition || undefined,
+          isAvailable: true,
+        });
+        setListings(fallbackResponse.data.items);
+      } else if (listingsResponse.data.items.length === 0 && params.keywords) {
         const fallbackResponse = await searchAPI.searchListings({
           query: query,
           minPrice: params.minPrice || undefined,
@@ -44,10 +64,16 @@ function AISearch() {
           isAvailable: true,
         });
         setListings(fallbackResponse.data.items);
+      } else if (listingsResponse.data.items.length === 0) {
+        const fallbackResponse = await searchAPI.searchListings({
+          isAvailable: true,
+          page: 1,
+          pageSize: 12,
+        });
+        setListings(fallbackResponse.data.items);
       } else {
         setListings(listingsResponse.data.items);
       }
-
       setResults(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Hiba a keresés során');

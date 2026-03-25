@@ -276,6 +276,12 @@ namespace Libratica.Controllers
                 if (updateListingDto.IsAvailable.HasValue) listing.IsAvailable = updateListingDto.IsAvailable.Value;
                 if (updateListingDto.Location != null) listing.Location = updateListingDto.Location;
                 if (updateListingDto.Images != null) listing.Images = JsonSerializer.Serialize(updateListingDto.Images);
+                if (updateListingDto.Quantity.HasValue)
+                {
+                    listing.Quantity = updateListingDto.Quantity.Value;
+                    if (listing.Quantity == 0)
+                        listing.IsAvailable = false;
+                }
 
                 listing.UpdatedAt = DateTime.UtcNow;
 

@@ -23,13 +23,9 @@ function AISearch() {
     setListings([]);
 
     try {
-      // 1. AI elemzi a keresést
       const aiResponse = await aiAPI.search(query);
       const params = aiResponse.data;
       setAiParams(params);
-
-      // 2. Hirdetések lekérése az AI által visszaadott paraméterekkel
-      // Ha az AI nem ismert fel semmit, használjuk az eredeti query-t
 
       const listingsResponse = await searchAPI.searchListings({
         query: params.keywords || query,
@@ -52,7 +48,7 @@ function AISearch() {
         setListings(listingsResponse.data.items);
       }
 
-      setResults(true); 
+      setResults(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Hiba a keresés során');
     } finally {
@@ -62,11 +58,11 @@ function AISearch() {
 
   const getConditionLabel = (condition) => {
     const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '✨ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
     };
     return labels[condition] || condition;
   };
@@ -81,7 +77,6 @@ function AISearch() {
           Írd le természetes nyelven milyen könyvet keresel, és az AI megtalálja neked!
         </p>
 
-        {/* Keresőmező */}
         <form onSubmit={handleSearch} className="mb-8">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -95,7 +90,6 @@ function AISearch() {
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 mb-4"
             />
 
-            {/* Példák */}
             <div className="mb-4">
               <p className="text-xs text-gray-500 mb-2">Példák:</p>
               <div className="flex flex-wrap gap-2">
@@ -123,48 +117,46 @@ function AISearch() {
               className="w-full py-3 rounded text-white font-semibold disabled:bg-gray-400"
               style={{ backgroundColor: loading ? undefined : '#8b4513' }}
             >
-              {loading ? '🤖 AI elemzi a keresést...' : '🔍 Keresés AI-val'}
+              {loading ? 'AI elemzi a keresést...' : 'Keresés AI-val'}
             </button>
           </div>
         </form>
 
-        {/* AI által felismert paraméterek */}
         {aiParams && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium text-blue-800 mb-2">
-              🤖 Az AI ezt ismerte fel a keresésedből:
+              Az AI ezt ismerte fel a keresésedből:
             </p>
             <div className="flex flex-wrap gap-2">
               {aiParams.keywords && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  🔍 Kulcsszavak: {aiParams.keywords}
+                  Kulcsszavak: {aiParams.keywords}
                 </span>
               )}
               {aiParams.category && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  📚 Kategória: {aiParams.category}
+                  Kategória: {aiParams.category}
                 </span>
               )}
               {aiParams.minPrice && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  💰 Min. ár: {aiParams.minPrice} Ft
+                  Min. ár: {aiParams.minPrice} Ft
                 </span>
               )}
               {aiParams.maxPrice && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  💰 Max. ár: {aiParams.maxPrice} Ft
+                  Max. ár: {aiParams.maxPrice} Ft
                 </span>
               )}
               {aiParams.condition && (
                 <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-                  📦 Állapot: {getConditionLabel(aiParams.condition)}
+                  Állapot: {getConditionLabel(aiParams.condition)}
                 </span>
               )}
             </div>
           </div>
         )}
 
-        {/* Találatok */}
         {results && (
           <div>
             <h2 className="text-xl font-bold mb-4" style={{ color: '#8b4513' }}>

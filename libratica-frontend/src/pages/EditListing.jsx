@@ -40,7 +40,6 @@ const EditListing = () => {
       const response = await listingsAPI.getById(id);
       const listingData = response.data;
 
-      // Ellenőrizzük, hogy a felhasználó tulajdonosa-e
       if (listingData.seller.id !== user?.id && user?.roleName !== 'admin') {
         toast.error('Nincs jogosultságod szerkeszteni ezt a hirdetést!');
         navigate('/my-listings');
@@ -48,8 +47,7 @@ const EditListing = () => {
       }
 
       setListing(listingData);
-      
-      // Form adatok feltöltése
+
       setFormData({
         condition: listingData.condition,
         conditionDescription: listingData.conditionDescription || '',
@@ -74,7 +72,7 @@ const EditListing = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -128,7 +126,7 @@ const EditListing = () => {
       };
 
       await listingsAPI.update(id, submitData);
-      toast.success('✅ Hirdetés sikeresen frissítve!');
+      toast.success('Hirdetés sikeresen frissítve!');
       navigate('/my-listings');
     } catch (error) {
       console.error('Failed to update listing:', error);
@@ -139,11 +137,11 @@ const EditListing = () => {
   };
 
   const conditionOptions = [
-    { value: 'mint', label: '⭐ Újszerű - Teljesen hibátlan, szinte sosem használt' },
-    { value: 'excellent', label: '✨ Kiváló - Minimális használat nyoma, szinte hibátlan' },
-    { value: 'good', label: '👍 Jó - Látható használat nyoma, de jó állapotban' },
-    { value: 'fair', label: '👌 Elfogadható - Látható kopás, de olvasható' },
-    { value: 'poor', label: '📖 Gyenge - Sok használat nyoma, de funkcionális' },
+    { value: 'mint', label: 'Újszerű - Teljesen hibátlan, szinte sosem használt' },
+    { value: 'excellent', label: 'Kiváló - Minimális használat nyoma, szinte hibátlan' },
+    { value: 'good', label: 'Jó - Látható használat nyoma, de jó állapotban' },
+    { value: 'fair', label: 'Elfogadható - Látható kopás, de olvasható' },
+    { value: 'poor', label: 'Gyenge - Sok használat nyoma, de funkcionális' },
   ];
 
   const handleImageUpload = async (e) => {
@@ -218,10 +216,9 @@ const EditListing = () => {
         <p className="text-gray-600 mt-2">Módosítsd a hirdetés adatait</p>
       </div>
 
-      {/* Könyv információ (nem szerkeszthető) */}
       <div className="bg-[#f5ebe0] border border-gray-200 p-6 rounded-lg mb-6">
         <h2 className="text-xl font-bold mb-4 text-[#8b4513]">
-          📚 Könyv (nem szerkeszthető)
+          Könyv (nem szerkeszthető)
         </h2>
         <div className="flex gap-4">
           <img
@@ -241,12 +238,11 @@ const EditListing = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-4">
-          💡 A könyv adatait nem lehet módosítani. Ha hibás, törölд a hirdetést és hozz létre újat.
+          A könyv adatait nem lehet módosítani. Ha hibás, töröld a hirdetést és hozz létre újat.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Elérhetőség kapcsoló */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between">
             <div>
@@ -265,13 +261,12 @@ const EditListing = () => {
               />
               <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
               <span className="ml-3 text-sm font-medium text-gray-900">
-                {formData.isAvailable ? '✅ Elérhető' : '⏸️ Inaktív'}
+                {formData.isAvailable ? 'Elérhető' : 'Inaktív'}
               </span>
             </label>
           </div>
         </div>
 
-        {/* Állapot */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">1. Állapot</h2>
 
@@ -319,7 +314,6 @@ const EditListing = () => {
           </div>
         </div>
 
-        {/* Ár és mennyiség */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">2. Ár és mennyiség</h2>
 
@@ -368,14 +362,13 @@ const EditListing = () => {
               )}
               {formData.quantity === 0 && (
                 <p className="text-yellow-600 text-xs mt-1">
-                  ⚠️ Ha 0 darab, érdemes inaktiválni a hirdetést
+                  Ha 0 darab, érdemes inaktiválni a hirdetést
                 </p>
               )}
             </div>
           </div>
         </div>
 
-        {/* Helyszín */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">3. Átvételi helyszín</h2>
 
@@ -397,11 +390,9 @@ const EditListing = () => {
             </p>
           </div>
         </div>
-        
-        {/* Képek */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">4. Képek</h2>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               Képek feltöltése (max. 5 db, max. 5MB/kép, JPG/PNG/WEBP)
@@ -441,7 +432,6 @@ const EditListing = () => {
           )}
         </div>
 
-        {/* Submit gombok */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -458,19 +448,18 @@ const EditListing = () => {
             onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#654321')}
             onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#8b4513')}
           >
-            {saving ? 'Mentés...' : '✓ Módosítások mentése'}
+            {saving ? 'Mentés...' : 'Módosítások mentése'}
           </button>
         </div>
       </form>
 
-      {/* Info doboz */}
       <div className="mt-8 bg-yellow-50 p-6 rounded-lg border border-yellow-200">
-        <h3 className="font-bold text-lg mb-3">ℹ️ Fontos tudnivalók</h3>
+        <h3 className="font-bold text-lg mb-3">Fontos tudnivalók</h3>
         <ul className="space-y-2 text-sm text-gray-700">
-          <li>✓ A könyv adatait nem lehet módosítani (cím, szerző, stb.)</li>
-          <li>✓ A hirdetés létrehozás időpontja nem változik</li>
-          <li>✓ A megtekintések száma megmarad</li>
-          <li>✓ Ha valaki már kosárba tette, az továbbra is benne lesz</li>
+          <li>- A könyv adatait nem lehet módosítani (cím, szerző, stb.)</li>
+          <li>- A hirdetés létrehozás időpontja nem változik</li>
+          <li>- A megtekintések száma megmarad</li>
+          <li>- Ha valaki már kosárba tette, az továbbra is benne lesz</li>
         </ul>
       </div>
     </div>

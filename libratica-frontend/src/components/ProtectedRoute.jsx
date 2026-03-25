@@ -21,7 +21,7 @@ function ProtectedRoute({ children, requireAdmin = false }) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <h2 className="text-xl font-bold mb-2">🚫 Hozzáférés megtagadva</h2>
+          <h2 className="text-xl font-bold mb-2">Hozzáférés megtagadva</h2>
           <p>Nincs jogosultságod ehhez az oldalhoz. Csak adminisztrátorok férhetnek hozzá.</p>
         </div>
       </div>

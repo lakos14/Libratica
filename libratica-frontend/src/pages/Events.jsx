@@ -85,14 +85,14 @@ function Events() {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('hu-HU', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZone: 'Europe/Budapest'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Budapest'
     });
-    };
+  };
 
   const filteredEvents = events.filter(e => {
     if (filter === 'all') return true;
@@ -110,7 +110,6 @@ function Events() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Fejléc */}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold" style={{ color: '#8b4513' }}>
@@ -129,25 +128,22 @@ function Events() {
           )}
         </div>
 
-        {/* Szűrő */}
         <div className="flex gap-3 mb-6">
           {['all', 'bookfair', 'bookswap'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                filter === f
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${filter === f
                   ? 'text-white'
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+                }`}
               style={filter === f ? { backgroundColor: '#8b4513' } : {}}
             >
-              {f === 'all' ? '📋 Összes' : f === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
+              {f === 'all' ? 'Összes' : f === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
             </button>
           ))}
         </div>
 
-        {/* Események lista */}
         {filteredEvents.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded p-8 text-center">
             <p className="text-gray-500 text-lg mb-2">Nincsenek események</p>
@@ -165,20 +161,18 @@ function Events() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
               <div key={event.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition">
-                {/* Típus badge */}
                 <div className="px-4 pt-4">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    event.type === 'bookfair'
-                    ? 'bg-blue-100 text-blue-800'
-                    : 'bg-green-100 text-green-800'
-                }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                    }`}>
                     {getTypeLabel(event.type)}
-                </span>
-                {event.isExpired && (
+                  </span>
+                  {event.isExpired && (
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500 ml-2">
-                    Lezajlott
+                      Lezajlott
                     </span>
-                )}
+                  )}
                 </div>
 
                 <div className="p-4">
@@ -219,13 +213,13 @@ function Events() {
                       Részletek
                     </Link>
                     {user && !event.isExpired && (
-                    <button
+                      <button
                         onClick={() => handleToggleAttend(event.id)}
                         className="flex-1 px-3 py-2 text-sm rounded text-white font-medium"
                         style={{ backgroundColor: '#8b4513' }}
-                    >
+                      >
                         Részt veszek
-                    </button>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -235,7 +229,6 @@ function Events() {
         )}
       </div>
 
-      {/* Létrehozás modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-screen overflow-y-auto">
@@ -317,7 +310,7 @@ function Events() {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
                 <p className="text-xs text-yellow-800">
-                  ℹ️ Az esemény admin jóváhagyás után jelenik meg a listában.
+                  Az esemény admin jóváhagyás után jelenik meg a listában.
                 </p>
               </div>
 

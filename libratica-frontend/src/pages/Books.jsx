@@ -93,10 +93,8 @@ function Books() {
           Könyvek böngészése
         </h1>
 
-        {/* Keresés és szűrők */}
         <div className="bg-white border border-gray-200 rounded p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Keresés */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Keresés
@@ -110,7 +108,6 @@ function Books() {
               />
             </div>
 
-            {/* Szerző */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Szerző
@@ -125,7 +122,6 @@ function Books() {
               />
             </div>
 
-            {/* Min év */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Min. év
@@ -140,7 +136,6 @@ function Books() {
               />
             </div>
 
-            {/* Max év */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Max. év
@@ -174,7 +169,6 @@ function Books() {
             </div>
           </div>
 
-          {/* Szűrők törlése gomb */}
           {(searchQuery || filters.author || filters.minYear || filters.maxYear) && (
             <div className="mt-4">
               <button
@@ -187,21 +181,18 @@ function Books() {
           )}
         </div>
 
-        {/* Találatok száma */}
         <div className="mb-4">
           <p className="text-gray-600">
             {loading ? 'Betöltés...' : `${totalCount} könyv találat`}
           </p>
         </div>
 
-        {/* Loading */}
         {loading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         )}
 
-        {/* Könyvek grid */}
         {!loading && books.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {books.map((book) => (
@@ -243,7 +234,6 @@ function Books() {
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-8">
             <button
@@ -274,11 +264,10 @@ function Books() {
                 <button
                   key={p}
                   onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${
-                    currentPage === p
+                  className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
                       ? 'text-white border-transparent'
                       : 'border-gray-300 hover:bg-gray-50'
-                  }`}
+                    }`}
                   style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
                 >
                   {p}
@@ -302,7 +291,6 @@ function Books() {
           </div>
         )}
 
-        {/* Nincs találat */}
         {!loading && books.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">Nincs találat</p>

@@ -32,7 +32,7 @@ function App() {
       <AuthProvider>
         <div className="min-h-screen bg-gray-50">
           <Navbar />
-          <ToastContainer 
+          <ToastContainer
             position="top-right"
             autoClose={3000}
             hideProgressBar={false}
@@ -40,38 +40,35 @@ function App() {
             pauseOnHover
           />
           <Routes>
-            {/* Publikus oldalak */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/books" element={<Books />} />
             <Route path="/listings" element={<Listings />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
-
-            {/* Védett oldalak */}
-            <Route 
-              path="/cart" 
+            <Route
+              path="/cart"
               element={
                 <ProtectedRoute>
                   <Cart />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/my-listings" 
+            <Route
+              path="/my-listings"
               element={
                 <ProtectedRoute>
                   <MyListings />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/listings/create" 
+            <Route
+              path="/listings/create"
               element={
                 <ProtectedRoute>
                   <CreateListing />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route
               path="/edit-listing/:id"
@@ -81,13 +78,13 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route 
-              path="/orders" 
+            <Route
+              path="/orders"
               element={
                 <ProtectedRoute>
                   <Orders />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route
               path="/admin"
@@ -111,52 +108,52 @@ function App() {
                 <UserProfile />
               }
             />
-            <Route 
-              path="/ai-search" 
+            <Route
+              path="/ai-search"
               element={
                 <AISearch />
               }
-           />
-           <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-                <Wishlist />
-              </ProtectedRoute>
-            }
-           />
-           <Route
-            path="/collection"
-            element={
-              <ProtectedRoute>
-                <BookCollection />
-              </ProtectedRoute>
-            }
-           />
-           <Route
-            path="/recommendations"
-            element={
-              <ProtectedRoute>
-                <Recommendations />
-              </ProtectedRoute>
-            }
-           />
-           <Route
-            path="/events"
-            element={
-              <ProtectedRoute>
-                <Events />
-              </ProtectedRoute>
-            }
-           />
-           <Route
-            path="/events/:id"
-            element={
-              <ProtectedRoute>
-                <EventDetails />
-              </ProtectedRoute>
-            }
-           />
+            />
+            <Route
+              path="/wishlist"
+              element={
+                <ProtectedRoute>
+                  <Wishlist />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/collection"
+              element={
+                <ProtectedRoute>
+                  <BookCollection />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/recommendations"
+              element={
+                <ProtectedRoute>
+                  <Recommendations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events"
+              element={
+                <ProtectedRoute>
+                  <Events />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/events/:id"
+              element={
+                <ProtectedRoute>
+                  <EventDetails />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
       </AuthProvider>

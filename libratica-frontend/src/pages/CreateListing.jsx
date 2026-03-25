@@ -4,12 +4,9 @@ import { booksAPI, listingsAPI, openLibraryAPI, imagesAPI } from '../services/ap
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 
-
-
 const CreateListing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [googleSearchQuery, setGoogleSearchQuery] = useState('');
@@ -17,7 +14,6 @@ const CreateListing = () => {
   const [googleResults, setGoogleResults] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // Könyv adatok (új könyv esetén)
   const [bookData, setBookData] = useState({
     title: '',
     author: '',
@@ -62,7 +58,7 @@ const CreateListing = () => {
   };
   const searchOpenLibrary = async () => {
     if (!googleSearchQuery.trim()) return;
-    
+
     setGoogleSearching(true);
     try {
       let results;
@@ -73,7 +69,7 @@ const CreateListing = () => {
         const docs = await openLibraryAPI.searchByTitle(googleSearchQuery);
         results = docs.map(doc => ({ isISBN: false, data: doc }));
       }
-      
+
       if (results.length === 0) {
         toast.info('Nem található könyv');
       }
@@ -108,8 +104,8 @@ const CreateListing = () => {
         isbn: d.isbn?.[0] || '',
         publisher: d.publisher?.[0] || '',
         publicationYear: d.first_publish_year?.toString() || '',
-        coverImageUrl: d.cover_i 
-          ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` 
+        coverImageUrl: d.cover_i
+          ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg`
           : '',
         pageCount: d.number_of_pages_median || '',
       });
@@ -122,7 +118,7 @@ const CreateListing = () => {
   const handleBookDataChange = (e) => {
     const { name, value } = e.target;
     setBookData({ ...bookData, [name]: value });
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -146,7 +142,7 @@ const CreateListing = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -155,15 +151,13 @@ const CreateListing = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Könyv validáció
-      if (!bookData.title.trim()) {
-        newErrors.title = 'Cím kötelező';
-      }
-      if (!bookData.author.trim()) {
-        newErrors.author = 'Szerző kötelező';
-      }
+    if (!bookData.title.trim()) {
+      newErrors.title = 'Cím kötelező';
+    }
+    if (!bookData.author.trim()) {
+      newErrors.author = 'Szerző kötelező';
+    }
 
-    // Hirdetés validáció
     if (!formData.condition) {
       newErrors.condition = 'Állapot megadása kötelező';
     }
@@ -204,24 +198,22 @@ const CreateListing = () => {
 
       let bookId;
 
-      // Ha új könyvet adunk meg, először létrehozzuk
-        const bookSubmitData = {
-          title: bookData.title,
-          author: bookData.author,
-          isbn: bookData.isbn || null,
-          publisher: bookData.publisher || null,
-          publicationYear: bookData.publicationYear ? parseInt(bookData.publicationYear) : null,
-          language: bookData.language || null,
-          description: bookData.description || null,
-          coverImageUrl: bookData.coverImageUrl || null,
-          pageCount: bookData.pageCount ? parseInt(bookData.pageCount) : null,
-          categoryIds: bookData.categoryIds,
-        };
+      const bookSubmitData = {
+        title: bookData.title,
+        author: bookData.author,
+        isbn: bookData.isbn || null,
+        publisher: bookData.publisher || null,
+        publicationYear: bookData.publicationYear ? parseInt(bookData.publicationYear) : null,
+        language: bookData.language || null,
+        description: bookData.description || null,
+        coverImageUrl: bookData.coverImageUrl || null,
+        pageCount: bookData.pageCount ? parseInt(bookData.pageCount) : null,
+        categoryIds: bookData.categoryIds,
+      };
 
-        const bookResponse = await booksAPI.create(bookSubmitData);
-        bookId = bookResponse.data.id;
+      const bookResponse = await booksAPI.create(bookSubmitData);
+      bookId = bookResponse.data.id;
 
-      // Hirdetés létrehozása
       const submitData = {
         bookId: bookId,
         condition: formData.condition,
@@ -234,7 +226,7 @@ const CreateListing = () => {
       };
 
       await listingsAPI.create(submitData);
-      toast.success('✅ Hirdetés sikeresen létrehozva!');
+      toast.success('Hirdetés sikeresen létrehozva!');
       navigate('/my-listings');
     } catch (error) {
       console.error('Failed to create listing:', error);
@@ -245,11 +237,11 @@ const CreateListing = () => {
   };
 
   const conditionOptions = [
-    { value: 'mint', label: '⭐ Újszerű - Teljesen hibátlan, szinte sosem használt' },
-    { value: 'excellent', label: '✨ Kiváló - Minimális használat nyoma, szinte hibátlan' },
-    { value: 'good', label: '👍 Jó - Látható használat nyoma, de jó állapotban' },
-    { value: 'fair', label: '👌 Elfogadható - Látható kopás, de olvasható' },
-    { value: 'poor', label: '📖 Gyenge - Sok használat nyoma, de funkcionális' },
+    { value: 'mint', label: 'Újszerű - Teljesen hibátlan, szinte sosem használt' },
+    { value: 'excellent', label: 'Kiváló - Minimális használat nyoma, szinte hibátlan' },
+    { value: 'good', label: 'Jó - Látható használat nyoma, de jó állapotban' },
+    { value: 'fair', label: 'Elfogadható - Látható kopás, de olvasható' },
+    { value: 'poor', label: 'Gyenge - Sok használat nyoma, de funkcionális' },
   ];
 
   const handleImageUpload = async (e) => {
@@ -303,245 +295,238 @@ const CreateListing = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Mód választás */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">1. Könyv megadása</h2>
 
-          {/* ÚJ KÖNYV MÓD */}
-            <div className="space-y-4 border-t pt-6">
-              <p className="text-sm text-gray-600 mb-4">
-                Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
+          <div className="space-y-4 border-t pt-6">
+            <p className="text-sm text-gray-600 mb-4">
+              Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
+            </p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm font-medium text-blue-800 mb-2">
+                Automatikus kitöltés Open Books alapján
               </p>
-              {/* Open Books keresés */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-sm font-medium text-blue-800 mb-2">
-                  🔍 Automatikus kitöltés Open Books alapján
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={googleSearchQuery}
-                    onChange={(e) => setGoogleSearchQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())}
-                    placeholder="ISBN vagy könyvcím..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={searchOpenLibrary}
-                    disabled={googleSearching}
-                    className="px-4 py-2 text-white rounded disabled:bg-gray-400"
-                    style={{ backgroundColor: '#8b4513' }}
-                  >
-                    {googleSearching ? '⏳' : '🔍'}
-                  </button>
-                </div>
-
-                {/* Open Books API keresési eredmények */}
-                {googleResults.length > 0 && (
-                  <div className="mt-3 border rounded-lg max-h-64 overflow-y-auto bg-white">
-                    {googleResults.map((item, index) => {
-                      const title = item.isISBN ? item.data.title : item.data.title;
-                      const author = item.isISBN 
-                        ? item.data.authors?.map(a => a.name).join(', ')
-                        : item.data.author_name?.join(', ');
-                      const cover = item.isISBN
-                        ? item.data.cover?.medium
-                        : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
-                      const year = item.isISBN
-                        ? item.data.publish_date?.slice(-4)
-                        : item.data.first_publish_year;
-
-                      return (
-                        <div
-                          key={index}
-                          onClick={() => fillFromOpenLibrary(item)}
-                          className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
-                        >
-                          {cover ? (
-                            <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
-                          ) : (
-                            <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
-                              <span className="text-gray-400 text-xs">📚</span>
-                            </div>
-                          )}
-                          <div className="flex-1">
-                            <p className="font-medium text-sm">{title}</p>
-                            <p className="text-xs text-gray-600">{author}</p>
-                            {year && <p className="text-xs text-gray-400">{year}</p>}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={googleSearchQuery}
+                  onChange={(e) => setGoogleSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())}
+                  placeholder="ISBN vagy könyvcím..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+                />
+                <button
+                  type="button"
+                  onClick={searchOpenLibrary}
+                  disabled={googleSearching}
+                  className="px-4 py-2 text-white rounded disabled:bg-gray-400"
+                  style={{ backgroundColor: '#8b4513' }}
+                >
+                  {googleSearching ? '⏳' : '🔍'}
+                </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Cím *
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={bookData.title}
-                    onChange={handleBookDataChange}
-                    placeholder="A könyv címe"
-                    maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                    required
-                  />
-                  {errors.title && (
-                    <p className="text-red-600 text-sm mt-1">{errors.title}</p>
-                  )}
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Szerző *
-                  </label>
-                  <input
-                    type="text"
-                    name="author"
-                    value={bookData.author}
-                    onChange={handleBookDataChange}
-                    placeholder="Szerző neve"
-                    maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                    required
-                  />
-                  {errors.author && (
-                    <p className="text-red-600 text-sm mt-1">{errors.author}</p>
-                  )}
-                </div>
+              {googleResults.length > 0 && (
+                <div className="mt-3 border rounded-lg max-h-64 overflow-y-auto bg-white">
+                  {googleResults.map((item, index) => {
+                    const title = item.isISBN ? item.data.title : item.data.title;
+                    const author = item.isISBN
+                      ? item.data.authors?.map(a => a.name).join(', ')
+                      : item.data.author_name?.join(', ');
+                    const cover = item.isISBN
+                      ? item.data.cover?.medium
+                      : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
+                    const year = item.isISBN
+                      ? item.data.publish_date?.slice(-4)
+                      : item.data.first_publish_year;
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    ISBN (opcionális)
-                  </label>
-                  <input
-                    type="text"
-                    name="isbn"
-                    value={bookData.isbn}
-                    onChange={handleBookDataChange}
-                    placeholder="978-963-XXX-XXX-X"
-                    maxLength="20"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
+                    return (
+                      <div
+                        key={index}
+                        onClick={() => fillFromOpenLibrary(item)}
+                        className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                      >
+                        {cover ? (
+                          <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
+                        ) : (
+                          <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
+                            <span className="text-gray-400 text-xs">📚</span>
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{title}</p>
+                          <p className="text-xs text-gray-600">{author}</p>
+                          {year && <p className="text-xs text-gray-400">{year}</p>}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Kiadó (opcionális)
-                  </label>
-                  <input
-                    type="text"
-                    name="publisher"
-                    value={bookData.publisher}
-                    onChange={handleBookDataChange}
-                    placeholder="Kiadó neve"
-                    maxLength="200"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Kiadás éve (opcionális)
-                  </label>
-                  <input
-                    type="number"
-                    name="publicationYear"
-                    value={bookData.publicationYear}
-                    onChange={handleBookDataChange}
-                    placeholder="2020"
-                    min="1000"
-                    max="2100"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Nyelv
-                  </label>
-                  <input
-                    type="text"
-                    name="language"
-                    value={bookData.language}
-                    onChange={handleBookDataChange}
-                    placeholder="magyar"
-                    maxLength="50"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Oldalszám (opcionális)
-                  </label>
-                  <input
-                    type="number"
-                    name="pageCount"
-                    value={bookData.pageCount}
-                    onChange={handleBookDataChange}
-                    placeholder="350"
-                    min="1"
-                    max="10000"
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
-                  />
-                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Cím *
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={bookData.title}
+                  onChange={handleBookDataChange}
+                  placeholder="A könyv címe"
+                  maxLength="200"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  required
+                />
+                {errors.title && (
+                  <p className="text-red-600 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Leírás (opcionális)
+                  Szerző *
                 </label>
-                <textarea
-                  name="description"
-                  value={bookData.description}
+                <input
+                  type="text"
+                  name="author"
+                  value={bookData.author}
                   onChange={handleBookDataChange}
-                  placeholder="Rövid leírás a könyvről..."
-                  rows="3"
-                  maxLength="2000"
+                  placeholder="Szerző neve"
+                  maxLength="200"
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  required
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {bookData.description.length} / 2000 karakter
-                </p>
+                {errors.author && (
+                  <p className="text-red-600 text-sm mt-1">{errors.author}</p>
+                )}
               </div>
 
-              {/* Kategóriák */}
-              {categories.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                      Kategória * (kötelező)
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category.id}
-                        type="button"
-                        onClick={() => handleCategoryToggle(category.id)}
-                        className={`px-3 py-1 rounded-full text-sm transition ${
-                          bookData.categoryIds.includes(category.id)
-                            ? 'bg-[#8b4513] text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
-                      >
-                        {category.name}
-                      </button>
-                    ))}
-                  </div>
-                  {errors.categoryIds && (
-                    <p className="text-red-600 text-sm mt-1">{errors.categoryIds}</p>
-                  )}
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  ISBN (opcionális)
+                </label>
+                <input
+                  type="text"
+                  name="isbn"
+                  value={bookData.isbn}
+                  onChange={handleBookDataChange}
+                  placeholder="978-963-XXX-XXX-X"
+                  maxLength="20"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Kiadó (opcionális)
+                </label>
+                <input
+                  type="text"
+                  name="publisher"
+                  value={bookData.publisher}
+                  onChange={handleBookDataChange}
+                  placeholder="Kiadó neve"
+                  maxLength="200"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Kiadás éve (opcionális)
+                </label>
+                <input
+                  type="number"
+                  name="publicationYear"
+                  value={bookData.publicationYear}
+                  onChange={handleBookDataChange}
+                  placeholder="2020"
+                  min="1000"
+                  max="2100"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nyelv
+                </label>
+                <input
+                  type="text"
+                  name="language"
+                  value={bookData.language}
+                  onChange={handleBookDataChange}
+                  placeholder="magyar"
+                  maxLength="50"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Oldalszám (opcionális)
+                </label>
+                <input
+                  type="number"
+                  name="pageCount"
+                  value={bookData.pageCount}
+                  onChange={handleBookDataChange}
+                  placeholder="350"
+                  min="1"
+                  max="10000"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                />
+              </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Leírás (opcionális)
+              </label>
+              <textarea
+                name="description"
+                value={bookData.description}
+                onChange={handleBookDataChange}
+                placeholder="Rövid leírás a könyvről..."
+                rows="3"
+                maxLength="2000"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                {bookData.description.length} / 2000 karakter
+              </p>
+            </div>
+
+            {categories.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Kategória * (kötelező)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      type="button"
+                      onClick={() => handleCategoryToggle(category.id)}
+                      className={`px-3 py-1 rounded-full text-sm transition ${bookData.categoryIds.includes(category.id)
+                        ? 'bg-[#8b4513] text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
+                {errors.categoryIds && (
+                  <p className="text-red-600 text-sm mt-1">{errors.categoryIds}</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Állapot */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">2. Állapot</h2>
 
@@ -589,62 +574,56 @@ const CreateListing = () => {
           </div>
         </div>
 
-{/* Ár és mennyiség */}
-<div className="bg-white p-6 rounded-lg shadow-md">
-  <h2 className="text-2xl font-bold mb-4">3. Ár és mennyiség</h2>
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold mb-4">3. Ár és mennyiség</h2>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    {/* Ár input */}
-    <div>
-      <label className="block text-sm font-medium mb-2">
-        Ár * (100 - 1,000,000 Ft)
-      </label>
-      <div className="flex gap-2">
-        <input
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          min="100"
-          max="1000000"
-          step="100"
-          placeholder="2500"
-          className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
-          required
-        />
-        <span className="px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 flex items-center">
-          Ft
-        </span>
-      </div>
-      {errors.price && (
-        <p className="text-red-600 text-sm mt-1">{errors.price}</p>
-      )}
-    </div>
-
-    {/* Mennyiség input */}
-    <div>
-      <label className="block text-sm font-medium mb-2">
-        Mennyiség * (1-100 db)
-      </label>
-      <input
-        type="number"
-        name="quantity"
-        value={formData.quantity}
-        onChange={handleChange}
-        min="1"
-        max="100"
-        placeholder="1"
-        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
-        required
-      />
-      {errors.quantity && (
-        <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
-      )}
-    </div>
-  </div>
-</div>
-
-        {/* Helyszín */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Ár * (100 - 1,000,000 Ft)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  min="100"
+                  max="1000000"
+                  step="100"
+                  placeholder="2500"
+                  className="w-2/3 px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+                  required
+                />
+                <span className="px-4 py-2 bg-gray-100 border rounded-lg text-gray-700 flex items-center">
+                  Ft
+                </span>
+              </div>
+              {errors.price && (
+                <p className="text-red-600 text-sm mt-1">{errors.price}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Mennyiség * (1-100 db)
+              </label>
+              <input
+                type="number"
+                name="quantity"
+                value={formData.quantity}
+                onChange={handleChange}
+                min="1"
+                max="100"
+                placeholder="1"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+                required
+              />
+              {errors.quantity && (
+                <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
+              )}
+            </div>
+          </div>
+        </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">4. Átvételi helyszín</h2>
 
@@ -666,11 +645,10 @@ const CreateListing = () => {
             </p>
           </div>
         </div>
-        
-        {/* Képek */}
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">5. Képek (opcionális)</h2>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               Képek feltöltése (max. 5 db, max. 5MB/kép, JPG/PNG/WEBP)
@@ -684,11 +662,10 @@ const CreateListing = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 disabled:bg-gray-100"
             />
             {uploadingImage && (
-              <p className="text-sm text-gray-500 mt-1">⏳ Feltöltés folyamatban...</p>
+              <p className="text-sm text-gray-500 mt-1">Feltöltés folyamatban...</p>
             )}
           </div>
 
-          {/* Képek előnézete */}
           {formData.images.length > 0 && (
             <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
               {formData.images.map((url, index) => (
@@ -711,7 +688,6 @@ const CreateListing = () => {
           )}
         </div>
 
-        {/* Submit gombok */}
         <div className="flex gap-4">
           <button
             type="button"
@@ -725,19 +701,18 @@ const CreateListing = () => {
             disabled={loading}
             className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 font-semibold"
           >
-            {loading ? 'Létrehozás...' : '✓ Hirdetés létrehozása'}
+            {loading ? 'Létrehozás...' : 'Hirdetés létrehozása'}
           </button>
         </div>
       </form>
 
-      {/* Tippek */}
-      <div className="mt-8 bg-gray-50 p-6 rounded-lg border border-gray-300">
-        <h3 className="font-bold text-lg mb-3">💡 Tippek a sikeres hirdetéshez</h3>
+      <div className="mt-8 bg-yellow-50 p-6 rounded-lg border border-gray-300">
+        <h3 className="font-bold text-lg mb-3">Tippek a sikeres hirdetéshez</h3>
         <ul className="space-y-2 text-sm text-gray-700">
-          <li>✓ Légy őszinte az állapot leírásakor</li>
-          <li>✓ Adj meg reális árat (nézz utána hasonló hirdetéseknek)</li>
-          <li>✓ A részletes állapotleírás növeli a bizalmat</li>
-          <li>✓ Helyszín megadásával gyorsabban találsz vevőt</li>
+          <li>- Légy őszinte az állapot leírásakor</li>
+          <li>- Adj meg reális árat (nézz utána hasonló hirdetéseknek)</li>
+          <li>- A részletes állapotleírás növeli a bizalmat</li>
+          <li>- Helyszín megadásával gyorsabban találsz vevőt</li>
         </ul>
       </div>
     </div>

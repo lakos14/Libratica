@@ -78,7 +78,6 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Email *</label>
             <input
@@ -92,7 +91,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Felhasználónév */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Felhasználónév *</label>
             <input
@@ -108,7 +106,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Teljes név */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Teljes név *</label>
             <input
@@ -123,7 +120,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Telefonszám */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Telefonszám</label>
             <input
@@ -138,7 +134,6 @@ const Register = () => {
             />
           </div>
 
-          {/* Jelszó */}
           <div className="mb-4">
             <label className="block text-gray-700 mb-2">Jelszó *</label>
             <div className="relative">
@@ -165,7 +160,6 @@ const Register = () => {
             </p>
           </div>
 
-          {/* Jelszó megerősítése */}
           <div className="mb-6">
             <label className="block text-gray-700 mb-2">Jelszó megerősítése *</label>
             <div className="relative">

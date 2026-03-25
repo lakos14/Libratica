@@ -37,16 +37,16 @@ function ListingDetails() {
     }
   };
   useEffect(() => {
-  if (listing && user) {
-    checkWishlist();
-  }
-}, [listing, user]);
+    if (listing && user) {
+      checkWishlist();
+    }
+  }, [listing, user]);
 
   const checkWishlist = async () => {
     try {
       const response = await wishlistAPI.checkWishlist(listing.book?.id);
       setIsInWishlist(response.data.isInWishlist);
-    } catch {}
+    } catch { }
   };
 
   const handleWishlist = async () => {
@@ -111,11 +111,11 @@ function ListingDetails() {
 
   const getConditionLabel = (condition) => {
     const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '⭐ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
     };
     return labels[condition] || condition;
   };
@@ -155,7 +155,6 @@ function ListingDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Vissza gomb */}
         <button
           onClick={() => navigate(-1)}
           className="mb-4 text-gray-600 hover:text-gray-800"
@@ -164,66 +163,59 @@ function ListingDetails() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Bal oldal - Kép */}
-        <div className="bg-white border border-gray-200 rounded p-6 flex items-start justify-center">
-          {listing.images?.length > 0 ? (
-            <div className="w-full flex flex-col items-center justify-between h-full">
+          <div className="bg-white border border-gray-200 rounded p-6 flex items-start justify-center">
+            {listing.images?.length > 0 ? (
+              <div className="w-full flex flex-col items-center justify-between h-full">
+                <img
+                  src={`http://localhost:5102${listing.images[selectedImage]}`}
+                  alt={listing.book?.title}
+                  className="max-w-full max-h-96 object-contain rounded"
+                />
+                {listing.images.length > 1 && (
+                  <div className="flex gap-2 overflow-x-auto mt-4">
+                    {listing.images.map((img, index) => (
+                      <img
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        src={`http://localhost:5102${img}`}
+                        alt={`Kép ${index + 1}`}
+                        className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${selectedImage === index
+                            ? 'border-[#8b4513]'
+                            : 'border-gray-200 hover:border-gray-400'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : listing.book?.coverImageUrl ? (
               <img
-                src={`http://localhost:5102${listing.images[selectedImage]}`}
+                src={listing.book.coverImageUrl}
                 alt={listing.book?.title}
                 className="max-w-full max-h-96 object-contain rounded"
               />
-              {listing.images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto mt-4">
-                  {listing.images.map((img, index) => (
-                    <img
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      src={`http://localhost:5102${img}`}
-                      alt={`Kép ${index + 1}`}
-                      className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${
-                        selectedImage === index 
-                          ? 'border-[#8b4513]' 
-                          : 'border-gray-200 hover:border-gray-400'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : listing.book?.coverImageUrl ? (
-            <img
-              src={listing.book.coverImageUrl}
-              alt={listing.book?.title}
-              className="max-w-full max-h-96 object-contain rounded"
-            />
-          ) : (
-            <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
-              <span className="text-gray-400 text-6xl">📚</span>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="w-full h-96 bg-gray-200 rounded flex items-center justify-center">
+                <span className="text-gray-400 text-6xl">📚</span>
+              </div>
+            )}
+          </div>
 
-          {/* Jobb oldal - Részletek */}
           <div className="bg-white border border-gray-200 rounded p-6">
-            {/* Könyv cím */}
             <h1 className="text-3xl font-bold mb-2" style={{ color: '#8b4513' }}>
               {listing.book?.title}
             </h1>
 
-            {/* Szerző */}
             <p className="text-xl text-gray-600 mb-4">
               {listing.book?.author}
             </p>
 
-            {/* Ár */}
             <div className="mb-6">
               <span className="text-4xl font-bold" style={{ color: '#8b4513' }}>
                 {listing.price?.toLocaleString('hu-HU')} Ft
               </span>
             </div>
 
-            {/* Állapot */}
             <div className="mb-4">
               <span className="text-sm text-gray-600">Állapot:</span>
               <span className="ml-2 text-lg font-medium">
@@ -231,7 +223,6 @@ function ListingDetails() {
               </span>
             </div>
 
-            {/* Mennyiség */}
             <div className="mb-4">
               <span className="text-sm text-gray-600">Elérhető mennyiség:</span>
               <span className="ml-2 text-lg font-medium">
@@ -239,17 +230,15 @@ function ListingDetails() {
               </span>
             </div>
 
-            {/* Helyszín */}
             {listing.location && (
               <div className="mb-4">
                 <span className="text-sm text-gray-600">Helyszín:</span>
                 <span className="ml-2 text-lg font-medium">
-                  📍 {listing.location}
+                  {listing.location}
                 </span>
               </div>
             )}
 
-            {/* Leírás */}
             {listing.description && (
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
@@ -261,13 +250,12 @@ function ListingDetails() {
               </div>
             )}
 
-            {/* Eladó */}
             <div className="mb-6 pb-6 border-b border-gray-200">
               <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
                 Eladó
               </h3>
               <p className="text-gray-700">
-                <Link 
+                <Link
                   to={`/users/${listing.seller?.username}`}
                   className="font-medium hover:underline"
                   style={{ color: '#8b4513' }}
@@ -280,20 +268,18 @@ function ListingDetails() {
                     : '⭐ Még nincs értékelés'}
                 </span>
               </p>
-              <a 
+              <a
                 href={`https://mail.google.com/mail/?view=cm&to=${listing.seller?.email}&su=Érdeklődés a hirdetésről: ${encodeURIComponent(listing.book?.title)}&body=Szia ${listing.seller?.username},%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(listing.book?.title)} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block mt-2 text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
               >
-                ✉️ Kapcsolatfelvétel az eladóval
+                Kapcsolatfelvétel az eladóval
               </a>
             </div>
 
-            {/* Kosárba rakás */}
             {!isOwnListing && listing.isAvailable && user && (
               <div className="space-y-4">
-                {/* Mennyiség választó */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Mennyiség
@@ -308,16 +294,15 @@ function ListingDetails() {
                   />
                 </div>
 
-                {/* Kosárba gomb */}
                 <button
                   onClick={handleAddToCart}
                   disabled={addingToCart}
                   className="w-full px-6 py-3 rounded text-white font-semibold disabled:opacity-50"
                   style={{ backgroundColor: '#8b4513' }}
                 >
-                  {addingToCart ? 'Hozzáadás...' : '🛒 Kosárba rakom'}
+                  {addingToCart ? 'Hozzáadás...' : 'Kosárba rakom'}
                 </button>
-                  {user && (
+                {user && (
                   <button
                     onClick={handleWishlist}
                     className="w-full px-6 py-3 rounded font-semibold border mt-2"
@@ -331,10 +316,9 @@ function ListingDetails() {
                   </button>
                 )}
               </div>
-              
+
             )}
 
-            {/* Saját hirdetés */}
             {isOwnListing && (
               <div className="bg-blue-50 border border-blue-200 rounded p-4">
                 <p className="text-blue-800 text-sm">
@@ -343,7 +327,6 @@ function ListingDetails() {
               </div>
             )}
 
-            {/* Nincs bejelentkezve */}
             {!user && (
               <div className="space-y-4">
                 <p className="text-gray-600 text-sm">
@@ -359,7 +342,6 @@ function ListingDetails() {
               </div>
             )}
 
-            {/* Nem elérhető */}
             {!listing.isAvailable && (
               <div className="bg-gray-100 border border-gray-300 rounded p-4">
                 <p className="text-gray-700 text-sm">
@@ -367,24 +349,22 @@ function ListingDetails() {
                 </p>
               </div>
             )}
-            {/* Jelentés gomb - csak bejelentkezett, nem saját hirdetés aki nem admin*/}
             {user && !isOwnListing && user.roleName !== 'admin' && (
               <div className="mt-4">
                 <button
                   onClick={() => setReportModal(true)}
                   className="text-sm text-red-500 hover:text-red-700"
                 >
-                  🚩 Hirdetés jelentése
+                  Hirdetés jelentése
                 </button>
               </div>
             )}
 
-            {/* Report modal */}
             {reportModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                 <div className="bg-white rounded-lg p-6 max-w-md w-full">
                   <h3 className="text-xl font-bold mb-4">Hirdetés jelentése</h3>
-                  
+
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Válassz okot
@@ -427,7 +407,6 @@ function ListingDetails() {
           </div>
         </div>
 
-        {/* Könyv részletei (opcionális) */}
         {listing.book && (
           <div className="mt-8 bg-white border border-gray-200 rounded p-6">
             <h2 className="text-2xl font-bold mb-4" style={{ color: '#8b4513' }}>

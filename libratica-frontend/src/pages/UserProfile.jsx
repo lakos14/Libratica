@@ -29,11 +29,11 @@ function UserProfile() {
 
   const getConditionLabel = (condition) => {
     const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '✨ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
     };
     return labels[condition] || condition;
   };
@@ -78,15 +78,12 @@ function UserProfile() {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
 
-        {/* Profil fejléc */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-6">
-            {/* Avatar */}
             <div className="w-20 h-20 rounded-full bg-[#8b4513] text-white flex items-center justify-center text-3xl font-bold flex-shrink-0">
               {profile.username.charAt(0).toUpperCase()}
             </div>
 
-            {/* Adatok */}
             <div className="flex-1">
               <h1 className="text-2xl font-bold" style={{ color: '#8b4513' }}>
                 {profile.username}
@@ -95,7 +92,6 @@ function UserProfile() {
                 <p className="text-gray-600">{profile.fullName}</p>
               )}
 
-              {/* Rating */}
               <div className="flex items-center gap-2 mt-1">
                 {profile.rating ? (
                   <>
@@ -109,47 +105,41 @@ function UserProfile() {
                 )}
               </div>
 
-              {/* Meta */}
               <div className="flex gap-4 mt-2 text-sm text-gray-500">
-                <span>📚 {profile.activeListingsCount} aktív hirdetés</span>
-                <span>📅 Regisztrált: {formatDate(profile.createdAt)}</span>
+                <span>{profile.activeListingsCount} aktív hirdetés</span>
+                <span>Regisztrált: {formatDate(profile.createdAt)}</span>
               </div>
             </div>
           </div>
 
-          {/* Bio */}
           {profile.bio && (
             <p className="mt-4 text-gray-600 border-t pt-4">{profile.bio}</p>
           )}
         </div>
 
-        {/* Tab navigáció */}
         <div className="flex gap-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'listings'
+            className={`px-4 py-2 font-semibold ${activeTab === 'listings'
                 ? 'border-b-2'
                 : 'text-gray-600 hover:text-gray-800'
-            }`}
+              }`}
             style={activeTab === 'listings' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
-            📚 Hirdetések ({profile.listings?.length || 0})
+            Hirdetések ({profile.listings?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'reviews'
+            className={`px-4 py-2 font-semibold ${activeTab === 'reviews'
                 ? 'border-b-2'
                 : 'text-gray-600 hover:text-gray-800'
-            }`}
+              }`}
             style={activeTab === 'reviews' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
-            ⭐ Értékelések ({profile.reviews?.length || 0})
+            Értékelések ({profile.reviews?.length || 0})
           </button>
         </div>
 
-        {/* Hirdetések tab */}
         {activeTab === 'listings' && (
           <div>
             {profile.listings?.length === 0 ? (
@@ -202,7 +192,6 @@ function UserProfile() {
           </div>
         )}
 
-        {/* Értékelések tab */}
         {activeTab === 'reviews' && (
           <div>
             {profile.reviews?.length === 0 ? (

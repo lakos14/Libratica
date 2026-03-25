@@ -44,11 +44,11 @@ function MyListings() {
 
   const getConditionLabel = (condition) => {
     const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '⭐ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
     };
     return labels[condition] || condition;
   };
@@ -101,7 +101,6 @@ function MyListings() {
                 key={listing.id}
                 className="bg-white border border-gray-200 rounded p-4 flex flex-col"
               >
-                {/* Kép */}
                 {listing.images?.length > 0 ? (
                   <img
                     src={`http://localhost:5102${listing.images[0]}`}
@@ -120,7 +119,6 @@ function MyListings() {
                   </div>
                 )}
 
-                {/* Könyv info */}
                 <h3 className="font-bold text-gray-800 mb-1 text-sm line-clamp-2">
                   {listing.book?.title}
                 </h3>
@@ -128,7 +126,6 @@ function MyListings() {
                   {listing.book?.author}
                 </p>
 
-                {/* Részletek */}
                 <div className="flex flex-col gap-1 mb-3">
                   <span className="font-bold text-sm" style={{ color: '#8b4513' }}>
                     {listing.price?.toLocaleString('hu-HU')} Ft
@@ -137,16 +134,15 @@ function MyListings() {
                     {getConditionLabel(listing.condition)}
                   </span>
                   <span className="text-xs text-gray-500">
-                    📦 {listing.quantity} db
+                    {listing.quantity} db
                   </span>
                   {listing.location && (
                     <span className="text-xs text-gray-500">
-                      📍 {listing.location}
+                      {listing.location}
                     </span>
                   )}
                 </div>
 
-                {/* Státusz */}
                 <div className="mb-3">
                   <span
                     className={`inline-block px-2 py-1 rounded text-xs font-medium ${
@@ -155,30 +151,29 @@ function MyListings() {
                         : 'bg-gray-100 text-gray-800'
                     }`}
                   >
-                    {listing.isAvailable ? '✓ Elérhető' : '✗ Nem elérhető'}
+                    {listing.isAvailable ? 'Elérhető' : 'Nem elérhető'}
                   </span>
                 </div>
 
-                {/* Gombok */}
                 <div className="flex gap-2 mt-auto">
                   <button
                     onClick={() => navigate(`/listings/${listing.id}`)}
                     className="flex-1 px-3 py-2 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
-                    👁️ Megtekintés
+                    Megtekintés
                   </button>
                   <button
                     onClick={() => navigate(`/edit-listing/${listing.id}`)}
                     className="flex-1 px-3 py-2 text-xs rounded text-white"
                     style={{ backgroundColor: '#8b4513' }}
                   >
-                    ✏️ Szerkesztés
+                    Szerkesztés
                   </button>
                   <button
                     onClick={() => handleDelete(listing.id)}
                     className="px-3 py-2 text-xs rounded bg-red-600 text-white hover:bg-red-700"
                   >
-                    🗑️
+                    Törlés
                   </button>
                 </div>
               </div>

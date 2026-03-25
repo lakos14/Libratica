@@ -9,7 +9,6 @@ const api = axios.create({
   },
 });
 
-// Token hozzáadása minden kéréshez
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -23,14 +22,14 @@ api.interceptors.request.use(
   }
 );
 
-// Auth API
+//Auth API
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getCurrentUser: () => api.get('/auth/me'),
 };
 
-// Books API
+//Books API
 export const booksAPI = {
   getAll: (params) => api.get('/books', { params }),
   getWithAvailableListings: (params) => api.get('/books/with-available-listings', { params }),
@@ -40,7 +39,7 @@ export const booksAPI = {
   delete: (id) => api.delete(`/books/${id}`),
 };
 
-// Listings API
+//Listings API
 export const listingsAPI = {
   getAll: (params) => api.get('/listings', { params }),
   getById: (id) => api.get(`/listings/${id}`),
@@ -50,7 +49,7 @@ export const listingsAPI = {
   getMyListings: () => api.get('/listings/my-listings'),
 };
 
-// Cart API
+//Cart API
 export const cartAPI = {
   getCart: () => api.get('/cart'),
   addToCart: (data) => api.post('/cart/add', data),
@@ -59,7 +58,7 @@ export const cartAPI = {
   clearCart: () => api.delete('/cart/clear'),
 };
 
-// Orders API
+//Orders API
 export const ordersAPI = {
   getMyOrders: () => api.get('/orders'),
   getById: (id) => api.get(`/orders/${id}`),
@@ -71,13 +70,13 @@ export const ordersAPI = {
   rejectOrder: (id) => api.post(`/orders/${id}/reject`),
 };
 
-// Search API
+//Search API
 export const searchAPI = {
   searchBooks: (params) => api.get('/search/books', { params }),
   searchListings: (params) => api.get('/search/listings', { params }),
 };
 
-// Admin API
+//Admin API
 export const adminAPI = {
   getStats: () => api.get('/admin/stats'),
   getAllUsers: () => api.get('/admin/users'),
@@ -95,37 +94,37 @@ export const adminAPI = {
   deleteEvent: (id) => api.delete(`/admin/events/${id}`),
 };
 
-// Profile API
+//Profile API
 export const profileAPI = {
-    updateProfile: (data) => api.put('/profile', data),
-    changePassword: (data) => api.put('/profile/change-password', data),
+  updateProfile: (data) => api.put('/profile', data),
+  changePassword: (data) => api.put('/profile/change-password', data),
 };
 
-// Reviews API
+//Reviews API
 export const reviewsAPI = {
   createReview: (data) => api.post('/reviews', data),
   getUserReviews: (userId) => api.get(`/reviews/user/${userId}`),
   getOrderReviews: (orderId) => api.get(`/reviews/order/${orderId}`),
 };
 
-// Reports API
+//Reports API
 export const reportsAPI = {
   createReport: (data) => api.post('/reports', data),
   getReports: (status) => api.get('/reports', { params: { status } }),
   updateReportStatus: (id, data) => api.put(`/reports/${id}/status`, data),
 };
 
-// Users API
+//Users API
 export const usersAPI = {
   getPublicProfile: (username) => api.get(`/users/${username}`),
 };
 
-// AI API
+//AI API
 export const aiAPI = {
   search: (query) => api.post('/ai/search', { query }),
 };
 
-// Wishlist API
+//Wishlist API
 export const wishlistAPI = {
   getWishlist: () => api.get('/wishlist'),
   addToWishlist: (bookId) => api.post(`/wishlist/${bookId}`),
@@ -133,7 +132,7 @@ export const wishlistAPI = {
   checkWishlist: (bookId) => api.get(`/wishlist/check/${bookId}`),
 };
 
-// Open Library API
+//Open Library API
 export const openLibraryAPI = {
   searchByISBN: async (isbn) => {
     const res = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
@@ -148,7 +147,7 @@ export const openLibraryAPI = {
   },
 };
 
-// Book collection API
+//Book collection API
 export const bookCollectionAPI = {
   getCollection: () => api.get('/bookcollection'),
   addToCollection: (data) => api.post('/bookcollection', data),
@@ -156,12 +155,12 @@ export const bookCollectionAPI = {
   checkCollection: (googleBooksId) => api.get(`/bookcollection/check/${googleBooksId}`),
 };
 
-// Recommendations API
+//Recommendations API
 export const recommendationsAPI = {
   getRecommendations: () => api.get('/recommendations'),
 };
 
-// Images API
+//Images API
 export const imagesAPI = {
   upload: (formData) => api.post('/images/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
@@ -169,7 +168,7 @@ export const imagesAPI = {
   delete: (url) => api.delete(`/images?url=${encodeURIComponent(url)}`),
 };
 
-// Events API
+//Events API
 export const eventsAPI = {
   getAll: () => api.get('/events'),
   getById: (id) => api.get(`/events/${id}`),

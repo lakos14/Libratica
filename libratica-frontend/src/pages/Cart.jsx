@@ -12,14 +12,13 @@ const Cart = () => {
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [checkoutAll, setCheckoutAll] = useState(false);
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState(null); // ÚJ
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState(null);
   const navigate = useNavigate();
-  
-  // Kosár betöltése
+
   useEffect(() => {
     loadCart();
   }, []);
-  
+
   const loadCart = async () => {
     try {
       setLoading(true);
@@ -32,14 +31,13 @@ const Cart = () => {
       setLoading(false);
     }
   };
-  
-  // Eladónkénti csoportosítás
+
   const groupedBySeller = useMemo(() => {
     if (!cart?.items || cart.items.length === 0) return {};
-    
+
     return cart.items.reduce((acc, item) => {
       const sellerId = item.listing.seller.id;
-      
+
       if (!acc[sellerId]) {
         acc[sellerId] = {
           seller: item.listing.seller,
@@ -47,20 +45,18 @@ const Cart = () => {
           subtotal: 0
         };
       }
-      
+
       acc[sellerId].items.push(item);
       acc[sellerId].subtotal += item.price * item.quantity;
-      
+
       return acc;
     }, {});
   }, [cart]);
-  
-  // Törlés megerősítés megnyitása
+
   const handleRemoveItem = (cartItemId) => {
     setDeleteConfirmModal(cartItemId);
   };
-  
-  // Törlés végrehajtása
+
   const confirmRemoveItem = async () => {
     try {
       await api.delete(`/cart/items/${deleteConfirmModal}`);
@@ -71,31 +67,27 @@ const Cart = () => {
       toast.error('Nem sikerült eltávolítani a tételt');
     }
   };
-  
-  // Egy eladónak checkout indítása
+
   const handleCheckoutSeller = (sellerId) => {
     setSelectedSeller(sellerId);
     setCheckoutAll(false);
     setCheckoutModalOpen(true);
   };
-  
-  // Összes eladónak checkout indítása
+
   const handleCheckoutAllSellers = () => {
     setSelectedSeller(null);
     setCheckoutAll(true);
     setCheckoutModalOpen(true);
   };
-  
-  // Checkout végrehajtása
+
   const handleCheckoutSubmit = async ({ shippingAddress, paymentMethod }) => {
     try {
       if (checkoutAll) {
-        // Mindenkinek egyszerre
         const sellerIds = Object.keys(groupedBySeller);
-        
+
         for (const sellerId of sellerIds) {
           const group = groupedBySeller[sellerId];
-          
+
           await api.post('/orders/checkout', {
             sellerId: parseInt(sellerId),
             items: group.items.map(item => ({
@@ -106,20 +98,18 @@ const Cart = () => {
             shippingAddress,
             paymentMethod
           });
-          
-          // Kosárból törlés
+
           for (const item of group.items) {
             await api.delete(`/cart/items/${item.id}`);
           }
         }
-        
-        toast.success(`✅ ${sellerIds.length} rendelés sikeresen leadva!`);
+
+        toast.success(`${sellerIds.length} rendelés sikeresen leadva!`);
         navigate('/orders');
-        
+
       } else {
-        // Egy eladónak
         const group = groupedBySeller[selectedSeller];
-        
+
         await api.post('/orders/checkout', {
           sellerId: parseInt(selectedSeller),
           items: group.items.map(item => ({
@@ -130,24 +120,23 @@ const Cart = () => {
           shippingAddress,
           paymentMethod
         });
-        
-        // Kosárból törlés
+
         for (const item of group.items) {
           await api.delete(`/cart/items/${item.id}`);
         }
-        
-        toast.success(`✅ Rendelés leadva: ${group.seller.username}`);
+
+        toast.success(`Rendelés leadva: ${group.seller.username}`);
         await loadCart();
       }
-      
+
       setCheckoutModalOpen(false);
-      
+
     } catch (error) {
       console.error('Checkout hiba:', error);
       toast.error(error.response?.data?.message || 'Hiba történt a rendelés leadásakor');
     }
   };
-  
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -155,12 +144,12 @@ const Cart = () => {
       </div>
     );
   }
-  
+
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-12">
-          <p className="text-xl text-gray-600 mb-4">🛒 A kosarad üres</p>
+          <p className="text-xl text-gray-600 mb-4">A kosarad üres</p>
           <button
             onClick={() => navigate('/listings')}
             className="px-6 py-3 bg-[#8b4513] text-white rounded-lg hover:bg-[#654321] transition"
@@ -171,14 +160,13 @@ const Cart = () => {
       </div>
     );
   }
-  
+
   const sellerCount = Object.keys(groupedBySeller).length;
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Kosár</h1>
-      
-      {/* Eladónkénti csoportok */}
+
       <div className="mb-6">
         {Object.entries(groupedBySeller).map(([sellerId, group]) => (
           <SellerGroup
@@ -191,8 +179,7 @@ const Cart = () => {
           />
         ))}
       </div>
-      
-      {/* Összesítő */}
+
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <div className="flex justify-between items-center mb-4">
           <span className="text-xl font-bold">Végösszeg:</span>
@@ -200,28 +187,26 @@ const Cart = () => {
             {cart.totalAmount?.toLocaleString('hu-HU')} Ft
           </span>
         </div>
-        
+
         <button
           onClick={handleCheckoutAllSellers}
           className="w-full py-3 bg-[#8b4513] text-white rounded-lg font-semibold hover:bg-[#654321] transition"
         >
-          ✅ Összes megrendelése ({sellerCount} eladónak)
+          Összes megrendelése ({sellerCount} eladónak)
         </button>
-        
+
         <p className="text-xs text-gray-500 mt-2 text-center">
           {sellerCount} különböző rendelés jön létre
         </p>
       </div>
-      
-      {/* Checkout Modal */}
+
       <CheckoutModal
         isOpen={checkoutModalOpen}
         onClose={() => setCheckoutModalOpen(false)}
         onSubmit={handleCheckoutSubmit}
         sellerName={selectedSeller ? groupedBySeller[selectedSeller]?.seller.username : null}
       />
-      
-      {/* Törlés megerősítő modal */}
+
       {deleteConfirmModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">

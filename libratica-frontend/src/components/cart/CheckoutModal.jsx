@@ -48,7 +48,6 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
         )}
 
         <div className="space-y-4 mb-6">
-          {/* Teljes név */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Teljes név *
@@ -64,7 +63,6 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          {/* Irányítószám + Város */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -97,7 +95,6 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
             </div>
           </div>
 
-          {/* Utca, házszám */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Utca, házszám *
@@ -113,7 +110,6 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
             {errors.street && <p className="text-red-500 text-xs mt-1">{errors.street}</p>}
           </div>
 
-          {/* Fizetési mód */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Fizetési mód
@@ -148,15 +144,13 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
             </div>
           </div>
 
-          {/* Info */}
           <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
             <p className="text-xs text-yellow-800">
-              ℹ️ A platform nem kezel pénzügyi tranzakciókat. A fizetés közvetlenül az eladóval történik.
+              A platform nem kezel pénzügyi tranzakciókat. A fizetés közvetlenül az eladóval történik.
             </p>
           </div>
         </div>
 
-        {/* Gombok */}
         <div className="flex gap-3">
           <button
             onClick={onClose}

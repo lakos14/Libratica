@@ -24,11 +24,11 @@ function Recommendations() {
 
   const getConditionLabel = (condition) => {
     const labels = {
-      mint: '⭐ Újszerű',
-      excellent: '✨ Kiváló',
-      good: '👍 Jó',
-      fair: '👌 Elfogadható',
-      poor: '📦 Gyenge',
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
     };
     return labels[condition] || condition;
   };

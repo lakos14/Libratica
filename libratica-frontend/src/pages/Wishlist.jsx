@@ -104,7 +104,7 @@ function Wishlist() {
                     onClick={() => handleRemove(item.book?.id)}
                     className="px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200"
                   >
-                    ✕
+                    Törlés
                   </button>
                 </div>
               </div>

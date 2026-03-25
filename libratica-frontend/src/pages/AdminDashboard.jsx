@@ -21,7 +21,7 @@ function AdminDashboard() {
   const usersTotalPages = Math.ceil(users.length / adminPageSize);
   const paginatedListings = listings.slice((listingsPage - 1) * adminPageSize, listingsPage * adminPageSize);
   const listingsTotalPages = Math.ceil(listings.length / adminPageSize);
-  
+
   useEffect(() => {
     if (activeTab === 'stats') {
       loadStats();
@@ -237,80 +237,71 @@ function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">⚙️ Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-8">Admin felület</h1>
 
-      {/* Tab navigáció */}
       <div className="flex gap-4 mb-6 border-b">
         <button
           onClick={() => setActiveTab('stats')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'stats'
+          className={`px-4 py-2 font-semibold ${activeTab === 'stats'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          📊 Statisztikák
+          Statisztikák
         </button>
         <button
           onClick={() => setActiveTab('reports')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'reports'
+          className={`px-4 py-2 font-semibold ${activeTab === 'reports'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          🚩 Reportok
+          Reportok
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'users'
+          className={`px-4 py-2 font-semibold ${activeTab === 'users'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          👥 Felhasználók
+          Felhasználók
         </button>
         <button
           onClick={() => setActiveTab('listings')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'listings'
+          className={`px-4 py-2 font-semibold ${activeTab === 'listings'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          📚 Hirdetések
+          Hirdetések
         </button>
         <button
           onClick={() => setActiveTab('categories')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'categories'
+          className={`px-4 py-2 font-semibold ${activeTab === 'categories'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          🏷️ Kategóriák
+          Kategóriák
         </button>
         <button
           onClick={() => setActiveTab('events')}
-          className={`px-4 py-2 font-semibold ${
-            activeTab === 'events'
+          className={`px-4 py-2 font-semibold ${activeTab === 'events'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-800'
-          }`}
+            }`}
         >
-          📅 Események
+          Események
         </button>
       </div>
 
-      {/* Error message */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
           {error}
         </div>
       )}
 
-      {/* Loading */}
       {loading && (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -318,71 +309,46 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* TAB 1: Statisztikák */}
       {activeTab === 'stats' && stats && !loading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Általános statisztikák</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Összes felhasználó</p>
-                  <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
-                </div>
-                <div className="text-4xl">👥</div>
-              </div>
-              {stats.today.users > 0 && (
-                <p className="text-sm text-green-600 mt-2">+{stats.today.users} ma</p>
-              )}
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Összes könyv</p>
-                  <p className="text-3xl font-bold text-purple-600">{stats.totalBooks}</p>
-                </div>
-                <div className="text-4xl">📖</div>
+                <p className="text-gray-600 text-sm">Összes felhasználó</p>
+                <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Összes hirdetés</p>
-                  <p className="text-3xl font-bold text-orange-600">{stats.totalListings}</p>
-                  <p className="text-sm text-gray-500 mt-1">{stats.activeListings} aktív</p>
-                </div>
-                <div className="text-4xl">📚</div>
+                <p className="text-gray-600 text-sm">Összes könyv</p>
+                <p className="text-3xl font-bold text-purple-600">{stats.totalBooks}</p>
               </div>
-              {stats.today.listings > 0 && (
-                <p className="text-sm text-green-600 mt-2">+{stats.today.listings} ma</p>
-              )}
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm">Összes rendelés</p>
-                  <p className="text-3xl font-bold text-green-600">{stats.totalOrders}</p>
-                  <p className="text-sm text-gray-500 mt-1">{stats.pendingOrders} függőben</p>
-                </div>
-                <div className="text-4xl">🛒</div>
+                <p className="text-gray-600 text-sm">Összes hirdetés</p>
+                <p className="text-3xl font-bold text-orange-600">{stats.totalListings}</p>
               </div>
-              {stats.today.orders > 0 && (
-                <p className="text-sm text-green-600 mt-2">+{stats.today.orders} ma</p>
-              )}
+            </div>
+
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex items-center justify-between">
+                <p className="text-gray-600 text-sm">Összes rendelés</p>
+                <p className="text-3xl font-bold text-green-600">{stats.totalOrders}</p>
+              </div>
             </div>
           </div>
         </div>
       )}
-      
-      {/* TAB 2: Felhasználók */}
+
       {activeTab === 'users' && !loading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Felhasználók ({users.length})</h2>
-          
+
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -405,7 +371,7 @@ function AdminDashboard() {
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{user.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                        <a href={`/users/${user.username}`}
+                      <a href={`/users/${user.username}`}
                         className="text-sm font-medium hover:underline"
                         style={{ color: '#8b4513' }}
                         target="_blank"
@@ -417,9 +383,8 @@ function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.fullName || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.roleName === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                      }`}>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.roleName === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                        }`}>
                         {user.roleName}
                       </span>
                     </td>
@@ -430,19 +395,17 @@ function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(user.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.isActive ? '✓ Aktív' : '✗ Inaktív'}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                        {user.isActive ? 'Aktív' : 'Inaktív'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleToggleUserActive(user.id)}
-                          className={`px-2 py-1 text-xs rounded text-white ${
-                            user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                          }`}
+                          className={`px-2 py-1 text-xs rounded text-white ${user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                            }`}
                         >
                           {user.isActive ? 'Tiltás' : 'Aktiválás'}
                         </button>
@@ -450,7 +413,7 @@ function AdminDashboard() {
                           onClick={() => handleToggleUserRole(user.id)}
                           className="px-2 py-1 text-xs rounded bg-purple-500 text-white hover:bg-purple-600"
                         >
-                          {user.roleName === 'admin' ? '→ User' : '→ Admin'}
+                          {user.roleName === 'admin' ? 'User' : 'Admin'}
                         </button>
                       </div>
                     </td>
@@ -460,42 +423,40 @@ function AdminDashboard() {
             </table>
           </div>
           {usersTotalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-4">
-            <button onClick={() => setUsersPage(1)} disabled={usersPage === 1}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">«</button>
-            <button onClick={() => setUsersPage(prev => prev - 1)} disabled={usersPage === 1}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">‹</button>
-            {Array.from({ length: usersTotalPages }, (_, i) => i + 1)
-              .filter(p => p === 1 || p === usersTotalPages || Math.abs(p - usersPage) <= 2)
-              .reduce((acc, p, idx, arr) => {
-                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                acc.push(p);
-                return acc;
-              }, [])
-              .map((p, idx) => p === '...' ? (
-                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
-              ) : (
-                <button key={p} onClick={() => setUsersPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${
-                    usersPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                  style={usersPage === p ? { backgroundColor: '#8b4513' } : {}}
-                >{p}</button>
-              ))}
-            <button onClick={() => setUsersPage(prev => prev + 1)} disabled={usersPage === usersTotalPages}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">›</button>
-            <button onClick={() => setUsersPage(usersTotalPages)} disabled={usersPage === usersTotalPages}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">»</button>
-          </div>
-        )}
+            <div className="flex justify-center items-center gap-2 mt-4">
+              <button onClick={() => setUsersPage(1)} disabled={usersPage === 1}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">«</button>
+              <button onClick={() => setUsersPage(prev => prev - 1)} disabled={usersPage === 1}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">‹</button>
+              {Array.from({ length: usersTotalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === usersTotalPages || Math.abs(p - usersPage) <= 2)
+                .reduce((acc, p, idx, arr) => {
+                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, idx) => p === '...' ? (
+                  <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
+                ) : (
+                  <button key={p} onClick={() => setUsersPage(p)}
+                    className={`px-3 py-2 text-sm rounded border font-medium ${usersPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    style={usersPage === p ? { backgroundColor: '#8b4513' } : {}}
+                  >{p}</button>
+                ))}
+              <button onClick={() => setUsersPage(prev => prev + 1)} disabled={usersPage === usersTotalPages}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">›</button>
+              <button onClick={() => setUsersPage(usersTotalPages)} disabled={usersPage === usersTotalPages}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">»</button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 3: Hirdetések */}
       {activeTab === 'listings' && !loading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Hirdetések ({listings.length})</h2>
-          
+
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -541,11 +502,11 @@ function AdminDashboard() {
                       <div className="text-sm text-gray-500">{listing.seller.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {listing.condition === 'mint' && '⭐ Újszerű'}
-                      {listing.condition === 'excellent' && '✨ Kiváló'}
-                      {listing.condition === 'good' && '👍 Jó'}
-                      {listing.condition === 'fair' && '👌 Elfogadható'}
-                      {listing.condition === 'poor' && '📦 Gyenge'}
+                      {listing.condition === 'mint' && 'Újszerű'}
+                      {listing.condition === 'excellent' && 'Kiváló'}
+                      {listing.condition === 'good' && 'Jó'}
+                      {listing.condition === 'fair' && 'Elfogadható'}
+                      {listing.condition === 'poor' && 'Gyenge'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {listing.price.toLocaleString('hu-HU')} {listing.currency}
@@ -553,19 +514,17 @@ function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{listing.quantity} db</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(listing.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        listing.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {listing.isAvailable ? '✓ Elérhető' : '✗ Nem elérhető'}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${listing.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                        {listing.isAvailable ? 'Elérhető' : 'Nem elérhető'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleToggleListingAvailable(listing.id)}
-                          className={`px-2 py-1 text-xs rounded text-white ${
-                            listing.isAvailable ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
-                          }`}
+                          className={`px-2 py-1 text-xs rounded text-white ${listing.isAvailable ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+                            }`}
                         >
                           {listing.isAvailable ? 'Inaktiválás' : 'Aktiválás'}
                         </button>
@@ -583,52 +542,50 @@ function AdminDashboard() {
             </table>
           </div>
           {listingsTotalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-4">
-            <button
-              onClick={() => setListingsPage(1)}
-              disabled={listingsPage === 1}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-            >«</button>
-            <button
-              onClick={() => setListingsPage(prev => prev - 1)}
-              disabled={listingsPage === 1}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-            >‹</button>
-            {Array.from({ length: listingsTotalPages }, (_, i) => i + 1)
-              .filter(p => p === 1 || p === listingsTotalPages || Math.abs(p - listingsPage) <= 2)
-              .reduce((acc, p, idx, arr) => {
-                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                acc.push(p);
-                return acc;
-              }, [])
-              .map((p, idx) => p === '...' ? (
-                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
-              ) : (
-                <button
-                  key={p}
-                  onClick={() => setListingsPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${
-                    listingsPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                  style={listingsPage === p ? { backgroundColor: '#8b4513' } : {}}
-                >{p}</button>
-              ))}
-            <button
-              onClick={() => setListingsPage(prev => prev + 1)}
-              disabled={listingsPage === listingsTotalPages}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-            >›</button>
-            <button
-              onClick={() => setListingsPage(listingsTotalPages)}
-              disabled={listingsPage === listingsTotalPages}
-              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-            >»</button>
-          </div>
-        )}
+            <div className="flex justify-center items-center gap-2 mt-4">
+              <button
+                onClick={() => setListingsPage(1)}
+                disabled={listingsPage === 1}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+              >«</button>
+              <button
+                onClick={() => setListingsPage(prev => prev - 1)}
+                disabled={listingsPage === 1}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+              >‹</button>
+              {Array.from({ length: listingsTotalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === listingsTotalPages || Math.abs(p - listingsPage) <= 2)
+                .reduce((acc, p, idx, arr) => {
+                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                  acc.push(p);
+                  return acc;
+                }, [])
+                .map((p, idx) => p === '...' ? (
+                  <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setListingsPage(p)}
+                    className={`px-3 py-2 text-sm rounded border font-medium ${listingsPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    style={listingsPage === p ? { backgroundColor: '#8b4513' } : {}}
+                  >{p}</button>
+                ))}
+              <button
+                onClick={() => setListingsPage(prev => prev + 1)}
+                disabled={listingsPage === listingsTotalPages}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+              >›</button>
+              <button
+                onClick={() => setListingsPage(listingsTotalPages)}
+                disabled={listingsPage === listingsTotalPages}
+                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+              >»</button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* TAB 4: Reportok */}
       {activeTab === 'reports' && !loading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Reportok ({reports.length})</h2>
@@ -643,13 +600,12 @@ function AdminDashboard() {
                 <div key={report.id} className="bg-white border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {report.status === 'pending' ? '⏳ Függőben' :
-                        report.status === 'resolved' ? '✓ Megoldva' : '✗ Elvetve'}
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          report.status === 'resolved' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                        }`}>
+                        {report.status === 'pending' ? 'Függőben' :
+                          report.status === 'resolved' ? 'Megoldva' : 'Elvetve'}
                       </span>
                       <span className="ml-2 text-sm text-gray-500">{formatDate(report.createdAt)}</span>
                     </div>
@@ -667,7 +623,7 @@ function AdminDashboard() {
                         rel="noreferrer"
                         className="text-sm font-medium text-[#8b4513] hover:underline"
                       >
-                        📚 Hirdetés: {report.listing.title}
+                        Hirdetés: {report.listing.title}
                       </a>
                       <p className="text-sm text-gray-600">Szerző: {report.listing.author}</p>
                       <p className="text-sm text-gray-600">Eladó: {report.listing.seller?.username}</p>
@@ -677,23 +633,22 @@ function AdminDashboard() {
 
                   {report.reportedUser && (
                     <div className="bg-gray-50 rounded p-3 mb-2">
-                      <p className="text-sm font-medium">👤 Jelentett felhasználó: {report.reportedUser?.username}</p>
+                      <p className="text-sm font-medium">Jelentett felhasználó: {report.reportedUser?.username}</p>
                       <p className="text-sm text-gray-600">Email: {report.reportedUser?.email}</p>
                     </div>
                   )}
 
-                  {/* Report számlálók */}
                   {report.totalReportsOnUser && (
                     <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
                       <p className="text-sm font-medium text-orange-800">
-                        ⚠️ Ez a felhasználó összesen {report.totalReportsOnUser} alkalommal lett jelentve
+                        Ez a felhasználó összesen {report.totalReportsOnUser} alkalommal lett jelentve
                       </p>
                     </div>
                   )}
                   {report.totalReportsOnListing && (
                     <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
                       <p className="text-sm font-medium text-orange-800">
-                        ⚠️ Ez a hirdetés összesen {report.totalReportsOnListing} alkalommal lett jelentve
+                        Ez a hirdetés összesen {report.totalReportsOnListing} alkalommal lett jelentve
                       </p>
                     </div>
                   )}
@@ -708,13 +663,13 @@ function AdminDashboard() {
                         onClick={() => handleReportStatus(report.id, 'resolved')}
                         className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
                       >
-                        ✓ Elfogad {report.listing ? '(hirdetés inaktiválása)' : '(felhasználó tiltása)'}
+                        Elfogad {report.listing ? '(hirdetés inaktiválása)' : '(felhasználó tiltása)'}
                       </button>
                       <button
                         onClick={() => handleReportStatus(report.id, 'dismissed')}
                         className="px-4 py-2 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
                       >
-                        ✗ Elvet
+                        Elvet
                       </button>
                     </div>
                   )}
@@ -725,12 +680,10 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* TAB 5: Kategóriák */}
       {activeTab === 'categories' && !loading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Kategóriák</h2>
 
-          {/* Új kategória */}
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
             <h3 className="font-bold mb-3">Új kategória hozzáadása</h3>
             <div className="flex gap-3">
@@ -758,7 +711,6 @@ function AdminDashboard() {
             </div>
           </div>
 
-          {/* Kategória lista */}
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             {categories.map((category) => (
               <div key={category.id} className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50">
@@ -780,73 +732,71 @@ function AdminDashboard() {
         </div>
       )}
 
-      {/* TAB 6: Események*/}
       {activeTab === 'events' && !loading && (
-      <div>
-        <h2 className="text-2xl font-bold mb-6">Események ({events.length})</h2>
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Események ({events.length})</h2>
 
-        {events.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded p-8 text-center">
-            <p className="text-gray-500">Nincsenek események</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {events.map((event) => (
-              <div key={event.id} className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-bold text-lg">{event.title}</h3>
-                    <p className="text-sm text-gray-600">
-                      {event.type === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
-                    </p>
+          {events.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded p-8 text-center">
+              <p className="text-gray-500">Nincsenek események</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {events.map((event) => (
+                <div key={event.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-bold text-lg">{event.title}</h3>
+                      <p className="text-sm text-gray-600">
+                        {event.type === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        event.status === 'approved' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                      }`}>
+                      {event.status === 'pending' ? '⏳ Függőben' :
+                        event.status === 'approved' ? 'Jóváhagyva' : 'Elutasítva'}
+                    </span>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    event.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {event.status === 'pending' ? '⏳ Függőben' :
-                    event.status === 'approved' ? '✓ Jóváhagyva' : '✗ Elutasítva'}
-                  </span>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2 mb-3 text-sm text-gray-600">
-                  <p>📅 {formatDate(event.eventDate)}</p>
-                  <p>📍 {event.location}</p>
-                  <p>👤 Szervező: {event.organizer?.username}</p>
-                  <p>👥 {event.attendeesCount} résztvevő</p>
-                </div>
+                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm text-gray-600">
+                    <p>📅 {formatDate(event.eventDate)}</p>
+                    <p>📍 {event.location}</p>
+                    <p>👤 Szervező: {event.organizer?.username}</p>
+                    <p>👥 {event.attendeesCount} résztvevő</p>
+                  </div>
 
-                <div className="flex gap-2">
-                  {event.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => handleEventStatus(event.id, 'approved')}
-                        className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
-                      >
-                        ✓ Jóváhagyás
-                      </button>
-                      <button
-                        onClick={() => handleEventStatus(event.id, 'rejected')}
-                        className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
-                      >
-                        ✗ Elutasítás
-                      </button>
-                    </>
-                  )}
-                  <button
-                    onClick={() => handleDeleteEvent(event.id)}
-                    className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
-                  >
-                    Törlés
-                  </button>
+                  <div className="flex gap-2">
+                    {event.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleEventStatus(event.id, 'approved')}
+                          className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
+                        >
+                          Jóváhagyás
+                        </button>
+                        <button
+                          onClick={() => handleEventStatus(event.id, 'rejected')}
+                          className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
+                        >
+                          Elutasítás
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
+                    >
+                      Törlés
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    )}
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Globális alapértelmezett stílusok */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -19,7 +18,6 @@ code {
     monospace;
 }
 
-/* Egyszerű link stílusok */
 a {
   color: #8b4513;
   text-decoration: none;
@@ -30,17 +28,14 @@ a:hover {
   text-decoration: underline;
 }
 
-/* Egyszerű gombok */
 button {
   transition: all 0.2s ease;
 }
 
-/* Egyszerű shadow (nem túl fancy) */
 .simple-shadow {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-/* Egyszerű card */
 .simple-card {
   background: white;
   border: 1px solid #e5e5e5;
@@ -48,7 +43,6 @@ button {
   padding: 1rem;
 }
 
-/* Barna primary szín */
 .bg-primary {
   background-color: #8b4513;
 }
@@ -65,7 +59,6 @@ button {
   background-color: #654321;
 }
 
-/* Egyszerű input stílusok */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -87,7 +80,6 @@ select:focus {
   border-color: #8b4513;
 }
 
-/* Egyszerű gomb alapértelmezések */
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;

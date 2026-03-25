@@ -29,12 +29,10 @@ function Navbar() {
     <nav className="bg-white border-b border-gray-300">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          {/* Logo / Brand */}
           <Link to="/" className="text-2xl font-bold" style={{ color: '#8b4513' }}>
             Libratica
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/books" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
               Könyvek
@@ -58,7 +56,6 @@ function Navbar() {
                   Események
                 </Link>
 
-                {/* Dropdown */}
                 <div className="relative">
                   <button
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -120,7 +117,6 @@ function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden text-gray-700"
@@ -131,7 +127,6 @@ function Navbar() {
           </button>
         </div>
 
-        {/* Mobile menu */}
         {isMenuOpen && (
           <div className="md:hidden pb-4">
             <Link to="/books" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>

@@ -16,7 +16,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem('token');
     if (token) {
       loadUser();
@@ -44,9 +43,9 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Login failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Login failed'
       };
     }
   };
@@ -59,9 +58,9 @@ export const AuthProvider = ({ children }) => {
       setUser(response.data.user);
       return { success: true };
     } catch (error) {
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Registration failed' 
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Registration failed'
       };
     }
   };

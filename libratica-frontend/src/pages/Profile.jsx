@@ -21,23 +21,23 @@ const Profile = () => {
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
- const handleProfileSubmit = async (e) => {
-   e.preventDefault();
-   setProfileLoading(true);
- 
-   try {
-     await profileAPI.updateProfile({
-       username: profileData.username || null,
-       fullName: profileData.fullName || null,
-       phoneNumber: profileData.phoneNumber || null,  // üres string helyett null
-     });
-     toast.success('Profil sikeresen mentve!');
-     setTimeout(() => window.location.reload(), 1500);
-   } catch (err) {
-   } finally {
-     setProfileLoading(false);
-   }
- };
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileLoading(true);
+
+    try {
+      await profileAPI.updateProfile({
+        username: profileData.username || null,
+        fullName: profileData.fullName || null,
+        phoneNumber: profileData.phoneNumber || null,
+      });
+      toast.success('Profil sikeresen mentve!');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -73,12 +73,10 @@ const Profile = () => {
           Profil szerkesztése
         </h1>
 
-        {/* Profil adatok */}
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-bold mb-6">Alapadatok</h2>
 
           <form onSubmit={handleProfileSubmit} className="space-y-4">
-            {/* Email (nem szerkeszthető) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email cím (nem módosítható)
@@ -91,7 +89,6 @@ const Profile = () => {
               />
             </div>
 
-            {/* Felhasználónév */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Felhasználónév
@@ -106,7 +103,6 @@ const Profile = () => {
               />
             </div>
 
-            {/* Teljes név */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Teljes név
@@ -120,7 +116,6 @@ const Profile = () => {
               />
             </div>
 
-            {/* Telefonszám */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Telefonszám
@@ -146,7 +141,6 @@ const Profile = () => {
           </form>
         </div>
 
-        {/* Jelszóváltoztatás */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h2 className="text-xl font-bold mb-6">Jelszó megváltoztatása</h2>
 

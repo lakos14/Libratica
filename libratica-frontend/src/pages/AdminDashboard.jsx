@@ -17,8 +17,11 @@ function AdminDashboard() {
   const [usersPage, setUsersPage] = useState(1);
   const [listingsPage, setListingsPage] = useState(1);
   const adminPageSize = 15;
+  const paginatedUsers = users.slice((usersPage - 1) * adminPageSize, usersPage * adminPageSize);
+  const usersTotalPages = Math.ceil(users.length / adminPageSize);
+  const paginatedListings = listings.slice((listingsPage - 1) * adminPageSize, listingsPage * adminPageSize);
+  const listingsTotalPages = Math.ceil(listings.length / adminPageSize);
   
-
   useEffect(() => {
     if (activeTab === 'stats') {
       loadStats();
@@ -398,7 +401,7 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
+                {paginatedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{user.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -456,6 +459,35 @@ function AdminDashboard() {
               </tbody>
             </table>
           </div>
+          {usersTotalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button onClick={() => setUsersPage(1)} disabled={usersPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">«</button>
+            <button onClick={() => setUsersPage(prev => prev - 1)} disabled={usersPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">‹</button>
+            {Array.from({ length: usersTotalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === usersTotalPages || Math.abs(p - usersPage) <= 2)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) => p === '...' ? (
+                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
+              ) : (
+                <button key={p} onClick={() => setUsersPage(p)}
+                  className={`px-3 py-2 text-sm rounded border font-medium ${
+                    usersPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  style={usersPage === p ? { backgroundColor: '#8b4513' } : {}}
+                >{p}</button>
+              ))}
+            <button onClick={() => setUsersPage(prev => prev + 1)} disabled={usersPage === usersTotalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">›</button>
+            <button onClick={() => setUsersPage(usersTotalPages)} disabled={usersPage === usersTotalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">»</button>
+          </div>
+        )}
         </div>
       )}
 
@@ -480,7 +512,7 @@ function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {listings.map((listing) => (
+                {paginatedListings.map((listing) => (
                   <tr key={listing.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{listing.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -550,6 +582,49 @@ function AdminDashboard() {
               </tbody>
             </table>
           </div>
+          {listingsTotalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-4">
+            <button
+              onClick={() => setListingsPage(1)}
+              disabled={listingsPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >«</button>
+            <button
+              onClick={() => setListingsPage(prev => prev - 1)}
+              disabled={listingsPage === 1}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >‹</button>
+            {Array.from({ length: listingsTotalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === listingsTotalPages || Math.abs(p - listingsPage) <= 2)
+              .reduce((acc, p, idx, arr) => {
+                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, idx) => p === '...' ? (
+                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => setListingsPage(p)}
+                  className={`px-3 py-2 text-sm rounded border font-medium ${
+                    listingsPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  style={listingsPage === p ? { backgroundColor: '#8b4513' } : {}}
+                >{p}</button>
+              ))}
+            <button
+              onClick={() => setListingsPage(prev => prev + 1)}
+              disabled={listingsPage === listingsTotalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >›</button>
+            <button
+              onClick={() => setListingsPage(listingsTotalPages)}
+              disabled={listingsPage === listingsTotalPages}
+              className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            >»</button>
+          </div>
+        )}
         </div>
       )}
 

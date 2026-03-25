@@ -1,10 +1,15 @@
 # Libratica
-2026.03.24
+2026.03.25
 
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
 - regisztáció frissítése (placeholderek, jelszó megtekintése)
 - elfelejtett jelszó, email verification (ha marad idő)
+- frontend redesign (emojik ki)
+- borítókép ki a hirdetésfeltöltésnél (?)
+- currency ki mert ez magyar oldal
+- könyvről részben minden infó megjelenítése
+- ai funkció javítás (TypeError: listings.map is not a function)
 ### Bővítések:
 - Keresés fejlesztése
 

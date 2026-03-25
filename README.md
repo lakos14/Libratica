@@ -10,6 +10,7 @@
 - kicsi frontend redesign (emojik kivétele, stb)
 - code review 
 - tesztelés
+- ha valamiből 0db elérhető vegye ki a hirdetésekből
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:

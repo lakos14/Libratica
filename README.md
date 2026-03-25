@@ -3,8 +3,8 @@
 
 ## Tervezett funkciók a második félévre:
 ### Alapfunkciók:
+- regisztáció frissítése
 - elfelejtett jelszó
-- események létrehozása, böngészése oldal
 - email verification (ha marad idő)
 ### Bővítések:
 - Keresés fejlesztése
@@ -31,6 +31,7 @@
 - Open Library API
 - könyvgyütemény
 - képfeltöltés a hírdetéseknél mappából
+- események létrehozása, böngészése oldal
 ### Vásárlások és rendelések:
 - kapcsolatfelvétel gomb
 - ajánlórendszer

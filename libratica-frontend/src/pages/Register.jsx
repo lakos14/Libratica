@@ -7,6 +7,7 @@ const Register = () => {
     email: '',
     username: '',
     password: '',
+    confirmPassword: '',
     fullName: '',
     phoneNumber: '',
   });
@@ -25,6 +26,10 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setError('A két jelszó nem egyezik meg!');
+      return;
+    }
     setError('');
     setLoading(true);
 
@@ -107,6 +112,19 @@ const Register = () => {
               type="password"
               name="password"
               value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
+              required
+              minLength="6"
+            />
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2">Jelszó megerősítése *</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required

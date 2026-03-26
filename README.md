@@ -3,7 +3,6 @@
 
 ## Tervezett funkciók a második félévre:
 ### Opcionális:
-- identifier a felhasználókezelésre
 - reactben a lekérésekre reactquery
 - elfelejtett jelszó, email verification, email értesítések, ha marad idő
 ### Kötelező:

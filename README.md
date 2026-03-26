@@ -4,6 +4,8 @@
 ## Tervezett funkciók a második félévre:
 ### Opcionális:
 - elfelejtett jelszó, email verification, email értesítések, ha marad idő
+### Kötelező:
+- code review, tesztelés
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:
@@ -50,7 +52,6 @@
 - Tóth Bálint, Ábrahám Gyula, Pulai Gábor
 
 ## Technológiák
-
 ### Backend
 - ASP.NET Core 8.0
 - Entity Framework Core 9

@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { searchAPI, booksAPI } from '../services/api';
 import { Link } from 'react-router-dom';
+import { useBooksWithListings, useCategories } from '../hooks';
 
 function Books() {
-  const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     author: '',
@@ -13,60 +11,35 @@ function Books() {
     categoryId: '',
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12;
-  const [categories, setCategories] = useState([]);
 
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filters]);
-
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetch('http://localhost:5102/api/categories');
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error('Hiba a kategóriák betöltésekor:', error);
-      }
-    };
-    loadCategories();
-  }, []);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadBooks();
+      setDebouncedQuery(searchQuery);
+      setDebouncedFilters(filters);
+      setCurrentPage(1);
     }, 500);
-
     return () => clearTimeout(timer);
-  }, [currentPage, searchQuery, filters]);
+  }, [searchQuery, filters]);
 
-  const loadBooks = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        query: searchQuery || undefined,
-        author: filters.author || undefined,
-        minYear: filters.minYear || undefined,
-        maxYear: filters.maxYear || undefined,
-        categoryId: filters.categoryId || undefined,
-        page: currentPage,
-        pageSize,
-      };
+  const { data: categories = [] } = useCategories();
+  
+  const { data, isLoading, isError, error } = useBooksWithListings({
+    query: debouncedQuery || undefined,
+    author: debouncedFilters.author || undefined,
+    minYear: debouncedFilters.minYear || undefined,
+    maxYear: debouncedFilters.maxYear || undefined,
+    categoryId: debouncedFilters.categoryId || undefined,
+    page: currentPage,
+    pageSize,
+  });
 
-      const response = await booksAPI.getWithAvailableListings(params);
-      setBooks(response.data.items);
-      setTotalPages(response.data.totalPages);
-      setTotalCount(response.data.totalCount);
-    } catch (error) {
-      console.error('Hiba a könyvek betöltésekor:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const books = data?.items || [];
+  const totalPages = data?.totalPages || 1;
+  const totalCount = data?.totalCount || 0;
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -149,6 +122,7 @@ function Books() {
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Kategória
@@ -169,7 +143,7 @@ function Books() {
             </div>
           </div>
 
-          {(searchQuery || filters.author || filters.minYear || filters.maxYear) && (
+          {(searchQuery || filters.author || filters.minYear || filters.maxYear || filters.categoryId) && (
             <div className="mt-4">
               <button
                 onClick={clearFilters}
@@ -183,17 +157,23 @@ function Books() {
 
         <div className="mb-4">
           <p className="text-gray-600">
-            {loading ? 'Betöltés...' : `${totalCount} könyv találat`}
+            {isLoading ? 'Betöltés...' : `${totalCount} könyv találat`}
           </p>
         </div>
 
-        {loading && (
+        {isError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error?.message || 'Hiba történt a könyvek betöltésekor'}
+          </div>
+        )}
+
+        {isLoading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         )}
 
-        {!loading && books.length > 0 && (
+        {!isLoading && books.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {books.map((book) => (
               <div
@@ -264,10 +244,11 @@ function Books() {
                 <button
                   key={p}
                   onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
+                  className={`px-3 py-2 text-sm rounded border font-medium ${
+                    currentPage === p
                       ? 'text-white border-transparent'
                       : 'border-gray-300 hover:bg-gray-50'
-                    }`}
+                  }`}
                   style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
                 >
                   {p}
@@ -291,7 +272,7 @@ function Books() {
           </div>
         )}
 
-        {!loading && books.length === 0 && (
+        {!isLoading && books.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">Nincs találat</p>
             <p className="text-gray-400 text-sm mt-2">

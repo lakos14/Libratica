@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { booksAPI, listingsAPI, openLibraryAPI, imagesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCategories, useCreateListing } from '../hooks';
+import { booksAPI, openLibraryAPI, imagesAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 const CreateListing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
   const [googleSearchQuery, setGoogleSearchQuery] = useState('');
   const [googleSearching, setGoogleSearching] = useState(false);
   const [googleResults, setGoogleResults] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { data: categories = [] } = useCategories();
+  const createListing = useCreateListing();
 
   const [bookData, setBookData] = useState({
     title: '',
@@ -42,20 +45,9 @@ const CreateListing = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
     }
-    loadCategories();
   }, [isAuthenticated, navigate]);
 
-  const loadCategories = async () => {
-    try {
-      const response = await fetch('http://localhost:5102/api/categories');
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error('Failed to load categories:', error);
-    }
-  };
   const searchOpenLibrary = async () => {
     if (!googleSearchQuery.trim()) return;
 
@@ -67,7 +59,7 @@ const CreateListing = () => {
         results = data ? [{ isISBN: true, data, isbn: googleSearchQuery }] : [];
       } else {
         const docs = await openLibraryAPI.searchByTitle(googleSearchQuery);
-        results = docs.map(doc => ({ isISBN: false, data: doc }));
+        results = docs.map((doc) => ({ isISBN: false, data: doc }));
       }
 
       if (results.length === 0) {
@@ -87,7 +79,7 @@ const CreateListing = () => {
       setBookData({
         ...bookData,
         title: d.title || '',
-        author: d.authors?.map(a => a.name).join(', ') || '',
+        author: d.authors?.map((a) => a.name).join(', ') || '',
         isbn: item.isbn || '',
         publisher: d.publishers?.[0]?.name || '',
         publicationYear: d.publish_date ? d.publish_date.slice(-4) : '',
@@ -118,7 +110,6 @@ const CreateListing = () => {
   const handleBookDataChange = (e) => {
     const { name, value } = e.target;
     setBookData({ ...bookData, [name]: value });
-
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -129,12 +120,12 @@ const CreateListing = () => {
     if (currentIds.includes(categoryId)) {
       setBookData({
         ...bookData,
-        categoryIds: currentIds.filter(id => id !== categoryId)
+        categoryIds: currentIds.filter((id) => id !== categoryId),
       });
     } else {
       setBookData({
         ...bookData,
-        categoryIds: [...currentIds, categoryId]
+        categoryIds: [...currentIds, categoryId],
       });
     }
   };
@@ -142,7 +133,6 @@ const CreateListing = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -151,36 +141,19 @@ const CreateListing = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!bookData.title.trim()) {
-      newErrors.title = 'Cím kötelező';
-    }
-    if (!bookData.author.trim()) {
-      newErrors.author = 'Szerző kötelező';
-    }
-
-    if (!formData.condition) {
-      newErrors.condition = 'Állapot megadása kötelező';
-    }
-
-    if (!formData.price || parseFloat(formData.price) < 100) {
+    if (!bookData.title.trim()) newErrors.title = 'Cím kötelező';
+    if (!bookData.author.trim()) newErrors.author = 'Szerző kötelező';
+    if (!formData.condition) newErrors.condition = 'Állapot megadása kötelező';
+    if (!formData.price || parseFloat(formData.price) < 100)
       newErrors.price = 'Az ár minimum 100 Ft lehet';
-    }
-
-    if (parseFloat(formData.price) > 1000000) {
+    if (parseFloat(formData.price) > 1000000)
       newErrors.price = 'Az ár maximum 1,000,000 Ft lehet';
-    }
-
-    if (formData.quantity < 1 || formData.quantity > 100) {
+    if (formData.quantity < 1 || formData.quantity > 100)
       newErrors.quantity = 'Mennyiség 1-100 között lehet';
-    }
-
-    if (formData.conditionDescription && formData.conditionDescription.length > 1000) {
+    if (formData.conditionDescription && formData.conditionDescription.length > 1000)
       newErrors.conditionDescription = 'Maximum 1000 karakter';
-    }
-
-    if (bookData.categoryIds.length === 0) {
+    if (bookData.categoryIds.length === 0)
       newErrors.categoryIds = 'Legalább egy kategória kiválasztása kötelező';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -188,15 +161,10 @@ const CreateListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       setLoading(true);
-
-      let bookId;
 
       const bookSubmitData = {
         title: bookData.title,
@@ -212,7 +180,7 @@ const CreateListing = () => {
       };
 
       const bookResponse = await booksAPI.create(bookSubmitData);
-      bookId = bookResponse.data.id;
+      const bookId = bookResponse.data.id;
 
       const submitData = {
         bookId: bookId,
@@ -225,11 +193,10 @@ const CreateListing = () => {
         images: formData.images.length > 0 ? formData.images : null,
       };
 
-      await listingsAPI.create(submitData);
+      await createListing.mutateAsync(submitData);
       toast.success('Hirdetés sikeresen létrehozva!');
       navigate('/my-listings');
     } catch (error) {
-      console.error('Failed to create listing:', error);
       toast.error(error.response?.data?.message || 'Hiba történt a hirdetés létrehozásakor');
     } finally {
       setLoading(false);
@@ -274,7 +241,7 @@ const CreateListing = () => {
   const handleImageRemove = async (url) => {
     try {
       await imagesAPI.delete(url);
-      setFormData({ ...formData, images: formData.images.filter(img => img !== url) });
+      setFormData({ ...formData, images: formData.images.filter((img) => img !== url) });
       toast.success('Kép eltávolítva!');
     } catch (err) {
       toast.error('Hiba a kép eltávolításakor');
@@ -302,6 +269,7 @@ const CreateListing = () => {
             <p className="text-sm text-gray-600 mb-4">
               Add meg a könyv alapvető adatait. Csak a cím és szerző kötelező.
             </p>
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-sm font-medium text-blue-800 mb-2">
                 Automatikus kitöltés Open Books alapján
@@ -311,7 +279,9 @@ const CreateListing = () => {
                   type="text"
                   value={googleSearchQuery}
                   onChange={(e) => setGoogleSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())}
+                  onKeyPress={(e) =>
+                    e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())
+                  }
                   placeholder="ISBN vagy könyvcím..."
                   className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
                 />
@@ -331,11 +301,13 @@ const CreateListing = () => {
                   {googleResults.map((item, index) => {
                     const title = item.isISBN ? item.data.title : item.data.title;
                     const author = item.isISBN
-                      ? item.data.authors?.map(a => a.name).join(', ')
+                      ? item.data.authors?.map((a) => a.name).join(', ')
                       : item.data.author_name?.join(', ');
                     const cover = item.isISBN
                       ? item.data.cover?.medium
-                      : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
+                      : item.data.cover_i
+                      ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg`
+                      : null;
                     const year = item.isISBN
                       ? item.data.publish_date?.slice(-4)
                       : item.data.first_publish_year;
@@ -347,7 +319,11 @@ const CreateListing = () => {
                         className="flex gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
                       >
                         {cover ? (
-                          <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
+                          <img
+                            src={cover}
+                            alt={title}
+                            className="w-10 h-14 object-cover rounded"
+                          />
                         ) : (
                           <div className="w-10 h-14 bg-gray-200 rounded flex items-center justify-center">
                             <span className="text-gray-400 text-xs">📚</span>
@@ -364,11 +340,10 @@ const CreateListing = () => {
                 </div>
               )}
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Cím *
-                </label>
+                <label className="block text-sm font-medium mb-2">Cím *</label>
                 <input
                   type="text"
                   name="title"
@@ -376,18 +351,14 @@ const CreateListing = () => {
                   onChange={handleBookDataChange}
                   placeholder="A könyv címe"
                   maxLength="200"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                   required
                 />
-                {errors.title && (
-                  <p className="text-red-600 text-sm mt-1">{errors.title}</p>
-                )}
+                {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Szerző *
-                </label>
+                <label className="block text-sm font-medium mb-2">Szerző *</label>
                 <input
                   type="text"
                   name="author"
@@ -395,18 +366,14 @@ const CreateListing = () => {
                   onChange={handleBookDataChange}
                   placeholder="Szerző neve"
                   maxLength="200"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                   required
                 />
-                {errors.author && (
-                  <p className="text-red-600 text-sm mt-1">{errors.author}</p>
-                )}
+                {errors.author && <p className="text-red-600 text-sm mt-1">{errors.author}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  ISBN (opcionális)
-                </label>
+                <label className="block text-sm font-medium mb-2">ISBN (opcionális)</label>
                 <input
                   type="text"
                   name="isbn"
@@ -414,14 +381,12 @@ const CreateListing = () => {
                   onChange={handleBookDataChange}
                   placeholder="978-963-XXX-XXX-X"
                   maxLength="20"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Kiadó (opcionális)
-                </label>
+                <label className="block text-sm font-medium mb-2">Kiadó (opcionális)</label>
                 <input
                   type="text"
                   name="publisher"
@@ -429,14 +394,12 @@ const CreateListing = () => {
                   onChange={handleBookDataChange}
                   placeholder="Kiadó neve"
                   maxLength="200"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Kiadás éve (opcionális)
-                </label>
+                <label className="block text-sm font-medium mb-2">Kiadás éve (opcionális)</label>
                 <input
                   type="number"
                   name="publicationYear"
@@ -445,14 +408,12 @@ const CreateListing = () => {
                   placeholder="2020"
                   min="1000"
                   max="2100"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Nyelv
-                </label>
+                <label className="block text-sm font-medium mb-2">Nyelv</label>
                 <input
                   type="text"
                   name="language"
@@ -460,14 +421,12 @@ const CreateListing = () => {
                   onChange={handleBookDataChange}
                   placeholder="magyar"
                   maxLength="50"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Oldalszám (opcionális)
-                </label>
+                <label className="block text-sm font-medium mb-2">Oldalszám (opcionális)</label>
                 <input
                   type="number"
                   name="pageCount"
@@ -476,15 +435,13 @@ const CreateListing = () => {
                   placeholder="350"
                   min="1"
                   max="10000"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Leírás (opcionális)
-              </label>
+              <label className="block text-sm font-medium mb-2">Leírás (opcionális)</label>
               <textarea
                 name="description"
                 value={bookData.description}
@@ -492,7 +449,7 @@ const CreateListing = () => {
                 placeholder="Rövid leírás a könyvről..."
                 rows="3"
                 maxLength="2000"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {bookData.description.length} / 2000 karakter
@@ -501,19 +458,18 @@ const CreateListing = () => {
 
             {categories.length > 0 && (
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Kategória * (kötelező)
-                </label>
+                <label className="block text-sm font-medium mb-2">Kategória * (kötelező)</label>
                 <div className="flex flex-wrap gap-2">
                   {categories.map((category) => (
                     <button
                       key={category.id}
                       type="button"
                       onClick={() => handleCategoryToggle(category.id)}
-                      className={`px-3 py-1 rounded-full text-sm transition ${bookData.categoryIds.includes(category.id)
-                        ? 'bg-[#8b4513] text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                        }`}
+                      className={`px-3 py-1 rounded-full text-sm transition ${
+                        bookData.categoryIds.includes(category.id)
+                          ? 'bg-[#8b4513] text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
                     >
                       {category.name}
                     </button>
@@ -531,14 +487,12 @@ const CreateListing = () => {
           <h2 className="text-2xl font-bold mb-4">2. Állapot</h2>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Állapot *
-            </label>
+            <label className="block text-sm font-medium mb-2">Állapot *</label>
             <select
               name="condition"
               value={formData.condition}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
             >
               {conditionOptions.map((option) => (
@@ -547,9 +501,7 @@ const CreateListing = () => {
                 </option>
               ))}
             </select>
-            {errors.condition && (
-              <p className="text-red-600 text-sm mt-1">{errors.condition}</p>
-            )}
+            {errors.condition && <p className="text-red-600 text-sm mt-1">{errors.condition}</p>}
           </div>
 
           <div className="mt-4">
@@ -563,7 +515,7 @@ const CreateListing = () => {
               placeholder="Pl: Minimális kopás a gerincen, egyébként hibátlan. Aláhúzások nincsenek."
               rows="3"
               maxLength="1000"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>{formData.conditionDescription.length} / 1000 karakter</span>
@@ -579,9 +531,7 @@ const CreateListing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Ár * (100 - 1,000,000 Ft)
-              </label>
+              <label className="block text-sm font-medium mb-2">Ár * (100 - 1,000,000 Ft)</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -599,14 +549,10 @@ const CreateListing = () => {
                   Ft
                 </span>
               </div>
-              {errors.price && (
-                <p className="text-red-600 text-sm mt-1">{errors.price}</p>
-              )}
+              {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Mennyiség * (1-100 db)
-              </label>
+              <label className="block text-sm font-medium mb-2">Mennyiség * (1-100 db)</label>
               <input
                 type="number"
                 name="quantity"
@@ -618,19 +564,16 @@ const CreateListing = () => {
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 required
               />
-              {errors.quantity && (
-                <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
-              )}
+              {errors.quantity && <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>}
             </div>
           </div>
         </div>
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">4. Átvételi helyszín</h2>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Helyszín (opcionális)
-            </label>
+            <label className="block text-sm font-medium mb-2">Helyszín (opcionális)</label>
             <input
               type="text"
               name="location"
@@ -638,7 +581,7 @@ const CreateListing = () => {
               onChange={handleChange}
               placeholder="Pl: Budapest, XIII. kerület vagy Debrecen"
               maxLength="200"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
             />
             <p className="text-xs text-gray-500 mt-1">
               A konkrét cím megadása nem kötelező. Város vagy kerület is elég.
@@ -698,10 +641,10 @@ const CreateListing = () => {
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || createListing.isPending}
             className="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 font-semibold"
           >
-            {loading ? 'Létrehozás...' : 'Hirdetés létrehozása'}
+            {loading || createListing.isPending ? 'Létrehozás...' : 'Hirdetés létrehozása'}
           </button>
         </div>
       </form>

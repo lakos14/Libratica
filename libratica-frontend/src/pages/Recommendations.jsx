@@ -1,26 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { recommendationsAPI } from '../services/api';
-import { toast } from 'react-toastify';
+import { useRecommendations } from '../hooks';
 
 function Recommendations() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadRecommendations();
-  }, []);
-
-  const loadRecommendations = async () => {
-    try {
-      const response = await recommendationsAPI.getRecommendations();
-      setData(response.data);
-    } catch (err) {
-      toast.error('Hiba az ajánlások betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading, isError } = useRecommendations();
 
   const getConditionLabel = (condition) => {
     const labels = {
@@ -33,10 +16,22 @@ function Recommendations() {
     return labels[condition] || condition;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Hiba az ajánlások betöltésekor
+          </div>
+        </div>
       </div>
     );
   }

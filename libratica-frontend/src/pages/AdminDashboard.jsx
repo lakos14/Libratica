@@ -1,195 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { adminAPI, reportsAPI, eventsAPI } from '../services/api';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  useAdminStats,
+  useAdminUsers,
+  useAdminListings,
+  useAdminEvents,
+  useReports,
+  useCategories,
+  useToggleUserActive,
+  useToggleUserRole,
+  useAdminToggleListingAvailable,
+  useAdminDeleteListing,
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateReportStatus,
+  useUpdateEventStatus,
+  useAdminDeleteEvent,
+} from '../hooks';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('stats');
-  const [stats, setStats] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [reports, setReports] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
-  const [error, setError] = useState('');
-  const [events, setEvents] = useState([]);
   const [usersPage, setUsersPage] = useState(1);
   const [listingsPage, setListingsPage] = useState(1);
   const adminPageSize = 15;
+
+  const { data: stats, isLoading: statsLoading } = useAdminStats();
+  const { data: users = [], isLoading: usersLoading } = useAdminUsers();
+  const { data: listings = [], isLoading: listingsLoading } = useAdminListings();
+  const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
+  const { data: reports = [], isLoading: reportsLoading } = useReports();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
+
+  const toggleUserActive = useToggleUserActive();
+  const toggleUserRole = useToggleUserRole();
+  const toggleListingAvailable = useAdminToggleListingAvailable();
+  const deleteListing = useAdminDeleteListing();
+  const createCategory = useCreateCategory();
+  const deleteCategory = useDeleteCategory();
+  const updateReportStatus = useUpdateReportStatus();
+  const updateEventStatus = useUpdateEventStatus();
+  const deleteEvent = useAdminDeleteEvent();
+
   const paginatedUsers = users.slice((usersPage - 1) * adminPageSize, usersPage * adminPageSize);
   const usersTotalPages = Math.ceil(users.length / adminPageSize);
-  const paginatedListings = listings.slice((listingsPage - 1) * adminPageSize, listingsPage * adminPageSize);
+  const paginatedListings = listings.slice(
+    (listingsPage - 1) * adminPageSize,
+    listingsPage * adminPageSize
+  );
   const listingsTotalPages = Math.ceil(listings.length / adminPageSize);
-
-  useEffect(() => {
-    if (activeTab === 'stats') {
-      loadStats();
-    } else if (activeTab === 'users') {
-      loadUsers();
-    } else if (activeTab === 'listings') {
-      loadListings();
-    } else if (activeTab === 'reports') {
-      loadReports();
-    } else if (activeTab === 'categories') {
-      loadCategories();
-    } else if (activeTab === 'events') {
-      loadEvents();
-    }
-  }, [activeTab]);
-
-  const saveScrollPosition = () => window.scrollY;
-
-  const restoreScrollPosition = (pos) => {
-    setTimeout(() => window.scrollTo(0, pos), 50);
-  };
-
-  const loadStats = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await adminAPI.getStats();
-      setStats(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a statisztikák betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadUsers = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await adminAPI.getAllUsers();
-      setUsers(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a felhasználók betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadListings = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await adminAPI.getAllListings();
-      setListings(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a hirdetések betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadReports = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await reportsAPI.getReports();
-      setReports(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a reportok betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCategories = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await adminAPI.getCategories();
-      setCategories(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a kategóriák betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReportStatus = async (id, status) => {
-    try {
-      await reportsAPI.updateReportStatus(id, { status });
-      toast.success(status === 'resolved' ? 'Report elfogadva, intézkedés megtörtént!' : 'Report elvetve!');
-      loadReports();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a report kezelésekor');
-    }
-  };
-
-  const handleToggleUserActive = async (id) => {
-    try {
-      await adminAPI.toggleUserActive(id);
-      toast.success('Felhasználó státusza megváltoztatva!');
-      loadUsers();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleToggleUserRole = async (id) => {
-    if (!window.confirm('Biztosan megváltoztatod a szerepkört?')) return;
-    try {
-      await adminAPI.toggleUserRole(id);
-      toast.success('Szerepkör megváltoztatva!');
-      loadUsers();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleToggleListingAvailable = async (id) => {
-    const scrollPos = saveScrollPosition();
-    try {
-      await adminAPI.toggleListingAvailable(id);
-      toast.success('Hirdetés státusza megváltoztatva!');
-      await loadListings();
-      restoreScrollPosition(scrollPos);
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleDeleteListing = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt a hirdetést?')) return;
-    const scrollPos = saveScrollPosition();
-    try {
-      await adminAPI.deleteListing(id);
-      toast.success('Hirdetés törölve!');
-      await loadListings();
-      restoreScrollPosition(scrollPos);
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleCreateCategory = async () => {
-    if (!newCategory.name.trim()) {
-      toast.error('Kategória neve kötelező!');
-      return;
-    }
-    try {
-      await adminAPI.createCategory(newCategory);
-      toast.success('Kategória létrehozva!');
-      setNewCategory({ name: '', description: '' });
-      loadCategories();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleDeleteCategory = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt a kategóriát?')) return;
-    try {
-      await adminAPI.deleteCategory(id);
-      toast.success('Kategória törölve!');
-      loadCategories();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('hu-HU', {
@@ -197,220 +56,135 @@ function AdminDashboard() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
-  const loadEvents = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await adminAPI.getAllEvents();
-      setEvents(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba az események betöltésekor');
-    } finally {
-      setLoading(false);
-    }
+  const handleCreateCategory = async () => {
+    if (!newCategory.name.trim()) return;
+    await createCategory.mutateAsync(newCategory);
+    setNewCategory({ name: '', description: '' });
   };
 
-  const handleEventStatus = async (id, status) => {
-    try {
-      await adminAPI.updateEventStatus(id, { status });
-      toast.success(status === 'approved' ? 'Esemény jóváhagyva!' : 'Esemény elutasítva!');
-      loadEvents();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-
-  const handleDeleteEvent = async (id) => {
-    if (!window.confirm('Biztosan törlöd ezt az eseményt?')) return;
-    try {
-      await adminAPI.deleteEvent(id);
-      toast.success('Esemény törölve!');
-      loadEvents();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
+  const isLoading =
+    (activeTab === 'stats' && statsLoading) ||
+    (activeTab === 'users' && usersLoading) ||
+    (activeTab === 'listings' && listingsLoading) ||
+    (activeTab === 'events' && eventsLoading) ||
+    (activeTab === 'reports' && reportsLoading) ||
+    (activeTab === 'categories' && categoriesLoading);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Admin felület</h1>
 
-      <div className="flex gap-4 mb-6 border-b">
-        <button
-          onClick={() => setActiveTab('stats')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'stats'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
+      <div className="flex gap-4 mb-6 border-b flex-wrap">
+        {['stats', 'reports', 'users', 'listings', 'categories', 'events'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === tab
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
             }`}
-        >
-          Statisztikák
-        </button>
-        <button
-          onClick={() => setActiveTab('reports')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'reports'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
-            }`}
-        >
-          Reportok
-        </button>
-        <button
-          onClick={() => setActiveTab('users')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'users'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
-            }`}
-        >
-          Felhasználók
-        </button>
-        <button
-          onClick={() => setActiveTab('listings')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'listings'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
-            }`}
-        >
-          Hirdetések
-        </button>
-        <button
-          onClick={() => setActiveTab('categories')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'categories'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
-            }`}
-        >
-          Kategóriák
-        </button>
-        <button
-          onClick={() => setActiveTab('events')}
-          className={`px-4 py-2 font-semibold ${activeTab === 'events'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-800'
-            }`}
-        >
-          Események
-        </button>
+          >
+            {tab === 'stats' && 'Statisztikák'}
+            {tab === 'reports' && 'Reportok'}
+            {tab === 'users' && 'Felhasználók'}
+            {tab === 'listings' && 'Hirdetések'}
+            {tab === 'categories' && 'Kategóriák'}
+            {tab === 'events' && 'Események'}
+          </button>
+        ))}
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      {loading && (
+      {isLoading && (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           <p className="mt-2 text-gray-600">Betöltés...</p>
         </div>
       )}
 
-      {activeTab === 'stats' && stats && !loading && (
+      {activeTab === 'stats' && stats && !statsLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Általános statisztikák</h2>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-gray-600 text-sm">Összes felhasználó</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.totalUsers}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-gray-600 text-sm">Összes könyv</p>
-                <p className="text-3xl font-bold text-purple-600">{stats.totalBooks}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-gray-600 text-sm">Összes hirdetés</p>
-                <p className="text-3xl font-bold text-orange-600">{stats.totalListings}</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <p className="text-gray-600 text-sm">Összes rendelés</p>
-                <p className="text-3xl font-bold text-green-600">{stats.totalOrders}</p>
-              </div>
-            </div>
+            <StatCard label="Összes felhasználó" value={stats.totalUsers} color="blue" />
+            <StatCard label="Összes könyv" value={stats.totalBooks} color="purple" />
+            <StatCard label="Összes hirdetés" value={stats.totalListings} color="orange" />
+            <StatCard label="Összes rendelés" value={stats.totalOrders} color="green" />
           </div>
         </div>
       )}
 
-      {activeTab === 'users' && !loading && (
+      {activeTab === 'users' && !usersLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Felhasználók ({users.length})</h2>
-
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Felhasználónév</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teljes név</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Szerep</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hirdetések</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vásárlások</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Értékelés</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Regisztráció</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Státusz</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Műveletek</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Felhasználónév</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Szerep</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Státusz</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Műveletek</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{user.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">#{user.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <a href={`/users/${user.username}`}
+                      <Link
+                        to={`/users/${user.username}`}
                         className="text-sm font-medium hover:underline"
                         style={{ color: '#8b4513' }}
-                        target="_blank"
-                        rel="noreferrer"
                       >
                         {user.username}
-                      </a>
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.fullName || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.roleName === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.roleName === 'admin'
+                            ? 'bg-purple-100 text-purple-800'
+                            : 'bg-blue-100 text-blue-800'
+                        }`}
+                      >
                         {user.roleName}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.listingsCount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.ordersAsBuyerCount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.rating ? `⭐ ${user.rating.toFixed(1)}` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(user.createdAt)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}
+                      >
                         {user.isActive ? 'Aktív' : 'Inaktív'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleToggleUserActive(user.id)}
-                          className={`px-2 py-1 text-xs rounded text-white ${user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                            }`}
+                          onClick={() => toggleUserActive.mutate(user.id)}
+                          disabled={toggleUserActive.isPending}
+                          className={`px-2 py-1 text-xs rounded text-white ${
+                            user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                          }`}
                         >
                           {user.isActive ? 'Tiltás' : 'Aktiválás'}
                         </button>
                         <button
-                          onClick={() => handleToggleUserRole(user.id)}
+                          onClick={() => {
+                            if (window.confirm('Biztosan megváltoztatod a szerepkört?')) {
+                              toggleUserRole.mutate(user.id);
+                            }
+                          }}
+                          disabled={toggleUserRole.isPending}
                           className="px-2 py-1 text-xs rounded bg-purple-500 text-white hover:bg-purple-600"
                         >
                           {user.roleName === 'admin' ? 'User' : 'Admin'}
@@ -422,114 +196,72 @@ function AdminDashboard() {
               </tbody>
             </table>
           </div>
-          {usersTotalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-4">
-              <button onClick={() => setUsersPage(1)} disabled={usersPage === 1}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">«</button>
-              <button onClick={() => setUsersPage(prev => prev - 1)} disabled={usersPage === 1}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">‹</button>
-              {Array.from({ length: usersTotalPages }, (_, i) => i + 1)
-                .filter(p => p === 1 || p === usersTotalPages || Math.abs(p - usersPage) <= 2)
-                .reduce((acc, p, idx, arr) => {
-                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                  acc.push(p);
-                  return acc;
-                }, [])
-                .map((p, idx) => p === '...' ? (
-                  <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
-                ) : (
-                  <button key={p} onClick={() => setUsersPage(p)}
-                    className={`px-3 py-2 text-sm rounded border font-medium ${usersPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    style={usersPage === p ? { backgroundColor: '#8b4513' } : {}}
-                  >{p}</button>
-                ))}
-              <button onClick={() => setUsersPage(prev => prev + 1)} disabled={usersPage === usersTotalPages}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">›</button>
-              <button onClick={() => setUsersPage(usersTotalPages)} disabled={usersPage === usersTotalPages}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50">»</button>
-            </div>
-          )}
+          <Pagination current={usersPage} total={usersTotalPages} onChange={setUsersPage} />
         </div>
       )}
 
-      {activeTab === 'listings' && !loading && (
+      {activeTab === 'listings' && !listingsLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Hirdetések ({listings.length})</h2>
-
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Könyv</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eladó</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Állapot</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ár</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mennyiség</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Létrehozva</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Státusz</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Műveletek</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Könyv</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Eladó</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ár</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Státusz</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Műveletek</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {paginatedListings.map((listing) => (
                   <tr key={listing.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{listing.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">#{listing.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        {listing.book.coverImageUrl && (
-                          <img
-                            src={listing.book.coverImageUrl}
-                            alt={listing.book.title}
-                            className="h-10 w-8 object-cover rounded mr-3"
-                          />
-                        )}
-                        <div>
-                          <Link
-                            to={`/listings/${listing.id}`}
-                            className="text-sm font-medium text-[#8b4513] hover:underline"
-                            target="_blank"
-                          >
-                            {listing.book.title}
-                          </Link>
-                          <div className="text-sm text-gray-500">{listing.book.author}</div>
-                        </div>
-                      </div>
+                      <Link
+                        to={`/listings/${listing.id}`}
+                        className="text-sm font-medium text-[#8b4513] hover:underline"
+                      >
+                        {listing.book?.title}
+                      </Link>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{listing.seller?.username}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                      {listing.price?.toLocaleString('hu-HU')} Ft
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{listing.seller.username}</div>
-                      <div className="text-sm text-gray-500">{listing.seller.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {listing.condition === 'mint' && 'Újszerű'}
-                      {listing.condition === 'excellent' && 'Kiváló'}
-                      {listing.condition === 'good' && 'Jó'}
-                      {listing.condition === 'fair' && 'Elfogadható'}
-                      {listing.condition === 'poor' && 'Gyenge'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                      {listing.price.toLocaleString('hu-HU')} {listing.currency}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{listing.quantity} db</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(listing.createdAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${listing.isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          listing.isAvailable
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
                         {listing.isAvailable ? 'Elérhető' : 'Nem elérhető'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => handleToggleListingAvailable(listing.id)}
-                          className={`px-2 py-1 text-xs rounded text-white ${listing.isAvailable ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
-                            }`}
+                          onClick={() => toggleListingAvailable.mutate(listing.id)}
+                          disabled={toggleListingAvailable.isPending}
+                          className={`px-2 py-1 text-xs rounded text-white ${
+                            listing.isAvailable
+                              ? 'bg-yellow-500 hover:bg-yellow-600'
+                              : 'bg-green-500 hover:bg-green-600'
+                          }`}
                         >
                           {listing.isAvailable ? 'Inaktiválás' : 'Aktiválás'}
                         </button>
                         <button
-                          onClick={() => handleDeleteListing(listing.id)}
+                          onClick={() => {
+                            if (window.confirm('Biztosan törlöd ezt a hirdetést?')) {
+                              deleteListing.mutate(listing.id);
+                            }
+                          }}
+                          disabled={deleteListing.isPending}
                           className="px-2 py-1 text-xs rounded bg-red-500 text-white hover:bg-red-600"
                         >
                           Törlés
@@ -541,55 +273,13 @@ function AdminDashboard() {
               </tbody>
             </table>
           </div>
-          {listingsTotalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-4">
-              <button
-                onClick={() => setListingsPage(1)}
-                disabled={listingsPage === 1}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-              >«</button>
-              <button
-                onClick={() => setListingsPage(prev => prev - 1)}
-                disabled={listingsPage === 1}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-              >‹</button>
-              {Array.from({ length: listingsTotalPages }, (_, i) => i + 1)
-                .filter(p => p === 1 || p === listingsTotalPages || Math.abs(p - listingsPage) <= 2)
-                .reduce((acc, p, idx, arr) => {
-                  if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                  acc.push(p);
-                  return acc;
-                }, [])
-                .map((p, idx) => p === '...' ? (
-                  <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
-                ) : (
-                  <button
-                    key={p}
-                    onClick={() => setListingsPage(p)}
-                    className={`px-3 py-2 text-sm rounded border font-medium ${listingsPage === p ? 'text-white border-transparent' : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    style={listingsPage === p ? { backgroundColor: '#8b4513' } : {}}
-                  >{p}</button>
-                ))}
-              <button
-                onClick={() => setListingsPage(prev => prev + 1)}
-                disabled={listingsPage === listingsTotalPages}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-              >›</button>
-              <button
-                onClick={() => setListingsPage(listingsTotalPages)}
-                disabled={listingsPage === listingsTotalPages}
-                className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
-              >»</button>
-            </div>
-          )}
+          <Pagination current={listingsPage} total={listingsTotalPages} onChange={setListingsPage} />
         </div>
       )}
 
-      {activeTab === 'reports' && !loading && (
+      {activeTab === 'reports' && !reportsLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Reportok ({reports.length})</h2>
-
           {reports.length === 0 ? (
             <div className="bg-white border border-gray-200 rounded p-8 text-center">
               <p className="text-gray-500">Nincsenek reportok</p>
@@ -600,12 +290,20 @@ function AdminDashboard() {
                 <div key={report.id} className="bg-white border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                            'bg-gray-100 text-gray-800'
-                        }`}>
-                        {report.status === 'pending' ? 'Függőben' :
-                          report.status === 'resolved' ? 'Megoldva' : 'Elvetve'}
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          report.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : report.status === 'resolved'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}
+                      >
+                        {report.status === 'pending'
+                          ? 'Függőben'
+                          : report.status === 'resolved'
+                          ? 'Megoldva'
+                          : 'Elvetve'}
                       </span>
                       <span className="ml-2 text-sm text-gray-500">{formatDate(report.createdAt)}</span>
                     </div>
@@ -615,44 +313,6 @@ function AdminDashboard() {
                     Bejelentő: <span className="font-medium">{report.reporter?.username}</span>
                   </p>
 
-                  {report.listing && (
-                    <div className="bg-gray-50 rounded p-3 mb-2">
-                      <a
-                        href={`/listings/${report.listing.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm font-medium text-[#8b4513] hover:underline"
-                      >
-                        Hirdetés: {report.listing.title}
-                      </a>
-                      <p className="text-sm text-gray-600">Szerző: {report.listing.author}</p>
-                      <p className="text-sm text-gray-600">Eladó: {report.listing.seller?.username}</p>
-                      <p className="text-sm text-gray-600">Ár: {report.listing.price?.toLocaleString('hu-HU')} Ft</p>
-                    </div>
-                  )}
-
-                  {report.reportedUser && (
-                    <div className="bg-gray-50 rounded p-3 mb-2">
-                      <p className="text-sm font-medium">Jelentett felhasználó: {report.reportedUser?.username}</p>
-                      <p className="text-sm text-gray-600">Email: {report.reportedUser?.email}</p>
-                    </div>
-                  )}
-
-                  {report.totalReportsOnUser && (
-                    <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
-                      <p className="text-sm font-medium text-orange-800">
-                        Ez a felhasználó összesen {report.totalReportsOnUser} alkalommal lett jelentve
-                      </p>
-                    </div>
-                  )}
-                  {report.totalReportsOnListing && (
-                    <div className="bg-orange-50 border border-orange-200 rounded p-2 mb-3">
-                      <p className="text-sm font-medium text-orange-800">
-                        Ez a hirdetés összesen {report.totalReportsOnListing} alkalommal lett jelentve
-                      </p>
-                    </div>
-                  )}
-
                   <p className="text-sm mb-3">
                     Ok: <span className="font-medium">{report.reason}</span>
                   </p>
@@ -660,13 +320,15 @@ function AdminDashboard() {
                   {report.status === 'pending' && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleReportStatus(report.id, 'resolved')}
+                        onClick={() => updateReportStatus.mutate({ id: report.id, status: 'resolved' })}
+                        disabled={updateReportStatus.isPending}
                         className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
                       >
-                        Elfogad {report.listing ? '(hirdetés inaktiválása)' : '(felhasználó tiltása)'}
+                        Elfogad
                       </button>
                       <button
-                        onClick={() => handleReportStatus(report.id, 'dismissed')}
+                        onClick={() => updateReportStatus.mutate({ id: report.id, status: 'dismissed' })}
+                        disabled={updateReportStatus.isPending}
                         className="px-4 py-2 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
                       >
                         Elvet
@@ -680,7 +342,7 @@ function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'categories' && !loading && (
+      {activeTab === 'categories' && !categoriesLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Kategóriák</h2>
 
@@ -703,7 +365,8 @@ function AdminDashboard() {
               />
               <button
                 onClick={handleCreateCategory}
-                className="px-4 py-2 text-white rounded"
+                disabled={createCategory.isPending}
+                className="px-4 py-2 text-white rounded disabled:bg-gray-400"
                 style={{ backgroundColor: '#8b4513' }}
               >
                 + Hozzáadás
@@ -713,7 +376,10 @@ function AdminDashboard() {
 
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             {categories.map((category) => (
-              <div key={category.id} className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50">
+              <div
+                key={category.id}
+                className="flex items-center justify-between p-4 border-b last:border-b-0 hover:bg-gray-50"
+              >
                 <div>
                   <p className="font-medium">{category.name}</p>
                   {category.description && (
@@ -721,7 +387,12 @@ function AdminDashboard() {
                   )}
                 </div>
                 <button
-                  onClick={() => handleDeleteCategory(category.id)}
+                  onClick={() => {
+                    if (window.confirm('Biztosan törlöd ezt a kategóriát?')) {
+                      deleteCategory.mutate(category.id);
+                    }
+                  }}
+                  disabled={deleteCategory.isPending}
                   className="px-3 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200"
                 >
                   Törlés
@@ -732,10 +403,9 @@ function AdminDashboard() {
         </div>
       )}
 
-      {activeTab === 'events' && !loading && (
+      {activeTab === 'events' && !eventsLoading && (
         <div>
           <h2 className="text-2xl font-bold mb-6">Események ({events.length})</h2>
-
           {events.length === 0 ? (
             <div className="bg-white border border-gray-200 rounded p-8 text-center">
               <p className="text-gray-500">Nincsenek események</p>
@@ -751,12 +421,20 @@ function AdminDashboard() {
                         {event.type === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
                       </p>
                     </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        event.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                      }`}>
-                      {event.status === 'pending' ? '⏳ Függőben' :
-                        event.status === 'approved' ? 'Jóváhagyva' : 'Elutasítva'}
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-medium ${
+                        event.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : event.status === 'approved'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {event.status === 'pending'
+                        ? '⏳ Függőben'
+                        : event.status === 'approved'
+                        ? 'Jóváhagyva'
+                        : 'Elutasítva'}
                     </span>
                   </div>
 
@@ -771,13 +449,15 @@ function AdminDashboard() {
                     {event.status === 'pending' && (
                       <>
                         <button
-                          onClick={() => handleEventStatus(event.id, 'approved')}
+                          onClick={() => updateEventStatus.mutate({ id: event.id, status: 'approved' })}
+                          disabled={updateEventStatus.isPending}
                           className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700"
                         >
                           Jóváhagyás
                         </button>
                         <button
-                          onClick={() => handleEventStatus(event.id, 'rejected')}
+                          onClick={() => updateEventStatus.mutate({ id: event.id, status: 'rejected' })}
+                          disabled={updateEventStatus.isPending}
                           className="px-3 py-1 text-sm rounded bg-red-500 text-white hover:bg-red-600"
                         >
                           Elutasítás
@@ -785,7 +465,12 @@ function AdminDashboard() {
                       </>
                     )}
                     <button
-                      onClick={() => handleDeleteEvent(event.id)}
+                      onClick={() => {
+                        if (window.confirm('Biztosan törlöd ezt az eseményt?')) {
+                          deleteEvent.mutate(event.id);
+                        }
+                      }}
+                      disabled={deleteEvent.isPending}
                       className="px-3 py-1 text-sm rounded bg-gray-500 text-white hover:bg-gray-600"
                     >
                       Törlés
@@ -797,6 +482,64 @@ function AdminDashboard() {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, color }) {
+  const colorClasses = {
+    blue: 'text-blue-600',
+    purple: 'text-purple-600',
+    orange: 'text-orange-600',
+    green: 'text-green-600',
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center justify-between">
+        <p className="text-gray-600 text-sm">{label}</p>
+        <p className={`text-3xl font-bold ${colorClasses[color]}`}>{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function Pagination({ current, total, onChange }) {
+  if (total <= 1) return null;
+
+  return (
+    <div className="flex justify-center items-center gap-2 mt-4">
+      <button
+        onClick={() => onChange(1)}
+        disabled={current === 1}
+        className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+      >
+        «
+      </button>
+      <button
+        onClick={() => onChange((prev) => prev - 1)}
+        disabled={current === 1}
+        className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+      >
+        ‹
+      </button>
+      <span className="px-3 py-2 text-sm">
+        {current} / {total}
+      </span>
+      <button
+        onClick={() => onChange((prev) => prev + 1)}
+        disabled={current === total}
+        className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+      >
+        ›
+      </button>
+      <button
+        onClick={() => onChange(total)}
+        disabled={current === total}
+        className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+      >
+        »
+      </button>
     </div>
   );
 }

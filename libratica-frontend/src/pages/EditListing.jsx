@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { listingsAPI, imagesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useListing, useUpdateListing } from '../hooks';
+import { imagesAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 const EditListing = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [listing, setListing] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { data: listing, isLoading, isError } = useListing(id);
+  const updateListing = useUpdateListing();
 
   const [formData, setFormData] = useState({
     condition: 'good',
@@ -29,42 +29,28 @@ const EditListing = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
-      return;
     }
-    loadListing();
-  }, [id, isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate]);
 
-  const loadListing = async () => {
-    try {
-      setLoading(true);
-      const response = await listingsAPI.getById(id);
-      const listingData = response.data;
-
-      if (listingData.seller.id !== user?.id && user?.roleName !== 'admin') {
+  useEffect(() => {
+    if (listing) {
+      if (listing.seller.id !== user?.id && user?.roleName !== 'admin') {
         toast.error('Nincs jogosultságod szerkeszteni ezt a hirdetést!');
         navigate('/my-listings');
         return;
       }
 
-      setListing(listingData);
-
       setFormData({
-        condition: listingData.condition,
-        conditionDescription: listingData.conditionDescription || '',
-        price: listingData.price.toString(),
-        quantity: listingData.quantity,
-        isAvailable: listingData.isAvailable,
-        location: listingData.location || '',
-        images: listingData.images || [],
+        condition: listing.condition,
+        conditionDescription: listing.conditionDescription || '',
+        price: listing.price.toString(),
+        quantity: listing.quantity,
+        isAvailable: listing.isAvailable,
+        location: listing.location || '',
+        images: listing.images || [],
       });
-    } catch (error) {
-      console.error('Failed to load listing:', error);
-      toast.error('Hirdetés nem található');
-      navigate('/my-listings');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [listing, user, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -72,7 +58,6 @@ const EditListing = () => {
       ...formData,
       [name]: type === 'checkbox' ? checked : value,
     });
-
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -81,25 +66,15 @@ const EditListing = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.condition) {
-      newErrors.condition = 'Állapot megadása kötelező';
-    }
-
-    if (!formData.price || parseFloat(formData.price) < 100) {
+    if (!formData.condition) newErrors.condition = 'Állapot megadása kötelező';
+    if (!formData.price || parseFloat(formData.price) < 100)
       newErrors.price = 'Az ár minimum 100 Ft lehet';
-    }
-
-    if (parseFloat(formData.price) > 1000000) {
+    if (parseFloat(formData.price) > 1000000)
       newErrors.price = 'Az ár maximum 1,000,000 Ft lehet';
-    }
-
-    if (formData.quantity < 0 || formData.quantity > 100) {
+    if (formData.quantity < 0 || formData.quantity > 100)
       newErrors.quantity = 'Mennyiség 0-100 között lehet';
-    }
-
-    if (formData.conditionDescription && formData.conditionDescription.length > 1000) {
+    if (formData.conditionDescription && formData.conditionDescription.length > 1000)
       newErrors.conditionDescription = 'Maximum 1000 karakter';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -107,14 +82,9 @@ const EditListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
-      setSaving(true);
-
       const submitData = {
         condition: formData.condition,
         conditionDescription: formData.conditionDescription || null,
@@ -125,14 +95,11 @@ const EditListing = () => {
         images: formData.images.length > 0 ? formData.images : null,
       };
 
-      await listingsAPI.update(id, submitData);
+      await updateListing.mutateAsync({ id, data: submitData });
       toast.success('Hirdetés sikeresen frissítve!');
       navigate('/my-listings');
     } catch (error) {
-      console.error('Failed to update listing:', error);
       toast.error(error.response?.data?.message || 'Hiba történt a hirdetés frissítésekor');
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -174,14 +141,14 @@ const EditListing = () => {
   const handleImageRemove = async (url) => {
     try {
       await imagesAPI.delete(url);
-      setFormData({ ...formData, images: formData.images.filter(img => img !== url) });
+      setFormData({ ...formData, images: formData.images.filter((img) => img !== url) });
       toast.success('Kép eltávolítva!');
     } catch (err) {
       toast.error('Hiba a kép eltávolításakor');
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="text-2xl">Betöltés...</div>
@@ -189,7 +156,7 @@ const EditListing = () => {
     );
   }
 
-  if (!listing) {
+  if (isError || !listing) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Hirdetés nem található</h2>
@@ -217,9 +184,7 @@ const EditListing = () => {
       </div>
 
       <div className="bg-[#f5ebe0] border border-gray-200 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-bold mb-4 text-[#8b4513]">
-          Könyv (nem szerkeszthető)
-        </h2>
+        <h2 className="text-xl font-bold mb-4 text-[#8b4513]">Könyv (nem szerkeszthető)</h2>
         <div className="flex gap-4">
           <img
             src={listing.book.coverImageUrl || 'https://placehold.co/80x120/e5e5e5/666?text=📖'}
@@ -271,14 +236,12 @@ const EditListing = () => {
           <h2 className="text-2xl font-bold mb-4">1. Állapot</h2>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Állapot *
-            </label>
+            <label className="block text-sm font-medium mb-2">Állapot *</label>
             <select
               name="condition"
               value={formData.condition}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
               required
             >
               {conditionOptions.map((option) => (
@@ -287,9 +250,7 @@ const EditListing = () => {
                 </option>
               ))}
             </select>
-            {errors.condition && (
-              <p className="text-red-600 text-sm mt-1">{errors.condition}</p>
-            )}
+            {errors.condition && <p className="text-red-600 text-sm mt-1">{errors.condition}</p>}
           </div>
 
           <div className="mt-4">
@@ -303,7 +264,7 @@ const EditListing = () => {
               placeholder="Pl: Minimális kopás a gerincen, egyébként hibátlan."
               rows="3"
               maxLength="1000"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>{formData.conditionDescription.length} / 1000 karakter</span>
@@ -319,9 +280,7 @@ const EditListing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Ár * (100 - 1,000,000 Ft)
-              </label>
+              <label className="block text-sm font-medium mb-2">Ár * (100 - 1,000,000 Ft)</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -338,15 +297,11 @@ const EditListing = () => {
                   Ft
                 </span>
               </div>
-              {errors.price && (
-                <p className="text-red-600 text-sm mt-1">{errors.price}</p>
-              )}
+              {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Mennyiség * (0-100 db)
-              </label>
+              <label className="block text-sm font-medium mb-2">Mennyiség * (0-100 db)</label>
               <input
                 type="number"
                 name="quantity"
@@ -354,12 +309,10 @@ const EditListing = () => {
                 onChange={handleChange}
                 min="0"
                 max="100"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
                 required
               />
-              {errors.quantity && (
-                <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>
-              )}
+              {errors.quantity && <p className="text-red-600 text-sm mt-1">{errors.quantity}</p>}
               {formData.quantity === 0 && (
                 <p className="text-yellow-600 text-xs mt-1">
                   Ha 0 darab, érdemes inaktiválni a hirdetést
@@ -373,9 +326,7 @@ const EditListing = () => {
           <h2 className="text-2xl font-bold mb-4">3. Átvételi helyszín</h2>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Helyszín (opcionális)
-            </label>
+            <label className="block text-sm font-medium mb-2">Helyszín (opcionális)</label>
             <input
               type="text"
               name="location"
@@ -383,13 +334,14 @@ const EditListing = () => {
               onChange={handleChange}
               placeholder="Pl: Budapest, XIII. kerület vagy Debrecen"
               maxLength="200"
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:outline-none focus:border-gray-500"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
             />
             <p className="text-xs text-gray-500 mt-1">
               A konkrét cím megadása nem kötelező. Város vagy kerület is elég.
             </p>
           </div>
         </div>
+
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-bold mb-4">4. Képek</h2>
 
@@ -442,13 +394,11 @@ const EditListing = () => {
           </button>
           <button
             type="submit"
-            disabled={saving}
+            disabled={updateListing.isPending}
             className="flex-1 text-white py-3 rounded-lg disabled:bg-gray-400 font-semibold"
-            style={{ backgroundColor: saving ? undefined : '#8b4513' }}
-            onMouseEnter={(e) => !saving && (e.target.style.backgroundColor = '#654321')}
-            onMouseLeave={(e) => !saving && (e.target.style.backgroundColor = '#8b4513')}
+            style={{ backgroundColor: updateListing.isPending ? undefined : '#8b4513' }}
           >
-            {saving ? 'Mentés...' : 'Módosítások mentése'}
+            {updateListing.isPending ? 'Mentés...' : 'Módosítások mentése'}
           </button>
         </div>
       </form>

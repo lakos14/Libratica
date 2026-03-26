@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-
+import { useListings } from '../hooks';
 
 function Home() {
   const { user } = useAuth();
-  const [recentListings, setRecentListings] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadRecentListings();
-  }, []);
+  const { data, isLoading } = useListings({ page: 1, pageSize: 6, isAvailable: true });
+  const recentListings = data?.items || [];
 
-  const loadRecentListings = async () => {
-    try {
-      const response = await api.get('/listings');
-      setRecentListings(response.data.slice(0, 6));
-    } catch (error) {
-      console.error('Hiba a hirdetések betöltésekor:', error);
-    } finally {
-      setLoading(false);
-    }
+  const getConditionLabel = (condition) => {
+    const labels = {
+      mint: 'Újszerű',
+      excellent: 'Kiváló',
+      good: 'Jó',
+      fair: 'Elfogadható',
+      poor: 'Gyenge',
+    };
+    return labels[condition] || condition;
   };
 
   return (
@@ -31,12 +27,8 @@ function Home() {
           <h1 className="text-4xl font-bold mb-3" style={{ color: '#8b4513' }}>
             Üdvözöllek a Libratica-ban!
           </h1>
-          <p className="text-lg text-gray-600 mb-2">
-            Használt könyvek piactere
-          </p>
-          <p className="text-sm text-gray-500 mb-6">
-            Vásárolj és adj el könyveket egyszerűen
-          </p>
+          <p className="text-lg text-gray-600 mb-2">Használt könyvek piactere</p>
+          <p className="text-sm text-gray-500 mb-6">Vásárolj és adj el könyveket egyszerűen</p>
 
           {!user && (
             <div className="flex justify-center gap-4">
@@ -68,7 +60,7 @@ function Home() {
           </Link>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
@@ -97,28 +89,16 @@ function Home() {
                     <span className="text-gray-400 text-4xl">📚</span>
                   </div>
                 )}
-                <h3 className="font-bold text-gray-800 mb-1 text-sm">
-                  {listing.book?.title}
-                </h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  {listing.book?.author}
-                </p>
+                <h3 className="font-bold text-gray-800 mb-1 text-sm">{listing.book?.title}</h3>
+                <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
                 <div className="flex flex-col gap-1">
                   <span className="font-bold text-sm" style={{ color: '#8b4513' }}>
                     {listing.price?.toLocaleString('hu-HU')} Ft
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {listing.condition === 'mint' && 'Újszerű'}
-                    {listing.condition === 'excellent' && 'Kiváló'}
-                    {listing.condition === 'good' && 'Jó'}
-                    {listing.condition === 'fair' && 'Elfogadható'}
-                    {listing.condition === 'poor' && 'Gyenge'}
-                  </span>
+                  <span className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</span>
                   <span className="text-xs text-gray-500">
                     👤 {listing.seller?.username}
-                    {listing.seller?.rating
-                      ? ` ⭐ ${listing.seller.rating.toFixed(1)}`
-                      : ''}
+                    {listing.seller?.rating ? ` ⭐ ${listing.seller.rating.toFixed(1)}` : ''}
                   </span>
                 </div>
               </Link>

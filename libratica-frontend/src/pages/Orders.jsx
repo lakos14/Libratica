@@ -1,94 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import api, { reviewsAPI } from '../services/api';
+import {
+  usePurchases,
+  useSales,
+  useUpdateOrderStatus,
+  useRejectOrder,
+  useCreateReview,
+  useOrderReviews,
+} from '../hooks';
 import { toast } from 'react-toastify';
 
 function Orders() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('buyer');
   const [reviewModal, setReviewModal] = useState(null);
   const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
-  const [reviewLoading, setReviewLoading] = useState(false);
-  const [reviewedOrders, setReviewedOrders] = useState([]);
 
-  useEffect(() => {
-    loadOrders();
-  }, [activeTab]);
+  const { data: purchases = [], isLoading: purchasesLoading } = usePurchases();
+  const { data: sales = [], isLoading: salesLoading } = useSales();
+  const updateStatus = useUpdateOrderStatus();
+  const rejectOrder = useRejectOrder();
+  const createReview = useCreateReview();
 
-  const loadOrders = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const endpoint = activeTab === 'buyer' ? '/orders/purchases' : '/orders/sales';
-      const response = await api.get(endpoint);
-      setOrders(response.data);
-      await loadReviewedOrders(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a rendelések betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadReviewedOrders = async (orders) => {
-    const reviewed = [];
-    for (const order of orders) {
-      try {
-        const response = await reviewsAPI.getOrderReviews(order.id);
-        const alreadyReviewed = response.data.some(r => r.reviewer.id === user?.id);
-        if (alreadyReviewed) reviewed.push(order.id);
-      } catch { }
-    }
-    setReviewedOrders(reviewed);
-  };
-
+  const orders = activeTab === 'buyer' ? purchases : sales;
+  const isLoading = activeTab === 'buyer' ? purchasesLoading : salesLoading;
 
   const handleStatusUpdate = async (orderId, newStatus) => {
-    try {
-      await api.put(`/orders/${orderId}/status`, { status: newStatus });
-      toast.success('Státusz sikeresen frissítve!');
-      loadOrders();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a státusz frissítésekor');
-    }
+    await updateStatus.mutateAsync({ orderId, status: newStatus });
   };
 
   const handleRejectOrder = async (orderId) => {
-    if (!window.confirm('Biztosan elutasítod ezt a rendelést?')) {
-      return;
-    }
-
-    try {
-      await api.post(`/orders/${orderId}/reject`);
-      toast.success('Rendelés sikeresen elutasítva!');
-      loadOrders();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a rendelés elutasításakor');
-    }
+    if (!window.confirm('Biztosan elutasítod ezt a rendelést?')) return;
+    await rejectOrder.mutateAsync(orderId);
   };
 
   const handleSubmitReview = async () => {
-    setReviewLoading(true);
-    try {
-      await reviewsAPI.createReview({
-        orderId: reviewModal.orderId,
-        rating: reviewData.rating,
-        comment: reviewData.comment,
-      });
-      toast.success('Értékelés elküldve!');
-      setReviewModal(null);
-      setReviewData({ rating: 5, comment: '' });
-      loadOrders();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba az értékelés elküldésekor');
-    } finally {
-      setReviewLoading(false);
-    }
+    await createReview.mutateAsync({
+      orderId: reviewModal.orderId,
+      rating: reviewData.rating,
+      comment: reviewData.comment,
+    });
+    setReviewModal(null);
+    setReviewData({ rating: 5, comment: '' });
   };
 
   const getStatusLabel = (status) => {
@@ -113,17 +66,6 @@ function Orders() {
     return colors[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const getConditionLabel = (condition) => {
-    const labels = {
-      mint: 'Újszerű',
-      excellent: 'Kiváló',
-      good: 'Jó',
-      fair: 'Elfogadható',
-      poor: 'Gyenge',
-    };
-    return labels[condition] || condition;
-  };
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('hu-HU', {
       year: 'numeric',
@@ -134,7 +76,7 @@ function Orders() {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -152,9 +94,7 @@ function Orders() {
         <div className="flex gap-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('buyer')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'buyer'
-                ? 'border-b-2'
-                : 'text-gray-600 hover:text-gray-800'
+            className={`px-4 py-2 font-semibold ${activeTab === 'buyer' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
               }`}
             style={activeTab === 'buyer' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
@@ -162,21 +102,13 @@ function Orders() {
           </button>
           <button
             onClick={() => setActiveTab('seller')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'seller'
-                ? 'border-b-2'
-                : 'text-gray-600 hover:text-gray-800'
+            className={`px-4 py-2 font-semibold ${activeTab === 'seller' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
               }`}
             style={activeTab === 'seller' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
             Eladásaim
           </button>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
 
         {orders.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded p-8 text-center">
@@ -187,169 +119,26 @@ function Orders() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <div key={order.id} className="bg-white border border-gray-200 rounded p-4">
-                <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
-                  <div>
-                    <h3 className="font-bold text-lg" style={{ color: '#8b4513' }}>
-                      Rendelés #{order.id}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {formatDate(order.createdAt)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-3 py-1 rounded text-sm font-medium ${getStatusColor(
-                        order.status
-                      )}`}
-                    >
-                      {getStatusLabel(order.status)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  {order.items?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex gap-4 p-3 bg-gray-50 rounded"
-                    >
-                      {item.book?.coverImageUrl ? (
-                        <img
-                          src={item.book.coverImageUrl}
-                          alt={item.book?.title}
-                          className="w-16 h-20 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center">
-                          <span className="text-gray-400 text-2xl">📚</span>
-                        </div>
-                      )}
-
-                      <div className="flex-1">
-                        <h4 className="font-bold text-sm text-gray-800">
-                          {item.book?.title}
-                        </h4>
-                        <p className="text-xs text-gray-600">
-                          {item.book?.author}
-                        </p>
-                        <div className="flex gap-4 mt-2">
-                          <span className="text-sm text-gray-700">
-                            Mennyiség: {item.quantity} db
-                          </span>
-                          <span className="text-sm font-bold" style={{ color: '#8b4513' }}>
-                            {item.priceAtPurchase?.toLocaleString('hu-HU')} Ft
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                  <div>
-                    {activeTab === 'buyer' ? (
-                      <p className="text-sm text-gray-600">
-                        Eladó: <span className="font-medium">{order.seller?.username}</span>
-                      </p>
-                    ) : (
-                      <p className="text-sm text-gray-600">
-                        Vevő: <span className="font-medium">{order.buyer?.username}</span>
-                      </p>
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">Végösszeg:</p>
-                    <p className="text-xl font-bold" style={{ color: '#8b4513' }}>
-                      {order.totalAmount?.toLocaleString('hu-HU')} Ft
-                    </p>
-                  </div>
-                </div>
-                {activeTab === 'seller' && order.status === 'pending' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2">
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, 'confirmed')}
-                      className="px-4 py-2 text-sm rounded text-white"
-                      style={{ backgroundColor: '#8b4513' }}
-                    >
-                      Elfogadom
-                    </button>
-                    <button
-                      onClick={() => handleRejectOrder(order.id)}
-                      className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-700"
-                    >
-                      Elutasítom
-                    </button>
-                  </div>
-                )}
-
-                {activeTab === 'seller' && order.status === 'confirmed' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, 'shipped')}
-                      className="px-4 py-2 text-sm rounded text-white"
-                      style={{ backgroundColor: '#8b4513' }}
-                    >
-                      Elküldtem
-                    </button>
-                  </div>
-                )}
-
-                {activeTab === 'seller' && order.status === 'shipped' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => handleStatusUpdate(order.id, 'delivered')}
-                      className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700"
-                    >
-                      Kézbesítve
-                    </button>
-                  </div>
-                )}
-                {activeTab === 'buyer' && order.status === 'delivered' && !reviewedOrders.includes(order.id) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => setReviewModal({
-                        orderId: order.id,
-                        reviewedUsername: order.seller?.username
-                      })}
-                      className="px-4 py-2 text-sm rounded text-white"
-                      style={{ backgroundColor: '#8b4513' }}
-                    >
-                      ⭐ Eladó értékelése
-                    </button>
-                  </div>
-                )}
-
-                {activeTab === 'seller' && order.status === 'delivered' && !reviewedOrders.includes(order.id) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => setReviewModal({
-                        orderId: order.id,
-                        reviewedUsername: order.buyer?.username
-                      })}
-                      className="px-4 py-2 text-sm rounded text-white"
-                      style={{ backgroundColor: '#8b4513' }}
-                    >
-                      ⭐ Vevő értékelése
-                    </button>
-                  </div>
-                )}
-                {activeTab === 'buyer' && order.status === 'delivered' && reviewedOrders.includes(order.id) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-green-600">Már értékelted ezt a rendelést</p>
-                  </div>
-                )}
-
-                {activeTab === 'seller' && order.status === 'delivered' && reviewedOrders.includes(order.id) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-green-600">Már értékelted ezt a rendelést</p>
-                  </div>
-                )}
-              </div>
+              <OrderCard
+                key={order.id}
+                order={order}
+                activeTab={activeTab}
+                user={user}
+                onStatusUpdate={handleStatusUpdate}
+                onReject={handleRejectOrder}
+                onReview={(orderId, reviewedUsername) =>
+                  setReviewModal({ orderId, reviewedUsername })
+                }
+                getStatusLabel={getStatusLabel}
+                getStatusColor={getStatusColor}
+                formatDate={formatDate}
+                isUpdating={updateStatus.isPending || rejectOrder.isPending}
+              />
             ))}
           </div>
         )}
       </div>
+
       {reviewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -358,9 +147,7 @@ function Orders() {
             </h3>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Értékelés
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Értékelés</label>
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -401,14 +188,173 @@ function Orders() {
               </button>
               <button
                 onClick={handleSubmitReview}
-                disabled={reviewLoading}
+                disabled={createReview.isPending}
                 className="flex-1 px-4 py-2 text-white rounded disabled:bg-gray-400 font-semibold"
                 style={{ backgroundColor: '#8b4513' }}
               >
-                {reviewLoading ? 'Küldés...' : 'Értékelés elküldése'}
+                {createReview.isPending ? 'Küldés...' : 'Értékelés elküldése'}
               </button>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function OrderCard({
+  order,
+  activeTab,
+  user,
+  onStatusUpdate,
+  onReject,
+  onReview,
+  getStatusLabel,
+  getStatusColor,
+  formatDate,
+  isUpdating,
+}) {
+  const { data: orderReviews = [] } = useOrderReviews(order.id);
+  const alreadyReviewed = orderReviews.some((r) => r.reviewer?.id === user?.id);
+
+  return (
+    <div className="bg-white border border-gray-200 rounded p-4">
+      <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
+        <div>
+          <h3 className="font-bold text-lg" style={{ color: '#8b4513' }}>
+            Rendelés #{order.id}
+          </h3>
+          <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
+        </div>
+        <span
+          className={`inline-block px-3 py-1 rounded text-sm font-medium ${getStatusColor(
+            order.status
+          )}`}
+        >
+          {getStatusLabel(order.status)}
+        </span>
+      </div>
+
+      <div className="space-y-3 mb-4">
+        {order.items?.map((item) => (
+          <div key={item.id} className="flex gap-4 p-3 bg-gray-50 rounded">
+            {item.book?.coverImageUrl ? (
+              <img
+                src={item.book.coverImageUrl}
+                alt={item.book?.title}
+                className="w-16 h-20 object-cover rounded"
+              />
+            ) : (
+              <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center">
+                <span className="text-gray-400 text-2xl">📚</span>
+              </div>
+            )}
+            <div className="flex-1">
+              <h4 className="font-bold text-sm text-gray-800">{item.book?.title}</h4>
+              <p className="text-xs text-gray-600">{item.book?.author}</p>
+              <div className="flex gap-4 mt-2">
+                <span className="text-sm text-gray-700">Mennyiség: {item.quantity} db</span>
+                <span className="text-sm font-bold" style={{ color: '#8b4513' }}>
+                  {item.priceAtPurchase?.toLocaleString('hu-HU')} Ft
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+        <div>
+          {activeTab === 'buyer' ? (
+            <p className="text-sm text-gray-600">
+              Eladó: <span className="font-medium">{order.seller?.username}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-600">
+              Vevő: <span className="font-medium">{order.buyer?.username}</span>
+            </p>
+          )}
+        </div>
+        <div className="text-right">
+          <p className="text-sm text-gray-600">Végösszeg:</p>
+          <p className="text-xl font-bold" style={{ color: '#8b4513' }}>
+            {order.totalAmount?.toLocaleString('hu-HU')} Ft
+          </p>
+        </div>
+      </div>
+
+      {activeTab === 'seller' && order.status === 'pending' && (
+        <div className="mt-4 pt-4 border-t border-gray-200 flex gap-2">
+          <button
+            onClick={() => onStatusUpdate(order.id, 'confirmed')}
+            disabled={isUpdating}
+            className="px-4 py-2 text-sm rounded text-white disabled:bg-gray-400"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            Elfogadom
+          </button>
+          <button
+            onClick={() => onReject(order.id)}
+            disabled={isUpdating}
+            className="px-4 py-2 text-sm rounded bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400"
+          >
+            Elutasítom
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'seller' && order.status === 'confirmed' && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => onStatusUpdate(order.id, 'shipped')}
+            disabled={isUpdating}
+            className="px-4 py-2 text-sm rounded text-white disabled:bg-gray-400"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            Elküldtem
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'seller' && order.status === 'shipped' && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => onStatusUpdate(order.id, 'delivered')}
+            disabled={isUpdating}
+            className="px-4 py-2 text-sm rounded bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-400"
+          >
+            Kézbesítve
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'buyer' && order.status === 'delivered' && !alreadyReviewed && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => onReview(order.id, order.seller?.username)}
+            className="px-4 py-2 text-sm rounded text-white"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            ⭐ Eladó értékelése
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'seller' && order.status === 'delivered' && !alreadyReviewed && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <button
+            onClick={() => onReview(order.id, order.buyer?.username)}
+            className="px-4 py-2 text-sm rounded text-white"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            ⭐ Vevő értékelése
+          </button>
+        </div>
+      )}
+
+      {order.status === 'delivered' && alreadyReviewed && (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-green-600">✓ Már értékelted ezt a rendelést</p>
         </div>
       )}
     </div>

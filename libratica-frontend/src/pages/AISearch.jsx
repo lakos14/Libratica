@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { aiAPI, searchAPI } from '../services/api';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAISearch, useCategories } from '../hooks';
+import { searchAPI } from '../services/api';
+import { toast } from 'react-toastify';
 
 function AISearch() {
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
-  const [listings, setListings] = useState([]);
   const [aiParams, setAiParams] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [listings, setListings] = useState([]);
+  const [searched, setSearched] = useState(false);
+  const [searchingListings, setSearchingListings] = useState(false);
 
-  useEffect(() => {
-    fetch('http://localhost:5102/api/categories')
-      .then(res => res.json())
-      .then(data => setCategories(data));
-  }, []);
+  const { data: categories = [] } = useCategories();
+  const aiSearch = useAISearch();
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -25,16 +21,16 @@ function AISearch() {
       return;
     }
 
-    setLoading(true);
-    setResults(null);
+    setSearchingListings(true);
     setListings([]);
+    setAiParams(null);
 
     try {
-      const aiResponse = await aiAPI.search(query);
-      const params = aiResponse.data;
+      const params = await aiSearch.mutateAsync(query);
       setAiParams(params);
+
       const matchedCategory = categories.find(
-        c => c.name.toLowerCase() === params.category?.toLowerCase()
+        (c) => c.name.toLowerCase() === params.category?.toLowerCase()
       );
 
       const listingsResponse = await searchAPI.searchListings({
@@ -74,11 +70,11 @@ function AISearch() {
       } else {
         setListings(listingsResponse.data.items);
       }
-      setResults(true);
+      setSearched(true);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Hiba a keresés során');
     } finally {
-      setLoading(false);
+      setSearchingListings(false);
     }
   };
 
@@ -92,6 +88,8 @@ function AISearch() {
     };
     return labels[condition] || condition;
   };
+
+  const isLoading = aiSearch.isPending || searchingListings;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,11 +137,11 @@ function AISearch() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isLoading}
               className="w-full py-3 rounded text-white font-semibold disabled:bg-gray-400"
-              style={{ backgroundColor: loading ? undefined : '#8b4513' }}
+              style={{ backgroundColor: isLoading ? undefined : '#8b4513' }}
             >
-              {loading ? 'AI elemzi a keresést...' : 'Keresés AI-val'}
+              {isLoading ? 'AI elemzi a keresést...' : 'Keresés AI-val'}
             </button>
           </div>
         </form>
@@ -183,7 +181,7 @@ function AISearch() {
           </div>
         )}
 
-        {results && (
+        {searched && (
           <div>
             <h2 className="text-xl font-bold mb-4" style={{ color: '#8b4513' }}>
               Találatok ({listings.length})

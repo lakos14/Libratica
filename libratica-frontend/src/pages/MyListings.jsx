@@ -1,45 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useMyListings, useDeleteListing } from '../hooks';
 import { toast } from 'react-toastify';
 
 function MyListings() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadMyListings();
-  }, []);
-
-  const loadMyListings = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await api.get('/listings/my-listings');
-      setListings(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a hirdetések betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: listings = [], isLoading, isError } = useMyListings();
+  const deleteListing = useDeleteListing();
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Biztosan törölni szeretnéd ezt a hirdetést?')) {
-      return;
-    }
-
-    try {
-      await api.delete(`/listings/${id}`);
-      toast.success('Hirdetés sikeresen törölve!');
-      loadMyListings();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a hirdetés törlésekor');
-    }
+    if (!window.confirm('Biztosan törölni szeretnéd ezt a hirdetést?')) return;
+    await deleteListing.mutateAsync(id);
+    toast.success('Hirdetés sikeresen törölve!');
   };
 
   const getConditionLabel = (condition) => {
@@ -53,10 +26,22 @@ function MyListings() {
     return labels[condition] || condition;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Hiba a hirdetések betöltésekor
+          </div>
+        </div>
       </div>
     );
   }
@@ -76,12 +61,6 @@ function MyListings() {
             + Új hirdetés
           </Link>
         </div>
-
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
-          </div>
-        )}
 
         {listings.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded p-8 text-center">
@@ -122,9 +101,7 @@ function MyListings() {
                 <h3 className="font-bold text-gray-800 mb-1 text-sm line-clamp-2">
                   {listing.book?.title}
                 </h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  {listing.book?.author}
-                </p>
+                <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
 
                 <div className="flex flex-col gap-1 mb-3">
                   <span className="font-bold text-sm" style={{ color: '#8b4513' }}>
@@ -133,13 +110,9 @@ function MyListings() {
                   <span className="text-xs text-gray-500">
                     {getConditionLabel(listing.condition)}
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {listing.quantity} db
-                  </span>
+                  <span className="text-xs text-gray-500">{listing.quantity} db</span>
                   {listing.location && (
-                    <span className="text-xs text-gray-500">
-                      {listing.location}
-                    </span>
+                    <span className="text-xs text-gray-500">{listing.location}</span>
                   )}
                 </div>
 
@@ -171,9 +144,10 @@ function MyListings() {
                   </button>
                   <button
                     onClick={() => handleDelete(listing.id)}
-                    className="px-3 py-2 text-xs rounded bg-red-600 text-white hover:bg-red-700"
+                    disabled={deleteListing.isPending}
+                    className="px-3 py-2 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400"
                   >
-                    Törlés
+                    {deleteListing.isPending ? '...' : 'Törlés'}
                   </button>
                 </div>
               </div>

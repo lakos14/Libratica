@@ -1,36 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useCart, useRemoveFromCart, useCheckout } from '../hooks';
 import api from '../services/api';
 import SellerGroup from '../components/cart/SellerGroup';
 import CheckoutModal from '../components/cart/CheckoutModal';
 
-
 const Cart = () => {
-  const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedSeller, setSelectedSeller] = useState(null);
   const [checkoutAll, setCheckoutAll] = useState(false);
   const [deleteConfirmModal, setDeleteConfirmModal] = useState(null);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    loadCart();
-  }, []);
-
-  const loadCart = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/cart');
-      setCart(response.data);
-    } catch (error) {
-      console.error('Hiba a kosár betöltésekor:', error);
-      toast.error('Nem sikerült betölteni a kosarat');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: cart, isLoading, isError } = useCart();
+  const removeFromCart = useRemoveFromCart();
+  const checkout = useCheckout();
 
   const groupedBySeller = useMemo(() => {
     if (!cart?.items || cart.items.length === 0) return {};
@@ -58,14 +43,8 @@ const Cart = () => {
   };
 
   const confirmRemoveItem = async () => {
-    try {
-      await api.delete(`/cart/items/${deleteConfirmModal}`);
-      setDeleteConfirmModal(null);
-      await loadCart();
-    } catch (error) {
-      console.error('Hiba a tétel törlésekor:', error);
-      toast.error('Nem sikerült eltávolítani a tételt');
-    }
+    await removeFromCart.mutateAsync(deleteConfirmModal);
+    setDeleteConfirmModal(null);
   };
 
   const handleCheckoutSeller = (sellerId) => {
@@ -126,7 +105,6 @@ const Cart = () => {
         }
 
         toast.success(`Rendelés leadva: ${group.seller.username}`);
-        await loadCart();
       }
 
       setCheckoutModalOpen(false);
@@ -137,10 +115,23 @@ const Cart = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Betöltés...</div>
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <p className="mt-2 text-gray-600">Kosár betöltése...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          Nem sikerült betölteni a kosarat
+        </div>
       </div>
     );
   }
@@ -223,9 +214,10 @@ const Cart = () => {
               </button>
               <button
                 onClick={confirmRemoveItem}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                disabled={removeFromCart.isPending}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition disabled:bg-gray-400"
               >
-                Törlés
+                {removeFromCart.isPending ? 'Törlés...' : 'Törlés'}
               </button>
             </div>
           </div>

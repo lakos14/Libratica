@@ -1,28 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { bookCollectionAPI, openLibraryAPI } from '../services/api';
+import React, { useState } from 'react';
+import { useBookCollection, useAddToCollection, useRemoveFromCollection } from '../hooks';
+import { openLibraryAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 function BookCollection() {
-  const [collection, setCollection] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
 
-  useEffect(() => {
-    loadCollection();
-  }, []);
-
-  const loadCollection = async () => {
-    try {
-      const response = await bookCollectionAPI.getCollection();
-      setCollection(response.data);
-    } catch (err) {
-      toast.error('Hiba a gyűjtemény betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: collection = [], isLoading, isError } = useBookCollection();
+  const addToCollection = useAddToCollection();
+  const removeFromCollection = useRemoveFromCollection();
 
   const searchBooks = async () => {
     if (!searchQuery.trim()) return;
@@ -34,7 +22,7 @@ function BookCollection() {
         results = data ? [{ isISBN: true, data, isbn: searchQuery }] : [];
       } else {
         const docs = await openLibraryAPI.searchByTitle(searchQuery);
-        results = docs.map(doc => ({ isISBN: false, data: doc }));
+        results = docs.map((doc) => ({ isISBN: false, data: doc }));
       }
 
       if (results.length === 0) {
@@ -49,55 +37,58 @@ function BookCollection() {
   };
 
   const handleAdd = async (item) => {
-    try {
-      const title = item.isISBN ? item.data.title : item.data.title;
-      const author = item.isISBN
-        ? item.data.authors?.map(a => a.name).join(', ')
-        : item.data.author_name?.join(', ');
-      const cover = item.isISBN
-        ? item.data.cover?.large || item.data.cover?.medium
-        : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-L.jpg` : null;
-      const publisher = item.isISBN
-        ? item.data.publishers?.[0]?.name
-        : item.data.publisher?.[0];
-      const year = item.isISBN
-        ? item.data.publish_date?.slice(-4)
-        : item.data.first_publish_year?.toString();
-      const googleBooksId = item.isISBN
-        ? `isbn_${item.isbn}`
-        : `ol_${item.data.key?.replace('/works/', '')}`;
+    const title = item.isISBN ? item.data.title : item.data.title;
+    const author = item.isISBN
+      ? item.data.authors?.map((a) => a.name).join(', ')
+      : item.data.author_name?.join(', ');
+    const cover = item.isISBN
+      ? item.data.cover?.large || item.data.cover?.medium
+      : item.data.cover_i
+      ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-L.jpg`
+      : null;
+    const publisher = item.isISBN
+      ? item.data.publishers?.[0]?.name
+      : item.data.publisher?.[0];
+    const year = item.isISBN
+      ? item.data.publish_date?.slice(-4)
+      : item.data.first_publish_year?.toString();
+    const googleBooksId = item.isISBN
+      ? `isbn_${item.isbn}`
+      : `ol_${item.data.key?.replace('/works/', '')}`;
 
-      await bookCollectionAPI.addToCollection({
-        googleBooksId,
-        title,
-        author: author || null,
-        coverImageUrl: cover || null,
-        publisher: publisher || null,
-        publicationYear: year ? parseInt(year) : null,
-      });
-      toast.success('Könyv hozzáadva a gyűjteményhez!');
-      setSearchResults([]);
-      setSearchQuery('');
-      loadCollection();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
+    await addToCollection.mutateAsync({
+      googleBooksId,
+      title,
+      author: author || null,
+      coverImageUrl: cover || null,
+      publisher: publisher || null,
+      publicationYear: year ? parseInt(year) : null,
+    });
+
+    setSearchResults([]);
+    setSearchQuery('');
   };
 
   const handleRemove = async (id) => {
-    try {
-      await bookCollectionAPI.removeFromCollection(id);
-      toast.success('Könyv eltávolítva a gyűjteményből!');
-      loadCollection();
-    } catch (err) {
-      toast.error('Hiba az eltávolításkor');
-    }
+    await removeFromCollection.mutateAsync(id);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Hiba a gyűjtemény betöltésekor
+          </div>
+        </div>
       </div>
     );
   }
@@ -135,17 +126,22 @@ function BookCollection() {
               {searchResults.map((item, index) => {
                 const title = item.isISBN ? item.data.title : item.data.title;
                 const author = item.isISBN
-                  ? item.data.authors?.map(a => a.name).join(', ')
+                  ? item.data.authors?.map((a) => a.name).join(', ')
                   : item.data.author_name?.join(', ');
                 const cover = item.isISBN
                   ? item.data.cover?.medium
-                  : item.data.cover_i ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg` : null;
+                  : item.data.cover_i
+                  ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg`
+                  : null;
                 const year = item.isISBN
                   ? item.data.publish_date?.slice(-4)
                   : item.data.first_publish_year;
 
                 return (
-                  <div key={index} className="flex gap-3 p-3 border-b last:border-b-0 hover:bg-gray-50">
+                  <div
+                    key={index}
+                    className="flex gap-3 p-3 border-b last:border-b-0 hover:bg-gray-50"
+                  >
                     {cover ? (
                       <img src={cover} alt={title} className="w-10 h-14 object-cover rounded" />
                     ) : (
@@ -160,7 +156,8 @@ function BookCollection() {
                     </div>
                     <button
                       onClick={() => handleAdd(item)}
-                      className="px-3 py-1 text-sm text-white rounded self-center"
+                      disabled={addToCollection.isPending}
+                      className="px-3 py-1 text-sm text-white rounded self-center disabled:bg-gray-400"
                       style={{ backgroundColor: '#8b4513' }}
                     >
                       + Hozzáadás
@@ -175,12 +172,17 @@ function BookCollection() {
         {collection.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded p-8 text-center">
             <p className="text-gray-500 text-lg">A gyűjteményed üres</p>
-            <p className="text-gray-400 text-sm mt-2">Keress könyveket fent és add hozzá a gyűjteményedhez!</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Keress könyveket fent és add hozzá a gyűjteményedhez!
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {collection.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded p-3 flex flex-col">
+              <div
+                key={item.id}
+                className="bg-white border border-gray-200 rounded p-3 flex flex-col"
+              >
                 {item.coverImageUrl ? (
                   <img
                     src={item.coverImageUrl}
@@ -192,16 +194,15 @@ function BookCollection() {
                     <span className="text-gray-400 text-4xl">📚</span>
                   </div>
                 )}
-                <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
-                  {item.title}
-                </h3>
+                <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">{item.title}</h3>
                 <p className="text-xs text-gray-600 mb-1">{item.author}</p>
                 {item.publicationYear && (
                   <p className="text-xs text-gray-400 mb-2">{item.publicationYear}</p>
                 )}
                 <button
                   onClick={() => handleRemove(item.id)}
-                  className="mt-auto px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200"
+                  disabled={removeFromCollection.isPending}
+                  className="mt-auto px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200 disabled:opacity-50"
                 >
                   Eltávolítás
                 </button>

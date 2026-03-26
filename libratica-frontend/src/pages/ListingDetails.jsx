@@ -1,52 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api, { cartAPI, reportsAPI } from '../services/api';
+import {
+  useListing,
+  useAddToCart,
+  useWishlistCheck,
+  useToggleWishlist,
+  useCreateReport,
+} from '../hooks';
 import { toast } from 'react-toastify';
-import { wishlistAPI } from '../services/api';
 
 function ListingDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [listing, setListing] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [addingToCart, setAddingToCart] = useState(false);
   const [reportModal, setReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
-  const [reportLoading, setReportLoading] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
 
-  useEffect(() => {
-    loadListing();
-  }, [id]);
+  const { data: listing, isLoading, isError, error } = useListing(id);
+  const addToCart = useAddToCart();
+  const { data: wishlistData } = useWishlistCheck(listing?.book?.id);
+  const toggleWishlist = useToggleWishlist();
+  const createReport = useCreateReport();
 
-  const loadListing = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await api.get(`/listings/${id}`);
-      setListing(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Hiba a hirdetés betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    if (listing && user) {
-      checkWishlist();
-    }
-  }, [listing, user]);
+  const isInWishlist = wishlistData?.isInWishlist;
 
-  const checkWishlist = async () => {
-    try {
-      const response = await wishlistAPI.checkWishlist(listing.book?.id);
-      setIsInWishlist(response.data.isInWishlist);
-    } catch { }
+  const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    await addToCart.mutateAsync({
+      listingId: listing.id,
+      quantity: quantity,
+    });
   };
 
   const handleWishlist = async () => {
@@ -54,38 +44,7 @@ function ListingDetails() {
       navigate('/login');
       return;
     }
-    try {
-      if (isInWishlist) {
-        await wishlistAPI.removeFromWishlist(listing.book?.id);
-        toast.success('Eltávolítva a kívánságlistából!');
-        setIsInWishlist(false);
-      } else {
-        await wishlistAPI.addToWishlist(listing.book?.id);
-        toast.success('Hozzáadva a kívánságlistához!');
-        setIsInWishlist(true);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
-  };
-  const handleAddToCart = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    setAddingToCart(true);
-    try {
-      await cartAPI.addToCart({
-        listingId: listing.id,
-        quantity: quantity,
-      });
-      toast.success('Sikeresen hozzáadva a kosárhoz!');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a kosárba helyezéskor');
-    } finally {
-      setAddingToCart(false);
-    }
+    await toggleWishlist.mutateAsync(listing.book?.id);
   };
 
   const handleReport = async () => {
@@ -93,20 +52,13 @@ function ListingDetails() {
       toast.error('Az ok megadása kötelező!');
       return;
     }
-    setReportLoading(true);
-    try {
-      await reportsAPI.createReport({
-        listingId: listing.id,
-        reason: reportReason,
-      });
-      toast.success('Jelentés elküldve, köszönjük!');
-      setReportModal(false);
-      setReportReason('');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba a jelentés elküldésekor');
-    } finally {
-      setReportLoading(false);
-    }
+
+    await createReport.mutateAsync({
+      listingId: listing.id,
+      reason: reportReason,
+    });
+    setReportModal(false);
+    setReportReason('');
   };
 
   const getConditionLabel = (condition) => {
@@ -120,7 +72,7 @@ function ListingDetails() {
     return labels[condition] || condition;
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -128,12 +80,12 @@ function ListingDetails() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+            {error?.message || 'Hiba a hirdetés betöltésekor'}
           </div>
         </div>
       </div>
@@ -155,10 +107,7 @@ function ListingDetails() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-4 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={() => navigate(-1)} className="mb-4 text-gray-600 hover:text-gray-800">
           ← Vissza
         </button>
 
@@ -179,10 +128,11 @@ function ListingDetails() {
                         onClick={() => setSelectedImage(index)}
                         src={`http://localhost:5102${img}`}
                         alt={`Kép ${index + 1}`}
-                        className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${selectedImage === index
+                        className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${
+                          selectedImage === index
                             ? 'border-[#8b4513]'
                             : 'border-gray-200 hover:border-gray-400'
-                          }`}
+                        }`}
                       />
                     ))}
                   </div>
@@ -206,9 +156,7 @@ function ListingDetails() {
               {listing.book?.title}
             </h1>
 
-            <p className="text-xl text-gray-600 mb-4">
-              {listing.book?.author}
-            </p>
+            <p className="text-xl text-gray-600 mb-4">{listing.book?.author}</p>
 
             <div className="mb-6">
               <span className="text-4xl font-bold" style={{ color: '#8b4513' }}>
@@ -225,28 +173,22 @@ function ListingDetails() {
 
             <div className="mb-4">
               <span className="text-sm text-gray-600">Elérhető mennyiség:</span>
-              <span className="ml-2 text-lg font-medium">
-                {listing.quantity} db
-              </span>
+              <span className="ml-2 text-lg font-medium">{listing.quantity} db</span>
             </div>
 
             {listing.location && (
               <div className="mb-4">
                 <span className="text-sm text-gray-600">Helyszín:</span>
-                <span className="ml-2 text-lg font-medium">
-                  {listing.location}
-                </span>
+                <span className="ml-2 text-lg font-medium">{listing.location}</span>
               </div>
             )}
 
-            {listing.description && (
+            {listing.conditionDescription && (
               <div className="mb-6">
                 <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
-                  Leírás
+                  Állapot leírás
                 </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {listing.description}
-                </p>
+                <p className="text-gray-700 whitespace-pre-wrap">{listing.conditionDescription}</p>
               </div>
             )}
 
@@ -269,7 +211,15 @@ function ListingDetails() {
                 </span>
               </p>
               <a
-                href={`https://mail.google.com/mail/?view=cm&to=${listing.seller?.email}&su=Érdeklődés a hirdetésről: ${encodeURIComponent(listing.book?.title)}&body=Szia ${listing.seller?.username},%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(listing.book?.title)} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
+                href={`https://mail.google.com/mail/?view=cm&to=${
+                  listing.seller?.email
+                }&su=Érdeklődés a hirdetésről: ${encodeURIComponent(
+                  listing.book?.title
+                )}&body=Szia ${
+                  listing.seller?.username
+                },%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(
+                  listing.book?.title
+                )} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-block mt-2 text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
@@ -281,9 +231,7 @@ function ListingDetails() {
             {!isOwnListing && listing.isAvailable && user && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Mennyiség
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mennyiség</label>
                   <input
                     type="number"
                     min="1"
@@ -296,27 +244,26 @@ function ListingDetails() {
 
                 <button
                   onClick={handleAddToCart}
-                  disabled={addingToCart}
+                  disabled={addToCart.isPending}
                   className="w-full px-6 py-3 rounded text-white font-semibold disabled:opacity-50"
                   style={{ backgroundColor: '#8b4513' }}
                 >
-                  {addingToCart ? 'Hozzáadás...' : 'Kosárba rakom'}
+                  {addToCart.isPending ? 'Hozzáadás...' : 'Kosárba rakom'}
                 </button>
-                {user && (
-                  <button
-                    onClick={handleWishlist}
-                    className="w-full px-6 py-3 rounded font-semibold border mt-2"
-                    style={{
-                      borderColor: '#8b4513',
-                      color: isInWishlist ? 'white' : '#8b4513',
-                      backgroundColor: isInWishlist ? '#8b4513' : 'white'
-                    }}
-                  >
-                    {isInWishlist ? '❤️ Kívánságlistán van' : '🤍 Kívánságlistához adás'}
-                  </button>
-                )}
-              </div>
 
+                <button
+                  onClick={handleWishlist}
+                  disabled={toggleWishlist.isPending}
+                  className="w-full px-6 py-3 rounded font-semibold border mt-2 disabled:opacity-50"
+                  style={{
+                    borderColor: '#8b4513',
+                    color: isInWishlist ? 'white' : '#8b4513',
+                    backgroundColor: isInWishlist ? '#8b4513' : 'white',
+                  }}
+                >
+                  {isInWishlist ? '❤️ Kívánságlistán van' : '🤍 Kívánságlistához adás'}
+                </button>
+              </div>
             )}
 
             {isOwnListing && (
@@ -329,9 +276,7 @@ function ListingDetails() {
 
             {!user && (
               <div className="space-y-4">
-                <p className="text-gray-600 text-sm">
-                  Jelentkezz be a vásárláshoz!
-                </p>
+                <p className="text-gray-600 text-sm">Jelentkezz be a vásárláshoz!</p>
                 <button
                   onClick={() => navigate('/login')}
                   className="w-full px-6 py-3 rounded text-white font-semibold"
@@ -344,11 +289,10 @@ function ListingDetails() {
 
             {!listing.isAvailable && (
               <div className="bg-gray-100 border border-gray-300 rounded p-4">
-                <p className="text-gray-700 text-sm">
-                  Ez a hirdetés jelenleg nem elérhető.
-                </p>
+                <p className="text-gray-700 text-sm">Ez a hirdetés jelenleg nem elérhető.</p>
               </div>
             )}
+
             {user && !isOwnListing && user.roleName !== 'admin' && (
               <div className="mt-4">
                 <button
@@ -395,10 +339,10 @@ function ListingDetails() {
                     </button>
                     <button
                       onClick={handleReport}
-                      disabled={reportLoading}
+                      disabled={createReport.isPending}
                       className="flex-1 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:bg-gray-400 font-semibold"
                     >
-                      {reportLoading ? 'Küldés...' : 'Jelentés elküldése'}
+                      {createReport.isPending ? 'Küldés...' : 'Jelentés elküldése'}
                     </button>
                   </div>
                 </div>
@@ -447,7 +391,7 @@ function ListingDetails() {
                 <div>
                   <span className="text-sm text-gray-600">Kategória:</span>
                   <span className="ml-2 font-medium">
-                    {listing.book.categories.map(c => c.name).join(', ')}
+                    {listing.book.categories.map((c) => c.name).join(', ')}
                   </span>
                 </div>
               )}
@@ -457,9 +401,7 @@ function ListingDetails() {
                 <h3 className="text-lg font-bold mb-2" style={{ color: '#8b4513' }}>
                   Leírás
                 </h3>
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {listing.book.description}
-                </p>
+                <p className="text-gray-700 whitespace-pre-wrap">{listing.book.description}</p>
               </div>
             )}
           </div>

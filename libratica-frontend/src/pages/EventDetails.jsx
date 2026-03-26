@@ -1,78 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { eventsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useEvent, useToggleEventAttend, useAddEventComment, useDeleteEventComment } from '../hooks';
 import { toast } from 'react-toastify';
 
 function EventDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
-  const [commentLoading, setCommentLoading] = useState(false);
-  const [attending, setAttending] = useState(false);
 
-  useEffect(() => {
-    loadEvent();
-  }, [id]);
+  const { data: event, isLoading, isError } = useEvent(id);
+  const toggleAttend = useToggleEventAttend();
+  const addComment = useAddEventComment();
+  const deleteComment = useDeleteEventComment();
 
-  const loadEvent = async () => {
-    try {
-      const response = await eventsAPI.getById(id);
-      setEvent(response.data);
-      if (user) {
-        setAttending(response.data.attendees?.some(a => a.id === user.id));
-      }
-    } catch (err) {
-      toast.error('Hiba az esemény betöltésekor');
-      navigate('/events');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const attending = user && event?.attendees?.some((a) => a.id === user.id);
 
   const handleToggleAttend = async () => {
     if (!user) {
       toast.error('Bejelentkezés szükséges!');
       return;
     }
-    try {
-      const response = await eventsAPI.toggleAttend(id);
-      setAttending(response.data.attending);
-      toast.success(response.data.message);
-      loadEvent();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
+    await toggleAttend.mutateAsync(id);
   };
 
   const handleAddComment = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
 
-    setCommentLoading(true);
-    try {
-      await eventsAPI.addComment(id, { content: comment });
-      toast.success('Komment elküldve!');
-      setComment('');
-      loadEvent();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    } finally {
-      setCommentLoading(false);
-    }
+    await addComment.mutateAsync({ eventId: id, content: comment });
+    setComment('');
   };
 
   const handleDeleteComment = async (commentId) => {
-    try {
-      await eventsAPI.deleteComment(id, commentId);
-      toast.success('Komment törölve!');
-      loadEvent();
-    } catch (err) {
-      toast.error('Hiba a törléskor');
-    }
+    await deleteComment.mutateAsync({ eventId: id, commentId });
   };
 
   const getTypeLabel = (type) => {
@@ -86,11 +48,11 @@ function EventDetails() {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      timeZone: 'Europe/Budapest'
+      timeZone: 'Europe/Budapest',
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -98,24 +60,32 @@ function EventDetails() {
     );
   }
 
-  if (!event) return null;
+  if (isError || !event) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Esemény nem található
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <button
-          onClick={() => navigate('/events')}
-          className="mb-4 text-gray-600 hover:text-gray-800"
-        >
+        <button onClick={() => navigate('/events')} className="mb-4 text-gray-600 hover:text-gray-800">
           ← Vissza az eseményekhez
         </button>
 
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-green-100 text-green-800'
-              }`}>
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                event.type === 'bookfair' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+              }`}
+            >
               {getTypeLabel(event.type)}
             </span>
           </div>
@@ -153,13 +123,17 @@ function EventDetails() {
           {user && (
             <button
               onClick={handleToggleAttend}
-              className={`px-6 py-2 rounded font-semibold transition ${attending
-                ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                : 'text-white'
-                }`}
+              disabled={toggleAttend.isPending}
+              className={`px-6 py-2 rounded font-semibold transition disabled:opacity-50 ${
+                attending ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'text-white'
+              }`}
               style={!attending ? { backgroundColor: '#8b4513' } : {}}
             >
-              {attending ? 'Részt veszek (visszavonás)' : '+ Részt veszek'}
+              {toggleAttend.isPending
+                ? '...'
+                : attending
+                ? 'Részt veszek (visszavonás)'
+                : '+ Részt veszek'}
             </button>
           )}
         </div>
@@ -199,11 +173,11 @@ function EventDetails() {
               />
               <button
                 type="submit"
-                disabled={commentLoading || !comment.trim()}
+                disabled={addComment.isPending || !comment.trim()}
                 className="px-4 py-2 text-white rounded disabled:bg-gray-400 font-medium"
                 style={{ backgroundColor: '#8b4513' }}
               >
-                {commentLoading ? 'Küldés...' : 'Komment elküldése'}
+                {addComment.isPending ? 'Küldés...' : 'Komment elküldése'}
               </button>
             </form>
           ) : (
@@ -212,7 +186,8 @@ function EventDetails() {
                 Kommenteléshez{' '}
                 <a href="/login" className="font-medium" style={{ color: '#8b4513' }}>
                   jelentkezz be
-                </a>!
+                </a>
+                !
               </p>
             </div>
           )}
@@ -226,14 +201,13 @@ function EventDetails() {
                   <div className="flex justify-between items-start mb-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{c.user?.username}</span>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(c.createdAt)}
-                      </span>
+                      <span className="text-xs text-gray-400">{formatDate(c.createdAt)}</span>
                     </div>
                     {(user?.id === c.user?.id || user?.roleName === 'admin') && (
                       <button
                         onClick={() => handleDeleteComment(c.id)}
-                        className="text-xs text-red-500 hover:text-red-700"
+                        disabled={deleteComment.isPending}
+                        className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
                       >
                         Törlés
                       </button>

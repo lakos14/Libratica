@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { eventsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
+import { useEvents, useCreateEvent, useToggleEventAttend } from '../hooks';
 
 function Events() {
   const { user } = useAuth();
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -16,37 +13,18 @@ function Events() {
     eventDate: '',
     location: '',
   });
-  const [creating, setCreating] = useState(false);
   const [errors, setErrors] = useState({});
   const [filter, setFilter] = useState('all');
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  const loadEvents = async () => {
-    try {
-      const response = await eventsAPI.getAll();
-      setEvents(response.data);
-    } catch (err) {
-      toast.error('Hiba az események betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: events = [], isLoading, isError } = useEvents();
+  const createEvent = useCreateEvent();
+  const toggleAttend = useToggleEventAttend();
 
   const handleToggleAttend = async (id) => {
     if (!user) {
-      toast.error('Bejelentkezés szükséges!');
       return;
     }
-    try {
-      const response = await eventsAPI.toggleAttend(id);
-      toast.success(response.data.message);
-      loadEvents();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    }
+    await toggleAttend.mutateAsync(id);
   };
 
   const validateForm = () => {
@@ -63,19 +41,14 @@ function Events() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setCreating(true);
     try {
-      await eventsAPI.create({
+      await createEvent.mutateAsync({
         ...formData,
         eventDate: formData.eventDate,
       });
-      toast.success('Esemény létrehozva, admin jóváhagyásra vár!');
       setShowCreateModal(false);
       setFormData({ title: '', description: '', type: 'bookfair', eventDate: '', location: '' });
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Hiba történt');
-    } finally {
-      setCreating(false);
+    } catch (error) {
     }
   };
 
@@ -99,10 +72,22 @@ function Events() {
     return e.type === filter;
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Hiba az események betöltésekor
+          </div>
+        </div>
       </div>
     );
   }
@@ -133,10 +118,11 @@ function Events() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${filter === f
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                filter === f
                   ? 'text-white'
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+              }`}
               style={filter === f ? { backgroundColor: '#8b4513' } : {}}
             >
               {f === 'all' ? 'Összes' : f === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
@@ -162,10 +148,11 @@ function Events() {
             {filteredEvents.map((event) => (
               <div key={event.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition">
                 <div className="px-4 pt-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair'
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    event.type === 'bookfair'
                       ? 'bg-blue-100 text-blue-800'
                       : 'bg-green-100 text-green-800'
-                    }`}>
+                  }`}>
                     {getTypeLabel(event.type)}
                   </span>
                   {event.isExpired && (
@@ -215,7 +202,8 @@ function Events() {
                     {user && !event.isExpired && (
                       <button
                         onClick={() => handleToggleAttend(event.id)}
-                        className="flex-1 px-3 py-2 text-sm rounded text-white font-medium"
+                        disabled={toggleAttend.isPending}
+                        className="flex-1 px-3 py-2 text-sm rounded text-white font-medium disabled:opacity-50"
                         style={{ backgroundColor: '#8b4513' }}
                       >
                         Részt veszek
@@ -328,11 +316,11 @@ function Events() {
                 </button>
                 <button
                   type="submit"
-                  disabled={creating}
+                  disabled={createEvent.isPending}
                   className="flex-1 px-4 py-2 text-white rounded disabled:bg-gray-400 font-semibold"
                   style={{ backgroundColor: '#8b4513' }}
                 >
-                  {creating ? 'Létrehozás...' : 'Létrehozás'}
+                  {createEvent.isPending ? 'Létrehozás...' : 'Létrehozás'}
                 </button>
               </div>
             </form>

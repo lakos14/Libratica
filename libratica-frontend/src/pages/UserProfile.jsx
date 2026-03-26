@@ -1,31 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { usersAPI } from '../services/api';
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useUserProfile } from '../hooks';
 
 function UserProfile() {
   const { username } = useParams();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('listings');
 
-  useEffect(() => {
-    loadProfile();
-  }, [username]);
-
-  const loadProfile = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await usersAPI.getPublicProfile(username);
-      setProfile(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Felhasználó nem található');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: profile, isLoading, isError, error } = useUserProfile(username);
 
   const getConditionLabel = (condition) => {
     const labels = {
@@ -54,7 +35,7 @@ function UserProfile() {
     ));
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -62,22 +43,23 @@ function UserProfile() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+            {error?.message || 'Felhasználó nem található'}
           </div>
         </div>
       </div>
     );
   }
 
+  if (!profile) return null;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex items-center gap-6">
             <div className="w-20 h-20 rounded-full bg-[#8b4513] text-white flex items-center justify-center text-3xl font-bold flex-shrink-0">
@@ -88,9 +70,7 @@ function UserProfile() {
               <h1 className="text-2xl font-bold" style={{ color: '#8b4513' }}>
                 {profile.username}
               </h1>
-              {profile.fullName && (
-                <p className="text-gray-600">{profile.fullName}</p>
-              )}
+              {profile.fullName && <p className="text-gray-600">{profile.fullName}</p>}
 
               <div className="flex items-center gap-2 mt-1">
                 {profile.rating ? (
@@ -120,20 +100,18 @@ function UserProfile() {
         <div className="flex gap-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'listings'
-                ? 'border-b-2'
-                : 'text-gray-600 hover:text-gray-800'
-              }`}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'listings' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
+            }`}
             style={activeTab === 'listings' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
             Hirdetések ({profile.listings?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 font-semibold ${activeTab === 'reviews'
-                ? 'border-b-2'
-                : 'text-gray-600 hover:text-gray-800'
-              }`}
+            className={`px-4 py-2 font-semibold ${
+              activeTab === 'reviews' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
+            }`}
             style={activeTab === 'reviews' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
             Értékelések ({profile.reviews?.length || 0})
@@ -174,16 +152,12 @@ function UserProfile() {
                     <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
                       {listing.book?.title}
                     </h3>
-                    <p className="text-xs text-gray-600 mb-2">
-                      {listing.book?.author}
-                    </p>
+                    <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
                     <div className="mt-auto">
                       <p className="font-bold text-sm" style={{ color: '#8b4513' }}>
                         {listing.price?.toLocaleString('hu-HU')} {listing.currency}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {getConditionLabel(listing.condition)}
-                      </p>
+                      <p className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</p>
                     </div>
                   </Link>
                 ))}
@@ -210,17 +184,11 @@ function UserProfile() {
                         <span className="text-yellow-400 text-lg">
                           {renderStars(review.rating)}
                         </span>
-                        <span className="text-sm text-gray-500">
-                          {review.rating}/5
-                        </span>
+                        <span className="text-sm text-gray-500">{review.rating}/5</span>
                       </div>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(review.createdAt)}
-                      </span>
+                      <span className="text-xs text-gray-400">{formatDate(review.createdAt)}</span>
                     </div>
-                    {review.comment && (
-                      <p className="text-gray-700 text-sm">{review.comment}</p>
-                    )}
+                    {review.comment && <p className="text-gray-700 text-sm">{review.comment}</p>}
                   </div>
                 ))}
               </div>

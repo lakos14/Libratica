@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { listingsAPI, searchAPI } from '../services/api';
+import { useListings, useCategories } from '../hooks';
 
 function Listings() {
-  const [listings, setListings] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const pageSize = 12;
   const navigate = useNavigate();
-  const [categories, setCategories] = useState([]);
 
   const [filters, setFilters] = useState({
     query: '',
@@ -23,72 +18,45 @@ function Listings() {
     categoryId: '',
   });
 
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+
   useEffect(() => {
     const bookIdFromUrl = searchParams.get('bookId');
     if (bookIdFromUrl && bookIdFromUrl !== filters.bookId) {
-      setFilters((prev) => ({
-        ...prev,
-        bookId: bookIdFromUrl,
-      }));
+      setFilters((prev) => ({ ...prev, bookId: bookIdFromUrl }));
     }
   }, [searchParams]);
 
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await fetch('http://localhost:5102/api/categories');
-        const data = await response.json();
-        setCategories(data);
-      } catch (error) {
-        console.error('Hiba a kategóriák betöltésekor:', error);
-      }
-    };
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters]);
-
-  useEffect(() => {
     const timer = setTimeout(() => {
-      loadListings();
+      setDebouncedFilters(filters);
+      setCurrentPage(1);
     }, 500);
     return () => clearTimeout(timer);
-  }, [currentPage, filters]);
+  }, [filters]);
 
+  const { data: categories = [] } = useCategories();
 
-  const loadListings = async () => {
-    setLoading(true);
-    try {
-      const response = await searchAPI.searchListings({
-        query: filters.query || undefined,
-        bookId: filters.bookId || undefined,
-        minPrice: filters.minPrice || undefined,
-        maxPrice: filters.maxPrice || undefined,
-        condition: filters.condition || undefined,
-        location: filters.location || undefined,
-        categoryId: filters.categoryId || undefined,
-        isAvailable: true,
-        page: currentPage,
-        pageSize,
-      });
-      setListings(response.data.items);
-      setTotalPages(response.data.totalPages);
-      setTotalCount(response.data.totalCount);
-    } catch (error) {
-      console.error('Hiba a hirdetések betöltésekor:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data, isLoading, isError } = useListings({
+    query: debouncedFilters.query || undefined,
+    bookId: debouncedFilters.bookId || undefined,
+    minPrice: debouncedFilters.minPrice || undefined,
+    maxPrice: debouncedFilters.maxPrice || undefined,
+    condition: debouncedFilters.condition || undefined,
+    location: debouncedFilters.location || undefined,
+    categoryId: debouncedFilters.categoryId || undefined,
+    isAvailable: true,
+    page: currentPage,
+    pageSize,
+  });
+
+  const listings = data?.items || [];
+  const totalPages = data?.totalPages || 1;
+  const totalCount = data?.totalCount || 0;
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
   const clearFilters = () => {
@@ -124,9 +92,7 @@ function Listings() {
         <div className="bg-white border border-gray-200 rounded p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Keresés
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Keresés</label>
               <input
                 type="text"
                 name="query"
@@ -138,9 +104,7 @@ function Listings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Min. ár (Ft)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Min. ár (Ft)</label>
               <input
                 type="number"
                 name="minPrice"
@@ -152,9 +116,7 @@ function Listings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max. ár (Ft)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Max. ár (Ft)</label>
               <input
                 type="number"
                 name="maxPrice"
@@ -166,9 +128,7 @@ function Listings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Állapot
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Állapot</label>
               <select
                 name="condition"
                 value={filters.condition}
@@ -185,9 +145,7 @@ function Listings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Helyszín
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Helyszín</label>
               <input
                 type="text"
                 name="location"
@@ -199,9 +157,7 @@ function Listings() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Kategória
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Kategória</label>
               <select
                 name="categoryId"
                 value={filters.categoryId}
@@ -230,17 +186,23 @@ function Listings() {
           )}
         </div>
 
-        <p className="text-gray-600">
-          {loading ? 'Betöltés...' : `${totalCount} hirdetés találat`}
+        <p className="text-gray-600 mb-4">
+          {isLoading ? 'Betöltés...' : `${totalCount} hirdetés találat`}
         </p>
 
-        {loading && (
+        {isError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            Hiba történt a hirdetések betöltésekor
+          </div>
+        )}
+
+        {isLoading && (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
         )}
 
-        {!loading && listings.length > 0 && (
+        {!isLoading && listings.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {listings.map((listing) => (
               <div
@@ -268,32 +230,25 @@ function Listings() {
                 <h3 className="font-bold text-gray-800 mb-1 text-sm line-clamp-2">
                   {listing.book?.title}
                 </h3>
-                <p className="text-xs text-gray-600 mb-2">
-                  {listing.book?.author}
-                </p>
+                <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
                 <div className="flex flex-col gap-1 mt-auto">
                   <span className="font-bold text-sm" style={{ color: '#8b4513' }}>
                     {listing.price?.toLocaleString('hu-HU')} Ft
                   </span>
-                  <span className="text-xs text-gray-500">
-                    {getConditionLabel(listing.condition)}
-                  </span>
+                  <span className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</span>
                   {listing.location && (
-                    <span className="text-xs text-gray-500">
-                      {listing.location}
-                    </span>
+                    <span className="text-xs text-gray-500">{listing.location}</span>
                   )}
                   <span className="text-xs text-gray-500">
                     👤 {listing.seller?.username}
-                    {listing.seller?.rating
-                      ? ` ⭐ ${listing.seller.rating.toFixed(1)}`
-                      : ''}
+                    {listing.seller?.rating ? ` ⭐ ${listing.seller.rating.toFixed(1)}` : ''}
                   </span>
                 </div>
               </div>
             ))}
           </div>
         )}
+
         {totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-8">
             <button
@@ -304,7 +259,7 @@ function Listings() {
               «
             </button>
             <button
-              onClick={() => setCurrentPage(prev => prev - 1)}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
               disabled={currentPage === 1}
               className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             >
@@ -312,30 +267,34 @@ function Listings() {
             </button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+              .filter((p) => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
               .reduce((acc, p, idx, arr) => {
                 if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
                 acc.push(p);
                 return acc;
               }, [])
-              .map((p, idx) => p === '...' ? (
-                <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">...</span>
-              ) : (
-                <button
-                  key={p}
-                  onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
-                      ? 'text-white border-transparent'
-                      : 'border-gray-300 hover:bg-gray-50'
-                    }`}
-                  style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
-                >
-                  {p}
-                </button>
-              ))}
+              .map((p, idx) =>
+                p === '...' ? (
+                  <span key={`dots-${idx}`} className="px-2 py-2 text-sm text-gray-500">
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={p}
+                    onClick={() => setCurrentPage(p)}
+                    className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
+                        ? 'text-white border-transparent'
+                        : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
+                  >
+                    {p}
+                  </button>
+                )
+              )}
 
             <button
-              onClick={() => setCurrentPage(prev => prev + 1)}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
               disabled={currentPage === totalPages}
               className="px-3 py-2 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             >
@@ -351,7 +310,7 @@ function Listings() {
           </div>
         )}
 
-        {!loading && listings.length === 0 && (
+        {!isLoading && listings.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">Nincs találat</p>
             <p className="text-gray-400 text-sm mt-2">

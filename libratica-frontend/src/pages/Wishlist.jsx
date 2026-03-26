@@ -1,41 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { wishlistAPI } from '../services/api';
-import { toast } from 'react-toastify';
+import { useWishlist, useRemoveFromWishlist } from '../hooks';
 
 function Wishlist() {
-  const [wishlist, setWishlist] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadWishlist();
-  }, []);
-
-  const loadWishlist = async () => {
-    try {
-      const response = await wishlistAPI.getWishlist();
-      setWishlist(response.data);
-    } catch (err) {
-      toast.error('Hiba a kívánságlista betöltésekor');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: wishlist = [], isLoading, isError } = useWishlist();
+  const removeFromWishlist = useRemoveFromWishlist();
 
   const handleRemove = async (bookId) => {
-    try {
-      await wishlistAPI.removeFromWishlist(bookId);
-      toast.success('Eltávolítva a kívánságlistából!');
-      loadWishlist();
-    } catch (err) {
-      toast.error('Hiba az eltávolításkor');
-    }
+    await removeFromWishlist.mutateAsync(bookId);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            Hiba a kívánságlista betöltésekor
+          </div>
+        </div>
       </div>
     );
   }
@@ -102,9 +92,10 @@ function Wishlist() {
                   </Link>
                   <button
                     onClick={() => handleRemove(item.book?.id)}
-                    className="px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200"
+                    disabled={removeFromWishlist.isPending}
+                    className="px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200 disabled:opacity-50"
                   >
-                    Törlés
+                    {removeFromWishlist.isPending ? '...' : 'Törlés'}
                   </button>
                 </div>
               </div>

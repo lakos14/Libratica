@@ -15,7 +15,6 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState('');
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -41,6 +40,17 @@ const Register = () => {
     if (formData.password !== formData.confirmPassword) {
       setError('A két jelszó nem egyezik meg!');
       return false;
+    }
+    if (formData.phoneNumber) {
+      const cleanedPhone = formData.phoneNumber.replace(/[\s\-]/g, '');
+      if (!/^[+0-9]+$/.test(cleanedPhone)) {
+        setError('A telefonszám csak számokat, +, - és szóközt tartalmazhat!');
+        return false;
+      }
+      if (cleanedPhone.length < 11) {
+        setError('A telefonszám túl rövid! (min. 11 karakter, pl. +36301234567)');
+        return false;
+      }
     }
     return true;
   };
@@ -154,7 +164,6 @@ const Register = () => {
                 {showPassword ? 'Elrejt' : 'Mutat'}
               </button>
             </div>
-
             <p className="text-xs text-gray-500 mt-1">
               Min. 8 karakter, tartalmazzon betűt és számot
             </p>

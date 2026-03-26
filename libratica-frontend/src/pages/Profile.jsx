@@ -4,7 +4,7 @@ import { profileAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 const Profile = () => {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
 
   const [profileData, setProfileData] = useState({
     username: user?.username || '',
@@ -23,6 +23,19 @@ const Profile = () => {
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
+
+    if (profileData.phoneNumber) {
+      const cleanedPhone = profileData.phoneNumber.replace(/[\s\-]/g, '');
+      if (!/^[+0-9]+$/.test(cleanedPhone)) {
+        toast.error('A telefonszám csak számokat, +, - és szóközt tartalmazhat!');
+        return;
+      }
+      if (cleanedPhone.length < 11) {
+        toast.error('A telefonszám túl rövid! (min. 11 karakter, pl. +36301234567)');
+        return;
+      }
+    }
+
     setProfileLoading(true);
 
     try {
@@ -34,6 +47,7 @@ const Profile = () => {
       toast.success('Profil sikeresen mentve!');
       setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba a mentés során');
     } finally {
       setProfileLoading(false);
     }
@@ -42,13 +56,23 @@ const Profile = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('A két jelszó nem egyezik meg.');
+    if (passwordData.newPassword.length < 8) {
+      toast.error('Az új jelszó minimum 8 karakter legyen!');
       return;
     }
 
-    if (passwordData.newPassword.length < 6) {
-      toast.error('Az új jelszó minimum 6 karakter.');
+    if (!/[a-zA-Z]/.test(passwordData.newPassword)) {
+      toast.error('A jelszónak tartalmaznia kell legalább egy betűt!');
+      return;
+    }
+
+    if (!/[0-9]/.test(passwordData.newPassword)) {
+      toast.error('A jelszónak tartalmaznia kell legalább egy számot!');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('A két jelszó nem egyezik meg!');
       return;
     }
 
@@ -61,6 +85,7 @@ const Profile = () => {
       toast.success('Jelszó sikeresen megváltoztatva!');
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
+      toast.error(err.response?.data?.message || 'Hiba a jelszó változtatásakor');
     } finally {
       setPasswordLoading(false);
     }
@@ -125,6 +150,8 @@ const Profile = () => {
                 value={profileData.phoneNumber}
                 onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
                 placeholder="+36301234567"
+                pattern="[+0-9\s\-]+"
+                title="Csak számokat, +, - és szóközt tartalmazhat"
                 maxLength={20}
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
               />
@@ -152,7 +179,9 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.currentPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, currentPassword: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
                 required
               />
@@ -165,11 +194,17 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                minLength={6}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, newPassword: e.target.value })
+                }
+                minLength={8}
+                placeholder="Min. 8 karakter, betű és szám"
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
                 required
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Min. 8 karakter, tartalmazzon betűt és számot
+              </p>
             </div>
 
             <div>
@@ -179,7 +214,9 @@ const Profile = () => {
               <input
                 type="password"
                 value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                onChange={(e) =>
+                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
+                }
                 className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
                 required
               />

@@ -79,8 +79,6 @@ const Login = () => {
             disabled={loading}
             className="w-full text-white py-3 rounded-lg disabled:bg-gray-400 font-semibold"
             style={{ backgroundColor: loading ? undefined : '#8b4513' }}
-            onMouseEnter={(e) => !loading && (e.target.style.backgroundColor = '#654321')}
-            onMouseLeave={(e) => !loading && (e.target.style.backgroundColor = '#8b4513')}
           >
             {loading ? 'Bejelentkezés...' : 'Bejelentkezés'}
           </button>

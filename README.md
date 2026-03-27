@@ -2,10 +2,16 @@
 2026.03.25
 
 ## Tervezett funkciók a második félévre:
-### Opcionális:
-- elfelejtett jelszó, email verification, email értesítések, ha marad idő
 ### Kötelező:
 - code review, tesztelés
+- kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján
+- minden jelszóhoz mutasd gomb
+- a kapcsolatfelvételnél legyen egy másik gomb ami csak az alapértelmezet email alkalmazást nyitja meg
+- ha valaki profilját megtekinti a felhasználó, akkor legyen ott mindkét email gomb és egy telefonszám gomb, ez akár a hirdetéseknél is ott lehetne de csak akkor, ha az eladó engedélyezi, hogy felfedjék a telefonszámát
+- ha megrendelés alatt van egy hirdetés, akkor ne lehessen szerkeszteni
+- az eseményeknél legyen egy beágyazott térkép, ahol a helyszínt lehet kiválasztani
+- ai keresést a hirdetés oldalra bevonni, felesleges külön oldal neki
+- eseményeknél helyszín alapú szűrő
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:

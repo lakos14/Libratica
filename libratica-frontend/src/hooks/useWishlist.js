@@ -10,6 +10,9 @@ export const useWishlist = () => {
       const response = await wishlistAPI.getWishlist();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -21,6 +24,9 @@ export const useWishlistCheck = (bookId) => {
       return response.data;
     },
     enabled: !!bookId,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -51,8 +57,8 @@ export const useRemoveFromWishlist = () => {
       const response = await wishlistAPI.removeFromWishlist(bookId);
       return response.data;
     },
-    onSuccess: (_, bookId) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
+    onSuccess: async (_, bookId) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
       queryClient.setQueryData(queryKeys.wishlistCheck(bookId), { isInWishlist: false });
       toast.success('Eltávolítva a kívánságlistából!');
     },
@@ -78,8 +84,8 @@ export const useToggleWishlist = () => {
         return { action: 'added', bookId };
       }
     },
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
+    onSuccess: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.wishlist });
       queryClient.setQueryData(queryKeys.wishlistCheck(result.bookId), {
         isInWishlist: result.action === 'added',
       });

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEvent, useToggleEventAttend, useAddEventComment, useDeleteEventComment } from '../hooks';
 import { toast } from 'react-toastify';
+import MapPicker from '../components/MapPicker';
 
 function EventDetails() {
   const { id } = useParams();
@@ -82,9 +83,8 @@ function EventDetails() {
         <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <span
-              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                event.type === 'bookfair' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-              }`}
+              className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                }`}
             >
               {getTypeLabel(event.type)}
             </span>
@@ -106,6 +106,11 @@ function EventDetails() {
               <p className="text-gray-600">
                 📍 <span className="font-medium">{event.location}</span>
               </p>
+              {event.latitude && event.longitude && (
+                <div className="mt-4">
+                  <MapPicker position={[event.latitude, event.longitude]} setPosition={() => { }} />
+                </div>
+              )}
               <p className="text-gray-600">
                 👤 Szervező: <span className="font-medium">{event.organizer?.username}</span>
               </p>
@@ -124,16 +129,15 @@ function EventDetails() {
             <button
               onClick={handleToggleAttend}
               disabled={toggleAttend.isPending}
-              className={`px-6 py-2 rounded font-semibold transition disabled:opacity-50 ${
-                attending ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'text-white'
-              }`}
+              className={`px-6 py-2 rounded font-semibold transition disabled:opacity-50 ${attending ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'text-white'
+                }`}
               style={!attending ? { backgroundColor: '#8b4513' } : {}}
             >
               {toggleAttend.isPending
                 ? '...'
                 : attending
-                ? 'Részt veszek (visszavonás)'
-                : '+ Részt veszek'}
+                  ? 'Részt veszek (visszavonás)'
+                  : '+ Részt veszek'}
             </button>
           )}
         </div>

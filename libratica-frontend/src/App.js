@@ -18,7 +18,6 @@ import Orders from './pages/Orders';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import UserProfile from './pages/UserProfile';
-import AISearch from './pages/AISearch';
 import Wishlist from './pages/Wishlist';
 import BookCollection from './pages/BookCollection';
 import Recommendations from './pages/Recommendations';
@@ -106,12 +105,6 @@ function App() {
               path="/users/:username"
               element={
                 <UserProfile />
-              }
-            />
-            <Route
-              path="/ai-search"
-              element={
-                <AISearch />
               }
             />
             <Route

@@ -17,6 +17,7 @@ namespace Libratica.DataContext.DTOs
 
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
+        public bool? ShowPhoneNumber { get; set; }
     }
 
 }

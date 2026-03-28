@@ -19,5 +19,6 @@ namespace Libratica.DataContext.DTOs
         public bool IsVerified { get; set; }
         public decimal? Rating { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool ShowPhoneNumber { get; set; }
     }
 }

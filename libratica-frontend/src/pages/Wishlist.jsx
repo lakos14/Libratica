@@ -55,21 +55,25 @@ function Wishlist() {
                 key={item.id}
                 className="bg-white border border-gray-200 rounded p-3 flex flex-col"
               >
-                {item.book?.coverImageUrl ? (
-                  <img
-                    src={item.book.coverImageUrl}
-                    alt={item.book.title}
-                    className="w-full h-48 object-cover rounded mb-3"
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-gray-400 text-4xl">📚</span>
-                  </div>
-                )}
+                {(() => {
+                  const imgUrl = item.book?.firstListingImage
+                    ? `http://localhost:5102${JSON.parse(item.book.firstListingImage)[0]}`
+                    : item.book?.coverImageUrl;
+                  return imgUrl ? (
+                    <img src={imgUrl} alt={item.book.title} className="w-full h-48 object-cover rounded mb-3" />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                      <span className="text-gray-400 text-4xl">📚</span>
+                    </div>
+                  );
+                })()}
 
-                <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
+                <Link
+                  to={`/listings?bookId=${item.book?.id}`}
+                  className="font-bold text-sm text-gray-800 line-clamp-2 mb-1 hover:text-[#8b4513]"
+                >
                   {item.book?.title}
-                </h3>
+                </Link>
                 <p className="text-xs text-gray-600 mb-2">
                   {item.book?.author}
                 </p>
@@ -91,7 +95,9 @@ function Wishlist() {
                     Hirdetések
                   </Link>
                   <button
-                    onClick={() => handleRemove(item.book?.id)}
+                    onClick={async () => {
+                      await handleRemove(item.book?.id);
+                    }}
                     disabled={removeFromWishlist.isPending}
                     className="px-2 py-1 text-xs rounded bg-red-100 text-red-600 hover:bg-red-200 disabled:opacity-50"
                   >

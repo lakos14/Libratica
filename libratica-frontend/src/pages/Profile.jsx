@@ -6,10 +6,15 @@ import { toast } from 'react-toastify';
 const Profile = () => {
   const { user } = useAuth();
 
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [profileData, setProfileData] = useState({
     username: user?.username || '',
     fullName: user?.fullName || '',
     phoneNumber: user?.phoneNumber || '',
+    showPhoneNumber: user?.showPhoneNumber || false,
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -43,6 +48,7 @@ const Profile = () => {
         username: profileData.username || null,
         fullName: profileData.fullName || null,
         phoneNumber: profileData.phoneNumber || null,
+        showPhoneNumber: profileData.showPhoneNumber,
       });
       toast.success('Profil sikeresen mentve!');
       setTimeout(() => window.location.reload(), 1500);
@@ -157,6 +163,18 @@ const Profile = () => {
               />
             </div>
 
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                id="showPhone"
+                checked={profileData.showPhoneNumber || false}
+                onChange={(e) => setProfileData({ ...profileData, showPhoneNumber: e.target.checked })}
+              />
+              <label htmlFor="showPhone" className="text-sm text-gray-700">
+                Telefonszámom megjelenítése a profilomon és hirdetéseimen
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={profileLoading}
@@ -176,32 +194,40 @@ const Profile = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Jelenlegi jelszó
               </label>
-              <input
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showCurrentPassword ? 'text' : 'password'}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 pr-16"
+                  required
+                />
+                <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm font-medium">
+                  {showCurrentPassword ? 'Elrejt' : 'Mutat'}
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Új jelszó
               </label>
-              <input
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, newPassword: e.target.value })
-                }
-                minLength={8}
-                placeholder="Min. 8 karakter, betű és szám"
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  minLength={8}
+                  placeholder="Min. 8 karakter, betű és szám"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 pr-16"
+                  required
+                />
+                <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm font-medium">
+                  {showNewPassword ? 'Elrejt' : 'Mutat'}
+                </button>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
                 Min. 8 karakter, tartalmazzon betűt és számot
               </p>
@@ -211,15 +237,19 @@ const Profile = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Új jelszó megerősítése
               </label>
-              <input
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 pr-16"
+                  required
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm font-medium">
+                  {showConfirmPassword ? 'Elrejt' : 'Mutat'}
+                </button>
+              </div>
             </div>
 
             <button

@@ -66,10 +66,11 @@ namespace Libratica.Services.Implementations
                 PhoneNumber = user.PhoneNumber,
                 ProfilePictureUrl = user.ProfilePictureUrl,
                 Bio = user.Bio,
-                RoleName = role.Name,
+                RoleName = user.Role.Name,
                 IsVerified = user.IsVerified,
                 Rating = user.Rating,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                ShowPhoneNumber = user.ShowPhoneNumber,
             };
 
             return new AuthResponseDto
@@ -118,7 +119,8 @@ namespace Libratica.Services.Implementations
                 RoleName = user.Role.Name,
                 IsVerified = user.IsVerified,
                 Rating = user.Rating,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                ShowPhoneNumber = user.ShowPhoneNumber,
             };
 
             return new AuthResponseDto
@@ -149,7 +151,8 @@ namespace Libratica.Services.Implementations
                 RoleName = user.Role.Name,
                 IsVerified = user.IsVerified,
                 Rating = user.Rating,
-                CreatedAt = user.CreatedAt
+                CreatedAt = user.CreatedAt,
+                ShowPhoneNumber = user.ShowPhoneNumber,
             };
         }
 

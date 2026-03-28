@@ -35,7 +35,7 @@ namespace Libratica.Controllers
                 - category: string (ha felismerhető: Sci-Fi, Fantasy, Romantikus, Krimi, Ismeretterjesztő, Történelem, Informatika, Gyerekkönyv - vagy null)
                 - minPrice: number vagy null
                 - maxPrice: number vagy null  
-                - condition: string (mint, excellent, good, fair, poor) vagy null
+                - condition: CSAK ezek egyike lehet: mint, excellent, good, fair, poor - vagy null. SOHA ne adj vissza magyar szót!
 
                 Fontos szabályok:
                 - keywords legyen minél rövidebb, csak 1-2 szó!

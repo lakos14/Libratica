@@ -50,6 +50,7 @@ namespace Libratica.Controllers
                     Items = cartItems.Select(ci => new CartItemDto
                     {
                         Id = ci.Id,
+                        ListingId = ci.ListingId,
                         Listing = MapToListingDto(ci.Listing),
                         Quantity = ci.Quantity,
                         Price = ci.Price
@@ -89,13 +90,20 @@ namespace Libratica.Controllers
                     return BadRequest(new { message = "Saját hirdetést nem vásárolhatsz meg!" });
                 }
 
-                if (listing.Quantity < addToCartDto.Quantity)
-                {
-                    return BadRequest(new { message = $"Csak {listing.Quantity} db elérhető" });
-                }
-
                 var existingItem = await _context.CartItems
                     .FirstOrDefaultAsync(ci => ci.CartId == cart.Id && ci.ListingId == addToCartDto.ListingId);
+
+                var currentInCart = existingItem?.Quantity ?? 0;
+
+                if (currentInCart + addToCartDto.Quantity > listing.Quantity)
+                {
+                    var availableToAdd = listing.Quantity - currentInCart;
+                    if (availableToAdd <= 0)
+                    {
+                        return BadRequest(new { message = "Ez a termék már a kosárban van a maximális mennyiségben!" });
+                    }
+                    return BadRequest(new { message = $"Csak {availableToAdd} db adható még a kosárhoz!" });
+                }
 
                 if (existingItem != null)
                 {

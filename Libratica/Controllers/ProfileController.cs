@@ -41,6 +41,7 @@ namespace Libratica.Controllers
 
                 if (dto.FullName != null) user.FullName = dto.FullName;
                 if (dto.PhoneNumber != null) user.PhoneNumber = dto.PhoneNumber;
+                if (dto.ShowPhoneNumber.HasValue) user.ShowPhoneNumber = dto.ShowPhoneNumber.Value;
 
                 user.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
@@ -57,7 +58,8 @@ namespace Libratica.Controllers
                     RoleName = user.Role.Name,
                     IsVerified = user.IsVerified,
                     Rating = user.Rating,
-                    CreatedAt = user.CreatedAt
+                    CreatedAt = user.CreatedAt,
+                    ShowPhoneNumber = user.ShowPhoneNumber,
                 });
             }
             catch (Exception ex)

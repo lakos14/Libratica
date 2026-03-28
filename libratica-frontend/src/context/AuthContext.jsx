@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { queryClient } from '../lib/queryClient';
 
 const AuthContext = createContext();
 
@@ -41,6 +42,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login(credentials);
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
+      queryClient.clear();
+      
       return { success: true };
     } catch (error) {
       return {
@@ -56,6 +59,8 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(registerData);
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
+      queryClient.clear();
+      
       return { success: true };
     } catch (error) {
       return {
@@ -68,6 +73,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
+    queryClient.clear();
   };
 
   const value = {

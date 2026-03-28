@@ -9,6 +9,9 @@ export const useListings = (params = {}) => {
       const response = await searchAPI.searchListings(params);
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -20,6 +23,8 @@ export const useListing = (id) => {
       return response.data;
     },
     enabled: !!id,
+    staleTime: 0,
+    gcTime: 0,
   });
 };
 

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
   useListing,
   useAddToCart,
+  useCart,
   useWishlistCheck,
   useToggleWishlist,
   useCreateReport,
@@ -18,18 +19,28 @@ function ListingDetails() {
   const [reportModal, setReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [selectedImage, setSelectedImage] = useState(0);
-
   const { data: listing, isLoading, isError, error } = useListing(id);
+  const { data: cart } = useCart();
   const addToCart = useAddToCart();
   const { data: wishlistData } = useWishlistCheck(listing?.book?.id);
   const toggleWishlist = useToggleWishlist();
   const createReport = useCreateReport();
 
   const isInWishlist = wishlistData?.isInWishlist;
+  const quantityInCart = cart?.items?.find(item => item.listingId === listing?.id)?.quantity || 0;
+  const availableToAdd = listing ? listing.quantity - quantityInCart : 0;
 
   const handleAddToCart = async () => {
     if (!user) {
       navigate('/login');
+      return;
+    }
+    if (quantity > availableToAdd) {
+      if (availableToAdd <= 0) {
+        toast.error('Ez a termék már a kosárban van a maximális mennyiségben!');
+      } else {
+        toast.error(`Csak ${availableToAdd} db adható még a kosárhoz!`);
+      }
       return;
     }
 
@@ -128,11 +139,10 @@ function ListingDetails() {
                         onClick={() => setSelectedImage(index)}
                         src={`http://localhost:5102${img}`}
                         alt={`Kép ${index + 1}`}
-                        className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${
-                          selectedImage === index
-                            ? 'border-[#8b4513]'
-                            : 'border-gray-200 hover:border-gray-400'
-                        }`}
+                        className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${selectedImage === index
+                          ? 'border-[#8b4513]'
+                          : 'border-gray-200 hover:border-gray-400'
+                          }`}
                       />
                     ))}
                   </div>
@@ -210,46 +220,71 @@ function ListingDetails() {
                     : '⭐ Még nincs értékelés'}
                 </span>
               </p>
-              <a
-                href={`https://mail.google.com/mail/?view=cm&to=${
-                  listing.seller?.email
-                }&su=Érdeklődés a hirdetésről: ${encodeURIComponent(
-                  listing.book?.title
-                )}&body=Szia ${
-                  listing.seller?.username
-                },%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(
-                  listing.book?.title
-                )} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-block mt-2 text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
-              >
-                Kapcsolatfelvétel az eladóval
-              </a>
+              {!isOwnListing && (
+                <div className="flex gap-2 mt-2">
+
+                  <a href={`https://mail.google.com/mail/?view=cm&to=${listing.seller?.email}&su=Érdeklődés a hirdetésről: ${encodeURIComponent(listing.book?.title)}&body=Szia ${listing.seller?.username},%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(listing.book?.title)} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+                  >
+                    Gmail
+                  </a>
+
+                  <a href={`mailto:${listing.seller?.email}?subject=Érdeklődés a hirdetésről: ${encodeURIComponent(listing.book?.title)}&body=Szia ${listing.seller?.username},%0A%0AÉrdeklődnék a következő hirdetésed iránt:%0A${encodeURIComponent(listing.book?.title)} - ${listing.price?.toLocaleString('hu-HU')} Ft%0A%0A`}
+                    className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+                  >
+                    Email alkalmazás
+                  </a>
+
+                  {listing.seller?.phoneNumber && (
+                    <a href={`tel:${listing.seller.phoneNumber}`}
+                      className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+                    >
+                      📞 {listing.seller.phoneNumber}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
             {!isOwnListing && listing.isAvailable && user && (
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Mennyiség</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={listing.quantity}
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                    className="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
-                  />
-                </div>
+                {availableToAdd > 0 ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Mennyiség {quantityInCart > 0 && `(${quantityInCart} db már a kosárban)`}
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max={availableToAdd}
+                        value={quantity}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 1;
+                          setQuantity(Math.min(Math.max(1, val), availableToAdd));
+                        }}
+                        className="w-24 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+                      />
+                    </div>
 
-                <button
-                  onClick={handleAddToCart}
-                  disabled={addToCart.isPending}
-                  className="w-full px-6 py-3 rounded text-white font-semibold disabled:opacity-50"
-                  style={{ backgroundColor: '#8b4513' }}
-                >
-                  {addToCart.isPending ? 'Hozzáadás...' : 'Kosárba rakom'}
-                </button>
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={addToCart.isPending}
+                      className="w-full px-6 py-3 rounded text-white font-semibold disabled:opacity-50"
+                      style={{ backgroundColor: '#8b4513' }}
+                    >
+                      {addToCart.isPending ? 'Hozzáadás...' : 'Kosárba rakom'}
+                    </button>
+                  </>
+                ) : (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded p-4">
+                    <p className="text-yellow-800 text-sm">
+                      Ez a termék már a kosárban van a maximális mennyiségben ({quantityInCart} db).
+                    </p>
+                  </div>
+                )}
 
                 <button
                   onClick={handleWishlist}

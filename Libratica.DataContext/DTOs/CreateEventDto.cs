@@ -26,5 +26,7 @@ namespace Libratica.DataContext.DTOs
         [Required(ErrorMessage = "Helyszín kötelező")]
         [MaxLength(300)]
         public string Location { get; set; } = string.Empty;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

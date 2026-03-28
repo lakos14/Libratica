@@ -78,7 +78,9 @@ namespace Libratica.Controllers
                     user.CreatedAt,
                     ActiveListingsCount = activeListings.Count(),
                     Listings = activeListings,
-                    Reviews = reviews
+                    Reviews = reviews,
+                    user.Email,
+                    PhoneNumber = user.ShowPhoneNumber ? user.PhoneNumber : null,
                 });
             }
             catch (Exception ex)

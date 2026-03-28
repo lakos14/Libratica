@@ -39,6 +39,7 @@ namespace Libratica.DataContext.Entities
         public DateTime? LastLoginAt { get; set; }
         [Column(TypeName = "decimal(3,2)")]
         public decimal? Rating { get; set; }
+        public bool ShowPhoneNumber { get; set; } = false;
         public ICollection<Listing> Listings { get; set; } = new List<Listing>();
         public ICollection<Order> OrdersAsBuyer { get; set; } = new List<Order>();
         public ICollection<Order> OrdersAsSeller { get; set; } = new List<Order>();

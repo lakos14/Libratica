@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useListings, useCategories } from '../hooks';
+import { useListings, useCategories, useAISearch } from '../hooks';
+
 
 function Listings() {
   const [searchParams] = useSearchParams();
@@ -18,13 +19,18 @@ function Listings() {
     categoryId: '',
   });
 
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiSearching, setAiSearching] = useState(false);
+  const aiSearch = useAISearch();
+
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
   useEffect(() => {
     const bookIdFromUrl = searchParams.get('bookId');
-    if (bookIdFromUrl && bookIdFromUrl !== filters.bookId) {
-      setFilters((prev) => ({ ...prev, bookId: bookIdFromUrl }));
-    }
+    setFilters(prev => ({
+      ...prev,
+      bookId: bookIdFromUrl || '',
+    }));
   }, [searchParams]);
 
   useEffect(() => {
@@ -59,6 +65,46 @@ function Listings() {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAISearch = async (e) => {
+    e.preventDefault();
+    if (!aiQuery.trim()) return;
+
+    setAiSearching(true);
+    try {
+      const params = await aiSearch.mutateAsync(aiQuery);
+
+      const matchedCategory = categories.find(
+        (c) => c.name.toLowerCase() === params.category?.toLowerCase()
+      ) || categories.find(
+        (c) => c.name.toLowerCase() === params.keywords?.toLowerCase()
+      );
+
+      const isKeywordACategory = categories.some(
+        (c) => c.name.toLowerCase() === params.keywords?.toLowerCase()
+      );
+
+      const genericWords = ['könyv', 'könyvek', 'regény', 'regények', 'olcsó', 'drága', 'könyveket', 'regényt', 'krimit', 'krimik', 'sci-fit', 'fantasyt', 'könyvet'];
+      const isKeywordGeneric = genericWords.some(
+        (w) => w === params.keywords?.toLowerCase()
+      );
+
+      const validConditions = ['mint', 'excellent', 'good', 'fair', 'poor'];
+      const condition = validConditions.includes(params.condition) ? params.condition : '';
+
+      setFilters(prev => ({
+        ...prev,
+        query: isKeywordACategory || isKeywordGeneric ? '' : params.keywords || '',
+        categoryId: matchedCategory?.id || '',
+        minPrice: params.minPrice || '',
+        maxPrice: params.maxPrice || '',
+        condition: condition,
+      }));
+    } catch (err) {
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
   const clearFilters = () => {
     setFilters({
       query: '',
@@ -88,6 +134,27 @@ function Listings() {
         <h1 className="text-3xl font-bold mb-6" style={{ color: '#8b4513' }}>
           Hirdetések böngészése
         </h1>
+
+        <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+          <p className="text-sm font-medium text-blue-800 mb-2">AI Keresés</p>
+          <form onSubmit={handleAISearch} className="flex gap-2">
+            <input
+              type="text"
+              value={aiQuery}
+              onChange={(e) => setAiQuery(e.target.value)}
+              placeholder="Pl: Fantasy regényt keresek sárkányokról olcsón..."
+              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+            />
+            <button
+              type="submit"
+              disabled={aiSearching}
+              className="px-4 py-2 text-white rounded disabled:bg-gray-400 whitespace-nowrap"
+              style={{ backgroundColor: '#8b4513' }}
+            >
+              {aiSearching ? 'Keresés...' : 'AI Keresés'}
+            </button>
+          </form>
+        </div>
 
         <div className="bg-white border border-gray-200 rounded p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -210,23 +277,18 @@ function Listings() {
                 onClick={() => navigate(`/listings/${listing.id}`)}
                 className="bg-white border border-gray-200 rounded p-3 cursor-pointer hover:border-gray-400 transition-colors flex flex-col"
               >
-                {listing.images?.length > 0 ? (
-                  <img
-                    src={`http://localhost:5102${listing.images[0]}`}
-                    alt={listing.book?.title}
-                    className="w-full h-64 object-cover rounded mb-3"
-                  />
-                ) : listing.book?.coverImageUrl ? (
-                  <img
-                    src={listing.book.coverImageUrl}
-                    alt={listing.book?.title}
-                    className="w-full h-64 object-cover rounded mb-3"
-                  />
-                ) : (
-                  <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-gray-400 text-4xl">📚</span>
-                  </div>
-                )}
+                {(() => {
+                  const imgUrl = listing.images?.length > 0
+                    ? `http://localhost:5102${listing.images[0]}`
+                    : listing.book?.coverImageUrl;
+                  return imgUrl ? (
+                    <img src={imgUrl} alt={listing.book?.title} className="w-full h-64 object-cover rounded mb-3" />
+                  ) : (
+                    <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                      <span className="text-gray-400 text-4xl">📚</span>
+                    </div>
+                  );
+                })()}
                 <h3 className="font-bold text-gray-800 mb-1 text-sm line-clamp-2">
                   {listing.book?.title}
                 </h3>
@@ -283,8 +345,8 @@ function Listings() {
                     key={p}
                     onClick={() => setCurrentPage(p)}
                     className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
-                        ? 'text-white border-transparent'
-                        : 'border-gray-300 hover:bg-gray-50'
+                      ? 'text-white border-transparent'
+                      : 'border-gray-300 hover:bg-gray-50'
                       }`}
                     style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
                   >

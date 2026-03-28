@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useBooksWithListings, useCategories } from '../hooks';
+import { useBooksWithListings, useCategories, useAISearch } from '../hooks';
+
 
 function Books() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,6 +17,10 @@ function Books() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [debouncedFilters, setDebouncedFilters] = useState(filters);
 
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiSearching, setAiSearching] = useState(false);
+  const aiSearch = useAISearch();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -26,7 +31,7 @@ function Books() {
   }, [searchQuery, filters]);
 
   const { data: categories = [] } = useCategories();
-  
+
   const { data, isLoading, isError, error } = useBooksWithListings({
     query: debouncedQuery || undefined,
     author: debouncedFilters.author || undefined,
@@ -49,6 +54,39 @@ function Books() {
     }));
   };
 
+  const handleAISearch = async (e) => {
+    e.preventDefault();
+    if (!aiQuery.trim()) return;
+
+    setAiSearching(true);
+    try {
+      const params = await aiSearch.mutateAsync(aiQuery);
+
+      const matchedCategory = categories.find(
+        (c) => c.name.toLowerCase() === params.category?.toLowerCase()
+      ) || categories.find(
+        (c) => c.name.toLowerCase() === params.keywords?.toLowerCase()
+      );
+
+      const genericWords = ['könyv', 'könyvek', 'regény', 'regények', 'olcsó', 'drága', 'könyveket', 'regényt', 'krimit', 'krimik', 'sci-fit', 'fantasyt', 'könyvet', 'gyerekkönyvek', 'gyerekkönyvet', 'informatikát', 'történelmet', 'gyerek', 'gyerekkönyv'];
+      const isKeywordACategory = categories.some(
+        (c) => c.name.toLowerCase() === params.keywords?.toLowerCase()
+      );
+      const isKeywordGeneric = genericWords.some(
+        (w) => w === params.keywords?.toLowerCase()
+      );
+
+      setFilters(prev => ({
+        ...prev,
+        author: isKeywordACategory || isKeywordGeneric ? '' : params.keywords || '',
+        categoryId: matchedCategory?.id || '',
+      }));
+    } catch (err) {
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setFilters({
@@ -65,6 +103,27 @@ function Books() {
         <h1 className="text-3xl font-bold mb-6" style={{ color: '#8b4513' }}>
           Könyvek böngészése
         </h1>
+
+        <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+          <p className="text-sm font-medium text-blue-800 mb-2">AI Keresés</p>
+          <form onSubmit={handleAISearch} className="flex gap-2">
+            <input
+              type="text"
+              value={aiQuery}
+              onChange={(e) => setAiQuery(e.target.value)}
+              placeholder="Pl: Fantasy regényt keresek sárkányokról..."
+              className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+            />
+            <button
+              type="submit"
+              disabled={aiSearching}
+              className="px-4 py-2 text-white rounded disabled:bg-gray-400 whitespace-nowrap"
+              style={{ backgroundColor: '#8b4513' }}
+            >
+              {aiSearching ? 'Keresés...' : 'AI Keresés'}
+            </button>
+          </form>
+        </div>
 
         <div className="bg-white border border-gray-200 rounded p-4 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -180,17 +239,18 @@ function Books() {
                 key={book.id}
                 className="bg-white border border-gray-200 rounded p-3 flex flex-col"
               >
-                {book.coverImageUrl ? (
-                  <img
-                    src={book.coverImageUrl}
-                    alt={book.title}
-                    className="w-full h-64 object-cover rounded mb-3"
-                  />
-                ) : (
-                  <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                    <span className="text-gray-400 text-4xl">📚</span>
-                  </div>
-                )}
+                {(() => {
+                  const imgUrl = book.firstListingImage
+                    ? `http://localhost:5102${JSON.parse(book.firstListingImage)[0]}`
+                    : book.coverImageUrl;
+                  return imgUrl ? (
+                    <img src={imgUrl} alt={book.title} className="w-full h-64 object-cover rounded mb-3" />
+                  ) : (
+                    <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                      <span className="text-gray-400 text-4xl">📚</span>
+                    </div>
+                  );
+                })()}
                 <h3 className="font-bold text-gray-800 mb-1 text-sm line-clamp-2">
                   {book.title}
                 </h3>
@@ -244,11 +304,10 @@ function Books() {
                 <button
                   key={p}
                   onClick={() => setCurrentPage(p)}
-                  className={`px-3 py-2 text-sm rounded border font-medium ${
-                    currentPage === p
-                      ? 'text-white border-transparent'
-                      : 'border-gray-300 hover:bg-gray-50'
-                  }`}
+                  className={`px-3 py-2 text-sm rounded border font-medium ${currentPage === p
+                    ? 'text-white border-transparent'
+                    : 'border-gray-300 hover:bg-gray-50'
+                    }`}
                   style={currentPage === p ? { backgroundColor: '#8b4513' } : {}}
                 >
                   {p}

@@ -46,18 +46,33 @@ namespace Libratica.Controllers
                     .ToListAsync();
 
                 // 3. Lekérjük a vásárolt könyvek kategóriáit
-                var preferredCategoryIds = await _context.BookCategories
-                    .Where(bc => purchasedBookIds.Contains(bc.BookId))
-                    .Select(bc => bc.CategoryId)
+                var wishlistCategoryIds = await _context.Wishlists
+                    .Where(w => w.UserId == userId)
+                    .SelectMany(w => w.Book.BookCategories.Select(bc => bc.CategoryId))
                     .Distinct()
                     .ToListAsync();
+
+                List<int> preferredCategoryIds;
+
+                if (wishlistCategoryIds.Any())
+                {
+                    preferredCategoryIds = wishlistCategoryIds;
+                }
+                else
+                {
+                    preferredCategoryIds = await _context.BookCategories
+                        .Where(bc => purchasedBookIds.Contains(bc.BookId))
+                        .Select(bc => bc.CategoryId)
+                        .Distinct()
+                        .ToListAsync();
+                }
 
                 List<object> recommendations;
 
                 if (preferredCategoryIds.Any())
                 {
                     // 4a. Ha van vásárlási előzmény — kategória alapú ajánlás
-                    var excludedBookIds = purchasedBookIds.Concat(wishlistBookIds).Distinct().ToList();
+                    var excludedBookIds = purchasedBookIds.Distinct().ToList();
 
                     recommendations = await _context.Listings
                         .Include(l => l.Book)
@@ -93,7 +108,7 @@ namespace Libratica.Controllers
                                 l.Seller.Username,
                                 l.Seller.Rating
                             },
-                            ReasonText = "A korábbi vásárlásaid alapján"
+                            ReasonText = "A kívánságlistád és vásárlásaid alapján"
                         })
                         .ToListAsync();
                 }
@@ -140,8 +155,8 @@ namespace Libratica.Controllers
                     recommendations,
                     basedOn = preferredCategoryIds.Any() ? "purchase_history" : "popularity",
                     message = preferredCategoryIds.Any()
-                        ? "A korábbi vásárlásaid alapján ajánljuk"
-                        : "Még nincs vásárlási előzményed, ezért a legnépszerűbb könyveket ajánljuk"
+                        ? "A kívánságlistád alapján ajánljuk"
+                        : "Még nincs kívánságlistád vagy vásárlásod, ezért a legnépszerűbb könyveket ajánljuk"
                 });
             }
             catch (Exception ex)

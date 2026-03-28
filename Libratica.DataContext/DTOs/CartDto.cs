@@ -18,6 +18,7 @@ namespace Libratica.DataContext.DTOs
     public class CartItemDto
     {
         public int Id { get; set; }
+        public int ListingId { get; set; }
         public ListingDto Listing { get; set; } = null!;
         public int Quantity { get; set; }
         public decimal Price { get; set; }

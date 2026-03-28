@@ -58,8 +58,12 @@ namespace Libratica.Controllers
                             }),
                             AvailableListingsCount = w.Book.Listings.Count(l => l.IsAvailable),
                             MinPrice = w.Book.Listings.Where(l => l.IsAvailable).Any()
-                                ? w.Book.Listings.Where(l => l.IsAvailable).Min(l => l.Price)
-                                : (decimal?)null
+                            ? w.Book.Listings.Where(l => l.IsAvailable).Min(l => l.Price)
+                            : (decimal?)null,
+                                                FirstListingImage = w.Book.Listings
+                            .Where(l => l.IsAvailable && l.Images != null)
+                            .Select(l => l.Images)
+                            .FirstOrDefault()
                         }
                     })
                     .ToListAsync();

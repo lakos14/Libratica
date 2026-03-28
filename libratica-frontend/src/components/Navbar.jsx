@@ -46,9 +46,6 @@ function Navbar() {
                 <Link to="/recommendations" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Ajánlott
                 </Link>
-                <Link to="/ai-search" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  AI Keresés
-                </Link>
                 <Link to="/cart" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Kosár
                 </Link>
@@ -103,10 +100,7 @@ function Navbar() {
                 </div>
               </>
             ) : (
-              <>
-                <Link to="/ai-search" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                  AI Keresés
-                </Link>
+              <>  
                 <Link to="/login" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Bejelentkezés
                 </Link>

@@ -32,6 +32,9 @@ export const useRecommendations = () => {
       const response = await recommendationsAPI.getRecommendations();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -42,6 +45,9 @@ export const useBookCollection = () => {
       const response = await bookCollectionAPI.getCollection();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 

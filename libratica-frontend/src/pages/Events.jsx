@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useEvents, useCreateEvent, useToggleEventAttend } from '../hooks';
+import MapPicker from '../components/MapPicker';
 
 function Events() {
   const { user } = useAuth();
@@ -13,8 +14,11 @@ function Events() {
     eventDate: '',
     location: '',
   });
+  const [mapPosition, setMapPosition] = useState(null);
   const [errors, setErrors] = useState({});
   const [filter, setFilter] = useState('all');
+
+  const [locationFilter, setLocationFilter] = useState('');
 
   const { data: events = [], isLoading, isError } = useEvents();
   const createEvent = useCreateEvent();
@@ -45,9 +49,12 @@ function Events() {
       await createEvent.mutateAsync({
         ...formData,
         eventDate: formData.eventDate,
+        latitude: mapPosition ? mapPosition[0] : null,
+        longitude: mapPosition ? mapPosition[1] : null,
       });
       setShowCreateModal(false);
       setFormData({ title: '', description: '', type: 'bookfair', eventDate: '', location: '' });
+      setMapPosition(null);
     } catch (error) {
     }
   };
@@ -68,8 +75,9 @@ function Events() {
   };
 
   const filteredEvents = events.filter(e => {
-    if (filter === 'all') return true;
-    return e.type === filter;
+    const typeMatch = filter === 'all' || e.type === filter;
+    const locationMatch = !locationFilter || e.location?.toLowerCase().includes(locationFilter.toLowerCase());
+    return typeMatch && locationMatch;
   });
 
   if (isLoading) {
@@ -113,21 +121,27 @@ function Events() {
           )}
         </div>
 
-        <div className="flex gap-3 mb-6">
+        <div className="flex gap-3 mb-6 flex-wrap items-center">
           {['all', 'bookfair', 'bookswap'].map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                filter === f
-                  ? 'text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-              }`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition ${filter === f
+                ? 'text-white'
+                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
               style={filter === f ? { backgroundColor: '#8b4513' } : {}}
             >
               {f === 'all' ? 'Összes' : f === 'bookfair' ? '📚 Könyvvásár' : '🔄 Könyvcsere'}
             </button>
           ))}
+          <input
+            type="text"
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+            placeholder="Helyszín szűrő..."
+            className="px-4 py-2 rounded-full text-sm border border-gray-300 focus:outline-none focus:border-gray-500"
+          />
         </div>
 
         {filteredEvents.length === 0 ? (
@@ -148,11 +162,10 @@ function Events() {
             {filteredEvents.map((event) => (
               <div key={event.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition">
                 <div className="px-4 pt-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    event.type === 'bookfair'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-green-100 text-green-800'
-                  }`}>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-green-100 text-green-800'
+                    }`}>
                     {getTypeLabel(event.type)}
                   </span>
                   {event.isExpired && (
@@ -277,9 +290,29 @@ function Events() {
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="Pl: Budapest, Vörösmarty tér"
                   maxLength={300}
-                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-gray-500 mb-2"
                 />
                 {errors.location && <p className="text-red-600 text-xs mt-1">{errors.location}</p>}
+                <p className="text-xs text-gray-500 mb-2">Vagy kattints a térképen a helyszín kiválasztásához</p>
+                <MapPicker
+                  position={mapPosition}
+                  setPosition={async (pos) => {
+                    setMapPosition(pos);
+                    try {
+                      const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${pos[0]}&lon=${pos[1]}&format=json`
+                      );
+                      const data = await res.json();
+                      const city = data.address.city || data.address.town || data.address.village || data.address.county || '';
+                      const country = data.address.country || '';
+                      setFormData(prev => ({
+                        ...prev,
+                        location: city ? `${city}, ${country}` : data.display_name
+                      }));
+                    } catch {
+                    }
+                  }}
+                />
               </div>
 
               <div>

@@ -37,6 +37,8 @@ namespace Libratica.DataContext.Entities
         public int OrganizerId { get; set; }
         [ForeignKey(nameof(OrganizerId))]
         public User Organizer { get; set; } = null!;
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

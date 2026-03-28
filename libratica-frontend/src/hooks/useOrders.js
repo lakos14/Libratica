@@ -11,6 +11,9 @@ export const usePurchases = () => {
       const response = await ordersAPI.getPurchases();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -21,6 +24,9 @@ export const useSales = () => {
       const response = await ordersAPI.getSales();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 

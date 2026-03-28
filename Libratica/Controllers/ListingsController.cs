@@ -168,7 +168,8 @@ namespace Libratica.Controllers
                         ProfilePictureUrl = listing.Seller.ProfilePictureUrl,
                         RoleName = listing.Seller.Role.Name,
                         Rating = listing.Seller.Rating,
-                        CreatedAt = listing.Seller.CreatedAt
+                        CreatedAt = listing.Seller.CreatedAt,
+                        PhoneNumber = listing.Seller.ShowPhoneNumber ? listing.Seller.PhoneNumber : null,
                     },
                     Condition = listing.Condition,
                     ConditionDescription = listing.ConditionDescription,
@@ -261,6 +262,18 @@ namespace Libratica.Controllers
                 if (listing == null)
                 {
                     return NotFound(new { message = "Hirdetés nem található" });
+                }
+
+                var hasActiveOrder = await _context.OrderItems
+                    .Include(oi => oi.Order)
+                    .AnyAsync(oi => oi.ListingId == id &&
+                        oi.Order.Status != "cancelled" &&
+                        oi.Order.Status != "delivered" &&
+                        oi.Order.Status != "rejected");
+
+                if (hasActiveOrder)
+                {
+                    return BadRequest(new { message = "A hirdetés megrendelés alatt van, nem szerkeszthető!" });
                 }
 
                 var userRole = User.FindFirst(ClaimTypes.Role)?.Value;

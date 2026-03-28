@@ -10,6 +10,9 @@ export const useEvents = () => {
       const response = await eventsAPI.getAll();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 

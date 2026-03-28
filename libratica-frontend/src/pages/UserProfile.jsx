@@ -95,108 +95,130 @@ function UserProfile() {
           {profile.bio && (
             <p className="mt-4 text-gray-600 border-t pt-4">{profile.bio}</p>
           )}
-        </div>
+
+          <div className="flex gap-2 mt-4 pt-4 border-t flex-wrap">
+
+            <a href={`https://mail.google.com/mail/?view=cm&to=${profile.email}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+            >
+              Gmail
+            </a>
+
+            <a href={`mailto:${profile.email}`}
+              className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+            >
+              Email alkalmazás
+            </a>
+            {profile.phoneNumber && (
+
+              <a href={`tel:${profile.phoneNumber}`}
+                className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
+              >
+                📞 {profile.phoneNumber}
+              </a>
+            )}
+          </div>
+        </div >
 
         <div className="flex gap-4 mb-6 border-b border-gray-300">
           <button
             onClick={() => setActiveTab('listings')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'listings' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 font-semibold ${activeTab === 'listings' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
+              }`}
             style={activeTab === 'listings' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
             Hirdetések ({profile.listings?.length || 0})
           </button>
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === 'reviews' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 font-semibold ${activeTab === 'reviews' ? 'border-b-2' : 'text-gray-600 hover:text-gray-800'
+              }`}
             style={activeTab === 'reviews' ? { color: '#8b4513', borderColor: '#8b4513' } : {}}
           >
             Értékelések ({profile.reviews?.length || 0})
           </button>
         </div>
 
-        {activeTab === 'listings' && (
-          <div>
-            {profile.listings?.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded p-8 text-center">
-                <p className="text-gray-500">Nincsenek aktív hirdetések</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {profile.listings?.map((listing) => (
-                  <Link
-                    key={listing.id}
-                    to={`/listings/${listing.id}`}
-                    className="bg-white border border-gray-200 rounded p-3 hover:border-gray-400 transition-colors flex flex-col"
-                  >
-                    {listing.images?.length > 0 ? (
-                      <img
-                        src={`http://localhost:5102${listing.images[0]}`}
-                        alt={listing.book?.title}
-                        className="w-full h-64 object-cover rounded mb-3"
-                      />
-                    ) : listing.book?.coverImageUrl ? (
-                      <img
-                        src={listing.book.coverImageUrl}
-                        alt={listing.book?.title}
-                        className="w-full h-64 object-cover rounded mb-3"
-                      />
-                    ) : (
-                      <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
-                        <span className="text-gray-400 text-4xl">📚</span>
+        {
+          activeTab === 'listings' && (
+            <div>
+              {profile.listings?.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded p-8 text-center">
+                  <p className="text-gray-500">Nincsenek aktív hirdetések</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {profile.listings?.map((listing) => (
+                    <Link
+                      key={listing.id}
+                      to={`/listings/${listing.id}`}
+                      className="bg-white border border-gray-200 rounded p-3 hover:border-gray-400 transition-colors flex flex-col"
+                    >
+                      {(() => {
+                        const imgUrl = listing.images?.length > 0
+                          ? `http://localhost:5102${listing.images[0]}`
+                          : listing.book?.coverImageUrl;
+                        return imgUrl ? (
+                          <img src={imgUrl} alt={listing.book?.title} className="w-full h-64 object-cover rounded mb-3" />
+                        ) : (
+                          <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                            <span className="text-gray-400 text-4xl">📚</span>
+                          </div>
+                        );
+                      })()}
+                      <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
+                        {listing.book?.title}
+                      </h3>
+                      <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
+                      <div className="mt-auto">
+                        <p className="font-bold text-sm" style={{ color: '#8b4513' }}>
+                          {listing.price?.toLocaleString('hu-HU')} {listing.currency}
+                        </p>
+                        <p className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</p>
                       </div>
-                    )}
-                    <h3 className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
-                      {listing.book?.title}
-                    </h3>
-                    <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
-                    <div className="mt-auto">
-                      <p className="font-bold text-sm" style={{ color: '#8b4513' }}>
-                        {listing.price?.toLocaleString('hu-HU')} {listing.currency}
-                      </p>
-                      <p className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        }
 
-        {activeTab === 'reviews' && (
-          <div>
-            {profile.reviews?.length === 0 ? (
-              <div className="bg-white border border-gray-200 rounded p-8 text-center">
-                <p className="text-gray-500">Még nincsenek értékelések</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {profile.reviews?.map((review) => (
-                  <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-800">
-                          {review.reviewer?.username}
-                        </span>
-                        <span className="text-yellow-400 text-lg">
-                          {renderStars(review.rating)}
-                        </span>
-                        <span className="text-sm text-gray-500">{review.rating}/5</span>
+        {
+          activeTab === 'reviews' && (
+            <div>
+              {profile.reviews?.length === 0 ? (
+                <div className="bg-white border border-gray-200 rounded p-8 text-center">
+                  <p className="text-gray-500">Még nincsenek értékelések</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {profile.reviews?.map((review) => (
+                    <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-800">
+                            {review.reviewer?.username}
+                          </span>
+                          <span className="text-yellow-400 text-lg">
+                            {renderStars(review.rating)}
+                          </span>
+                          <span className="text-sm text-gray-500">{review.rating}/5</span>
+                        </div>
+                        <span className="text-xs text-gray-400">{formatDate(review.createdAt)}</span>
                       </div>
-                      <span className="text-xs text-gray-400">{formatDate(review.createdAt)}</span>
+                      {review.comment && <p className="text-gray-700 text-sm">{review.comment}</p>}
                     </div>
-                    {review.comment && <p className="text-gray-700 text-sm">{review.comment}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        }
+      </div >
+    </div >
   );
 }
 

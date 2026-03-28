@@ -314,6 +314,10 @@ namespace Libratica.Controllers
                         Language = b.Language,
                         Description = b.Description,
                         CoverImageUrl = b.CoverImageUrl,
+                        FirstListingImage = b.Listings
+                        .Where(l => l.IsAvailable && l.Images != null)
+                        .Select(l => l.Images)
+                        .FirstOrDefault(),
                         PageCount = b.PageCount,
                         Categories = b.BookCategories.Select(bc => new CategoryDto
                         {

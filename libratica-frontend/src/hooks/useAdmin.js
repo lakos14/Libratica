@@ -10,6 +10,9 @@ export const useAdminStats = () => {
       const response = await adminAPI.getStats();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -20,6 +23,9 @@ export const useAdminUsers = () => {
       const response = await adminAPI.getAllUsers();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -30,6 +36,9 @@ export const useAdminListings = () => {
       const response = await adminAPI.getAllListings();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -40,6 +49,9 @@ export const useAdminEvents = () => {
       const response = await adminAPI.getAllEvents();
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 
@@ -50,6 +62,9 @@ export const useReports = (status) => {
       const response = await reportsAPI.getReports(status);
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: 'always',
   });
 };
 

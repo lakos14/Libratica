@@ -87,6 +87,8 @@ namespace Libratica.Controllers
                     e.Location,
                     e.Status,
                     e.CreatedAt,
+                    e.Latitude,
+                    e.Longitude,
                     Organizer = new { e.Organizer.Id, e.Organizer.Username },
                     Attendees = e.Attendees.Select(a => new { a.User.Id, a.User.Username }),
                     Comments = e.Comments.OrderByDescending(c => c.CreatedAt).Select(c => new
@@ -120,12 +122,16 @@ namespace Libratica.Controllers
                     Title = dto.Title,
                     Description = dto.Description,
                     Type = dto.Type,
-                    EventDate = DateTime.SpecifyKind(dto.EventDate, DateTimeKind.Unspecified),
+                    EventDate = dto.EventDate.Kind == DateTimeKind.Unspecified
+                        ? DateTime.SpecifyKind(dto.EventDate, DateTimeKind.Local).ToUniversalTime()
+                        : dto.EventDate.ToUniversalTime(),
                     Location = dto.Location,
                     Status = "pending",
                     OrganizerId = userId,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.UtcNow,
+                    Latitude = dto.Latitude,
+                    Longitude = dto.Longitude,
                 };
 
                 _context.Events.Add(newEvent);

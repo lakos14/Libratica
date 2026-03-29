@@ -241,7 +241,7 @@ function Listings() {
             </div>
           </div>
 
-          {(filters.query || filters.minPrice || filters.maxPrice || filters.condition || filters.location) && (
+          {(filters.query || filters.minPrice || filters.maxPrice || filters.condition || filters.location || filters.categoryId) && (
             <div className="mt-4">
               <button
                 onClick={clearFilters}

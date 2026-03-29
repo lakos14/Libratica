@@ -17,9 +17,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Könyvek keresése (cím, szerző, ISBN)
-        /// </summary>
+        //Könyvek keresése
         [HttpGet("books")]
         public async Task<ActionResult<IEnumerable<BookDto>>> SearchBooks(
             [FromQuery] string? query = null,
@@ -123,9 +121,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Hirdetések keresése (könyv alapján + ár, állapot szűrés)
-        /// </summary>
+        //Hirdetések keresése
         [HttpGet("listings")]
         public async Task<ActionResult<IEnumerable<ListingDto>>> SearchListings(
             [FromQuery] string? query = null,
@@ -275,9 +271,8 @@ namespace Libratica.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        /// <summary>
-        /// Elérhető nyelvek listája
-        /// </summary>
+
+        //Elérhető nyelvek listája
         [HttpGet("languages")]
         public async Task<ActionResult<IEnumerable<string>>> GetLanguages()
         {
@@ -298,9 +293,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Elérhető állapotok listája
-        /// </summary>
+        //Elérhető állapotok listája
         [HttpGet("conditions")]
         public ActionResult<IEnumerable<string>> GetConditions()
         {

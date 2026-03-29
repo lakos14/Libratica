@@ -3,7 +3,6 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using Libratica.DataContext.DTOs;
 
@@ -20,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Összes jóváhagyott esemény lekérése
-        /// </summary>
+        //Összes jóváhagyott esemény lekérése
         [HttpGet]
         public async Task<ActionResult> GetEvents()
         {
@@ -60,9 +57,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy esemény részletei
-        /// </summary>
+        //Egy esemény részletei
         [HttpGet("{id}")]
         public async Task<ActionResult> GetEvent(int id)
         {
@@ -106,9 +101,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Új esemény létrehozása
-        /// </summary>
+        //Új esemény létrehozása
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> CreateEvent([FromBody] CreateEventDto dto)
@@ -145,9 +138,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Részvételi szándék jelzése / visszavonása
-        /// </summary>
+        //Részvételi szándék jelzése / visszavonása
         [HttpPost("{id}/attend")]
         [Authorize]
         public async Task<ActionResult> ToggleAttend(int id)
@@ -187,9 +178,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Komment hozzáadása
-        /// </summary>
+        //Komment hozzáadása
         [HttpPost("{id}/comments")]
         [Authorize]
         public async Task<ActionResult> AddComment(int id, [FromBody] CreateEventCommentDto dto)
@@ -229,9 +218,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Komment törlése
-        /// </summary>
+        //Komment törlése
         [HttpDelete("{id}/comments/{commentId}")]
         [Authorize]
         public async Task<ActionResult> DeleteComment(int id, int commentId)
@@ -261,9 +248,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Saját események lekérése
-        /// </summary>
+        //Saját események lekérése
         [HttpGet("my-events")]
         [Authorize]
         public async Task<ActionResult> GetMyEvents()

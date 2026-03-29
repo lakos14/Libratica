@@ -18,9 +18,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Admin dashboard statisztikák
-        /// </summary>
+        //Admin dashboard statisztikák
         [HttpGet("stats")]
         public async Task<ActionResult> GetStats()
         {
@@ -60,9 +58,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Összes felhasználó listája (admin nézet)
-        /// </summary>
+        //Összes felhasználó listája admin nézet
         [HttpGet("users")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllUsers()
         {
@@ -98,9 +94,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Összes hirdetés (admin nézet)
-        /// </summary>
+        //Összes hirdetés admin nézet
         [HttpGet("listings")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllListings()
         {
@@ -145,9 +139,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// User részletei (admin nézet)
-        /// </summary>
+        //User részletei admin nézet
         [HttpGet("users/{id}")]
         public async Task<ActionResult<object>> GetUserDetails(int id)
         {
@@ -173,7 +165,6 @@ namespace Libratica.Controllers
                     user.FullName,
                     user.PhoneNumber,
                     user.ProfilePictureUrl,
-                    user.Bio,
                     RoleName = user.Role.Name,
                     user.IsVerified,
                     user.IsActive,
@@ -198,9 +189,8 @@ namespace Libratica.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        /// <summary>
-        /// Felhasználó tiltása / aktiválása
-        /// </summary>
+
+        //Felhasználó tiltása / aktiválása
         [HttpPut("users/{id}/toggle-active")]
         public async Task<ActionResult> ToggleUserActive(int id)
         {
@@ -226,9 +216,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Szerepkör változtatás (user <-> admin)
-        /// </summary>
+        //Szerepkör változtatás
         [HttpPut("users/{id}/toggle-role")]
         public async Task<ActionResult> ToggleUserRole(int id)
         {
@@ -259,9 +247,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Hirdetés inaktiválása / aktiválása
-        /// </summary>
+        //Hirdetés inaktiválása / aktiválása
         [HttpPut("listings/{id}/toggle-available")]
         public async Task<ActionResult> ToggleListingAvailable(int id)
         {
@@ -287,9 +273,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Hirdetés törlése
-        /// </summary>
+        //Hirdetés törlése
         [HttpDelete("listings/{id}")]
         public async Task<ActionResult> DeleteListing(int id)
         {
@@ -302,7 +286,6 @@ namespace Libratica.Controllers
                 if (listing == null)
                     return NotFound(new { message = "Hirdetés nem található" });
 
-                // Ha tartoznak hozzá rendelés tételek, csak inaktiváljuk
                 if (listing.OrderItems.Any())
                 {
                     listing.IsAvailable = false;
@@ -311,7 +294,6 @@ namespace Libratica.Controllers
                     return Ok(new { message = "Hirdetés inaktiválva (rendelések tartoznak hozzá, nem törölhető)" });
                 }
 
-                // Kosár tételek törlése először
                 var cartItems = await _context.CartItems
                     .Where(ci => ci.ListingId == id)
                     .ToListAsync();
@@ -328,9 +310,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Kategóriák lekérése
-        /// </summary>
+        //Kategóriák lekérése
         [HttpGet("categories")]
         public async Task<ActionResult> GetCategories()
         {
@@ -349,9 +329,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Új kategória hozzáadása
-        /// </summary>
+        //Új kategória hozzáadása
         [HttpPost("categories")]
         public async Task<ActionResult> CreateCategory([FromBody] CreateCategoryDto dto)
         {
@@ -379,9 +357,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Kategória törlése
-        /// </summary>
+        //Kategória törlése
         [HttpDelete("categories/{id}")]
         public async Task<ActionResult> DeleteCategory(int id)
         {
@@ -405,9 +381,8 @@ namespace Libratica.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        /// <summary>
-        /// Összes esemény lekérése (admin nézet)
-        /// </summary>
+
+        //Összes esemény lekérése admin nézetben
         [HttpGet("events")]
         public async Task<ActionResult> GetAllEvents()
         {
@@ -439,9 +414,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Esemény jóváhagyása / elutasítása
-        /// </summary>
+        //Esemény jóváhagyása / elutasítása
         [HttpPut("events/{id}/status")]
         public async Task<ActionResult> UpdateEventStatus(int id, [FromBody] UpdateEventStatusDto dto)
         {
@@ -463,9 +436,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Esemény törlése (admin)
-        /// </summary>
+        //Esemény törlése admin nézet
         [HttpDelete("events/{id}")]
         public async Task<ActionResult> DeleteEvent(int id)
         {

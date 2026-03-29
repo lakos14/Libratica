@@ -15,9 +15,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Felhasználó publikus profilja
-        /// </summary>
+        //Felhasználó publikus profilja
         [HttpGet("{username}")]
         public async Task<ActionResult> GetPublicProfile(string username)
         {
@@ -73,7 +71,6 @@ namespace Libratica.Controllers
                     user.Username,
                     user.FullName,
                     user.ProfilePictureUrl,
-                    user.Bio,
                     user.Rating,
                     user.CreatedAt,
                     ActiveListingsCount = activeListings.Count(),

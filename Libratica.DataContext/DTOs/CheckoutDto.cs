@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Libratica.Models.DTOs
+namespace Libratica.DataContext.DTOs
 {
     public class CheckoutDto
     {
         public int SellerId { get; set; }
 
-        public List<CheckoutItemDto> Items { get; set; }
+        [Required]
+        public List<CheckoutItemDto> Items { get; set; } = new();
 
         [Required]
-        public string ShippingAddress { get; set; }
+        public string ShippingAddress { get; set; } = string.Empty;
 
         public string? PaymentMethod { get; set; }
     }

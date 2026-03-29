@@ -4,17 +4,22 @@ const CartItemRow = ({ item, onRemove }) => {
   return (
     <div className="flex items-center gap-4 p-3 bg-gray-50 rounded">
       <div className="w-16 h-20 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
-        {item.listing?.book?.coverImageUrl ? (
-          <img
-            src={item.listing.book.coverImageUrl}
-            alt={item.listing.book.title}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-            📚
-          </div>
-        )}
+        {(() => {
+          const imgUrl = item.listing?.images?.length > 0
+            ? `http://localhost:5102${item.listing.images[0]}`
+            : item.listing?.book?.coverImageUrl;
+          return imgUrl ? (
+            <img
+              src={imgUrl}
+              alt={item.listing.book.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+              📚
+            </div>
+          );
+        })()}
       </div>
 
       <div className="flex-1 min-w-0">

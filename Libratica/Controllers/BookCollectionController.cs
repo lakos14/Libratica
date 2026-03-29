@@ -3,7 +3,6 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using Libratica.DataContext.DTOs;
 
 namespace Libratica.Controllers
@@ -20,6 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
+        //Könyvkollekció lekérése
         [HttpGet]
         public async Task<ActionResult> GetCollection()
         {
@@ -50,6 +50,7 @@ namespace Libratica.Controllers
             }
         }
 
+        //Könyvkollekcióhoz hozzáadás
         [HttpPost]
         public async Task<ActionResult> AddToCollection([FromBody] AddToCollectionDto dto)
         {
@@ -86,6 +87,7 @@ namespace Libratica.Controllers
             }
         }
 
+        //Törlés a kollekcióból
         [HttpDelete("{id}")]
         public async Task<ActionResult> RemoveFromCollection(int id)
         {
@@ -110,6 +112,7 @@ namespace Libratica.Controllers
             }
         }
 
+        //Könyv ellenőrzése a kollekcióban
         [HttpGet("check/{googleBooksId}")]
         public async Task<ActionResult> CheckCollection(string googleBooksId)
         {

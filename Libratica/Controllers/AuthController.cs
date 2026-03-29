@@ -16,9 +16,7 @@ namespace Libratica.Controllers
             _authService = authService;
         }
 
-        /// <summary>
-        /// Új felhasználó regisztrációja
-        /// </summary>
+        //Új felhasználó regisztrációja
         [HttpPost("register")]
         public async Task<ActionResult<AuthResponseDto>> Register([FromBody] RegisterDto registerDto)
         {
@@ -33,9 +31,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Bejelentkezés (email vagy username + jelszó)
-        /// </summary>
+        //Bejelentkezés
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponseDto>> Login([FromBody] LoginDto loginDto)
         {
@@ -50,9 +46,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Aktuális bejelentkezett felhasználó lekérése
-        /// </summary>
+        //Aktuális bejelentkezett felhasználó lekérése
         [HttpGet("me")]
         [Authorize]
         public async Task<ActionResult<UserDto>> GetCurrentUser()

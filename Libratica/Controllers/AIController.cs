@@ -15,9 +15,7 @@ namespace Libratica.Controllers
             _configuration = configuration;
         }
 
-        /// <summary>
-        /// Természetes nyelvi keresés AI segítségével
-        /// </summary>
+        //Természetes nyelvi keresés AI segítségével
         [HttpPost("search")]
         public async Task<ActionResult> AISearch([FromBody] AISearchDto dto)
         {
@@ -48,7 +46,6 @@ namespace Libratica.Controllers
                 var response = await client.CompleteChatAsync(prompt);
                 var content = response.Value.Content[0].Text;
 
-                // JSON parse
                 var result = JsonSerializer.Deserialize<AISearchResult>(content, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true

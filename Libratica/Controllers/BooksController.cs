@@ -17,9 +17,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Összes könyv lekérése (opcionális kategória szűrés)
-        /// </summary>
+        //Összes könyv lekérése
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooks([FromQuery] int? categoryId = null)
         {
@@ -66,9 +64,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy konkrét könyv lekérése ID alapján
-        /// </summary>
+        //Egy konkrét könyv lekérése ID alapján
         [HttpGet("{id}")]
         public async Task<ActionResult<BookDto>> GetBook(int id)
         {
@@ -113,9 +109,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Új könyv létrehozása (csak admin)
-        /// </summary>
+        //Új könyv létrehozása (csak admin)
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<BookDto>> CreateBook([FromBody] CreateBookDto createBookDto)
@@ -185,9 +179,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Könyv frissítése (csak admin)
-        /// </summary>
+        //Könyv frissítése (csak admin)
         [HttpPut("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult<BookDto>> UpdateBook(int id, [FromBody] UpdateBookDto updateBookDto)
@@ -262,9 +254,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Csak azok a könyvek, amelyekhez van elérhető hirdetés
-        /// </summary>
+        //Csak azok a könyvek lekérése, amelyekhez van elérhető hirdetés
         [HttpGet("with-available-listings")]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetBooksWithAvailableListings(
             [FromQuery] string? query = null,
@@ -351,9 +341,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Könyv törlése (csak admin)
-        /// </summary>
+        //Könyv törlése (csak admin)
         [HttpDelete("{id}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteBook(int id)

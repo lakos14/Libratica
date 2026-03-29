@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
 
 namespace Libratica.DataContext.Entities
 {
@@ -22,8 +21,6 @@ namespace Libratica.DataContext.Entities
         public string? PhoneNumber { get; set; }
         [MaxLength(500)]
         public string? ProfilePictureUrl { get; set; }
-        [MaxLength(1000)]
-        public string? Bio { get; set; }
         public int RoleId { get; set; }
         [ForeignKey(nameof(RoleId))]
         public Role Role { get; set; } = null!;

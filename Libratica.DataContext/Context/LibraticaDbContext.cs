@@ -1,6 +1,5 @@
 ﻿using Libratica.DataContext.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Libratica.DataContext.Context
 {
@@ -33,14 +32,14 @@ namespace Libratica.DataContext.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            // Role configuration
+            //Role
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name).IsUnique();
             });
 
-            // User configuration
+            //User
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -78,7 +77,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Category configuration
+            //Category
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -90,7 +89,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Book configuration
+            //Book
             modelBuilder.Entity<Book>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -99,7 +98,7 @@ namespace Libratica.DataContext.Context
                 entity.HasIndex(e => e.Author);
             });
 
-            // BookCategory configuration
+            //BookCategory
             modelBuilder.Entity<BookCategory>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -116,7 +115,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Listing configuration
+            //Listing
             modelBuilder.Entity<Listing>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -131,7 +130,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Order configuration
+            //Order
             modelBuilder.Entity<Order>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -141,7 +140,7 @@ namespace Libratica.DataContext.Context
                 entity.HasIndex(e => e.CreatedAt);
             });
 
-            // OrderItem configuration
+            //OrderItem
             modelBuilder.Entity<OrderItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -157,7 +156,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Review configuration
+            //Review
             modelBuilder.Entity<Review>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -169,7 +168,8 @@ namespace Libratica.DataContext.Context
                     .HasForeignKey(r => r.OrderId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            // Cart configuration
+
+            //Cart
             modelBuilder.Entity<Cart>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -181,7 +181,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // CartItem configuration
+            //CartItem
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -197,7 +197,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            //Report configuration
+            //Report
             modelBuilder.Entity<Report>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -219,7 +219,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            //Wishlist configuration
+            //Wishlist
             modelBuilder.Entity<Wishlist>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -236,7 +236,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            //Book collection configuration
+            //BookCollection
             modelBuilder.Entity<BookCollection>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -248,7 +248,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Event configuration
+            //Event
             modelBuilder.Entity<Event>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -261,7 +261,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // EventAttendee configuration
+            //EventAttendee
             modelBuilder.Entity<EventAttendee>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -278,7 +278,7 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // EventComment configuration
+            //EventComment
             modelBuilder.Entity<EventComment>(entity =>
             {
                 entity.HasKey(e => e.Id);
@@ -294,18 +294,17 @@ namespace Libratica.DataContext.Context
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Seed reference data
             SeedReferenceData(modelBuilder);
         }
         private void SeedReferenceData(ModelBuilder modelBuilder)
         {
-            // Roles
+            //Szerepkörök
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "user" },
                 new Role { Id = 2, Name = "admin" }
             );
 
-            // Categories
+            //Kategóriák
             modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Sci-Fi", Description = "Tudományos-fantasztikus regények", CreatedAt = new DateTime(2024, 1, 1) },
                 new Category { Id = 2, Name = "Fantasy", Description = "Fantasy és varázslatos történetek", CreatedAt = new DateTime(2024, 1, 1) },

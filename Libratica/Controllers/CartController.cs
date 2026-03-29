@@ -4,8 +4,6 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Libratica.Controllers
 {
@@ -21,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Saját kosár lekérése
-        /// </summary>
+        //Saját kosár lekérése
         [HttpGet]
         public async Task<ActionResult<CartDto>> GetCart()
         {
@@ -68,9 +64,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Termék hozzáadása a kosárhoz
-        /// </summary>
+        //Termék hozzáadása a kosárhoz
         [HttpPost("add")]
         public async Task<ActionResult> AddToCart([FromBody] AddToCartDto addToCartDto)
         {
@@ -133,9 +127,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Kosár tétel mennyiségének módosítása
-        /// </summary>
+        //Kosár tétel mennyiségének módosítása
         [HttpPut("items/{cartItemId}")]
         public async Task<ActionResult> UpdateCartItem(int cartItemId, [FromBody] UpdateCartItemDto updateDto)
         {
@@ -170,9 +162,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Tétel eltávolítása a kosárból
-        /// </summary>
+        //Tétel eltávolítása a kosárból
         [HttpDelete("items/{cartItemId}")]
         public async Task<IActionResult> RemoveFromCart(int cartItemId)
         {
@@ -202,9 +192,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Kosár ürítése
-        /// </summary>
+        //Kosár ürítése
         [HttpDelete("clear")]
         public async Task<IActionResult> ClearCart()
         {

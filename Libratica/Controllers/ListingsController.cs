@@ -19,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Összes hirdetés lekérése (szűrés: bookId, sellerId, category)
-        /// </summary>
+        //Összes hirdetés lekérése
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ListingDto>>> GetListings(
             [FromQuery] int? bookId = null,
@@ -110,9 +108,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy hirdetés lekérése ID alapján
-        /// </summary>
+        //Egy hirdetés lekérése id alapján
         [HttpGet("{id}")]
         public async Task<ActionResult<ListingDto>> GetListing(int id)
         {
@@ -189,9 +185,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Új hirdetés létrehozása (bejelentkezett user)
-        /// </summary>
+        //Új hirdetés létrehozása (bejelentkezett user)
         [HttpPost]
         [Authorize]
         public async Task<ActionResult<ListingDto>> CreateListing([FromBody] CreateListingDto createListingDto)
@@ -238,9 +232,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Saját hirdetés frissítése
-        /// </summary>
+        //Saját hirdetés frissítése
         [HttpPut("{id}")]
         [Authorize]
         public async Task<ActionResult> UpdateListing(int id, [FromBody] UpdateListingDto updateListingDto)
@@ -304,9 +296,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Hirdetés törlése
-        /// </summary>
+        //Hirdetés törlése
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> DeleteListing(int id)
@@ -334,9 +324,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Saját hirdetések lekérése
-        /// </summary>
+        //Saját hirdetések lekérése
         [HttpGet("my-listings")]
         [Authorize]
         public async Task<ActionResult<IEnumerable<ListingDto>>> GetMyListings()

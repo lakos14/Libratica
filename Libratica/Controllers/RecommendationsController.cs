@@ -1,9 +1,7 @@
 ﻿using Libratica.DataContext.Context;
-using Libratica.DataContext.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using System.Text.Json;
 
 namespace Libratica.Controllers
@@ -20,9 +18,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Személyre szabott ajánlások a felhasználó vásárlási előzményei alapján
-        /// </summary>
+        //Személyre szabott ajánlások a felhasználó vásárlási előzményei alapján
         [HttpGet]
         public async Task<ActionResult> GetRecommendations()
         {
@@ -30,7 +26,6 @@ namespace Libratica.Controllers
             {
                 var userId = GetCurrentUserId();
 
-                // 1. Lekérjük a felhasználó korábbi rendeléseit
                 var purchasedBookIds = await _context.Orders
                     .Where(o => o.BuyerId == userId && o.Status != "cancelled")
                     .Include(o => o.OrderItems)
@@ -39,13 +34,11 @@ namespace Libratica.Controllers
                     .Distinct()
                     .ToListAsync();
 
-                // 2. Lekérjük a kívánságlista könyveit
                 var wishlistBookIds = await _context.Wishlists
                     .Where(w => w.UserId == userId)
                     .Select(w => w.BookId)
                     .ToListAsync();
 
-                // 3. Lekérjük a vásárolt könyvek kategóriáit
                 var wishlistCategoryIds = await _context.Wishlists
                     .Where(w => w.UserId == userId)
                     .SelectMany(w => w.Book.BookCategories.Select(bc => bc.CategoryId))
@@ -71,10 +64,9 @@ namespace Libratica.Controllers
 
                 if (preferredCategoryIds.Any())
                 {
-                    // 4a. Ha van vásárlási előzmény — kategória alapú ajánlás
                     var excludedBookIds = purchasedBookIds.Distinct().ToList();
 
-                    recommendations = await _context.Listings
+                    var rawListings = await _context.Listings
                         .Include(l => l.Book)
                             .ThenInclude(b => b.BookCategories)
                                 .ThenInclude(bc => bc.Category)
@@ -87,35 +79,38 @@ namespace Libratica.Controllers
                             l.Book.BookCategories.Any(bc => preferredCategoryIds.Contains(bc.CategoryId)))
                         .OrderByDescending(l => l.CreatedAt)
                         .Take(8)
-                        .Select(l => (object)new
-                        {
-                            l.Id,
-                            l.Price,
-                            l.Currency,
-                            l.Condition,
-                            l.Location,
-                            Book = new
-                            {
-                                l.Book.Id,
-                                l.Book.Title,
-                                l.Book.Author,
-                                l.Book.CoverImageUrl,
-                                Categories = l.Book.BookCategories.Select(bc => bc.Category.Name)
-                            },
-                            Seller = new
-                            {
-                                l.Seller.Id,
-                                l.Seller.Username,
-                                l.Seller.Rating
-                            },
-                            ReasonText = "A kívánságlistád és vásárlásaid alapján"
-                        })
                         .ToListAsync();
+
+                    recommendations = rawListings.Select(l => (object)new
+                    {
+                        l.Id,
+                        l.Price,
+                        l.Currency,
+                        l.Condition,
+                        l.Location,
+                        Images = !string.IsNullOrEmpty(l.Images)
+                            ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
+                            : new List<string>(),
+                        Book = new
+                        {
+                            l.Book.Id,
+                            l.Book.Title,
+                            l.Book.Author,
+                            l.Book.CoverImageUrl,
+                            Categories = l.Book.BookCategories.Select(bc => bc.Category.Name)
+                        },
+                        Seller = new
+                        {
+                            l.Seller.Id,
+                            l.Seller.Username,
+                            l.Seller.Rating
+                        },
+                        ReasonText = "A kívánságlistád és vásárlásaid alapján"
+                    }).ToList();
                 }
                 else
                 {
-                    // 4b. Ha nincs vásárlási előzmény — legnépszerűbb hirdetések
-                    recommendations = await _context.Listings
+                    var rawListings = await _context.Listings
                         .Include(l => l.Book)
                             .ThenInclude(b => b.BookCategories)
                                 .ThenInclude(bc => bc.Category)
@@ -124,30 +119,34 @@ namespace Libratica.Controllers
                         .Where(l => l.IsAvailable && l.SellerId != userId)
                         .OrderByDescending(l => l.CreatedAt)
                         .Take(8)
-                        .Select(l => (object)new
-                        {
-                            l.Id,
-                            l.Price,
-                            l.Currency,
-                            l.Condition,
-                            l.Location,
-                            Book = new
-                            {
-                                l.Book.Id,
-                                l.Book.Title,
-                                l.Book.Author,
-                                l.Book.CoverImageUrl,
-                                Categories = l.Book.BookCategories.Select(bc => bc.Category.Name)
-                            },
-                            Seller = new
-                            {
-                                l.Seller.Id,
-                                l.Seller.Username,
-                                l.Seller.Rating
-                            },
-                            ReasonText = "Népszerű a platformon"
-                        })
                         .ToListAsync();
+
+                    recommendations = rawListings.Select(l => (object)new
+                    {
+                        l.Id,
+                        l.Price,
+                        l.Currency,
+                        l.Condition,
+                        l.Location,
+                        Images = !string.IsNullOrEmpty(l.Images)
+                            ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
+                            : new List<string>(),
+                        Book = new
+                        {
+                            l.Book.Id,
+                            l.Book.Title,
+                            l.Book.Author,
+                            l.Book.CoverImageUrl,
+                            Categories = l.Book.BookCategories.Select(bc => bc.Category.Name)
+                        },
+                        Seller = new
+                        {
+                            l.Seller.Id,
+                            l.Seller.Username,
+                            l.Seller.Rating
+                        },
+                        ReasonText = "Népszerű a platformon"
+                    }).ToList();
                 }
 
                 return Ok(new

@@ -15,6 +15,7 @@ namespace Libratica.Controllers
             _environment = environment;
         }
 
+        //Kép feltöltése
         [HttpPost("upload")]
         public async Task<ActionResult> UploadImage(IFormFile file)
         {
@@ -23,21 +24,17 @@ namespace Libratica.Controllers
                 if (file == null || file.Length == 0)
                     return BadRequest(new { message = "Nincs fájl kiválasztva" });
 
-                // Max 5MB
                 if (file.Length > 5 * 1024 * 1024)
                     return BadRequest(new { message = "A fájl mérete maximum 5MB lehet" });
 
-                // Csak képek
                 var allowedTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/webp" };
                 if (!allowedTypes.Contains(file.ContentType.ToLower()))
                     return BadRequest(new { message = "Csak JPG, PNG és WEBP formátum engedélyezett" });
 
-                // Mappa létrehozása ha nem létezik
                 var uploadPath = Path.Combine(_environment.WebRootPath, "images", "listings");
                 if (!Directory.Exists(uploadPath))
                     Directory.CreateDirectory(uploadPath);
 
-                // Egyedi fájlnév
                 var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
                 var filePath = Path.Combine(uploadPath, fileName);
 
@@ -55,6 +52,7 @@ namespace Libratica.Controllers
             }
         }
 
+        //Kép törlése
         [HttpDelete]
         [Authorize]
         public ActionResult DeleteImage([FromQuery] string url)

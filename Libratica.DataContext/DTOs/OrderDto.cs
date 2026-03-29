@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Libratica.DataContext.DTOs
+﻿namespace Libratica.DataContext.DTOs
 {
     public class OrderDto
     {

@@ -16,9 +16,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Összes kategória lekérése
-        /// </summary>
+        //Összes kategória lekérése
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
         {
@@ -44,9 +42,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy kategória lekérése ID alapján
-        /// </summary>
+        //Egy kategória lekérése ID alapján
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryDto>> GetCategory(int id)
         {
@@ -78,9 +74,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy kategória könyveinek lekérése
-        /// </summary>
+        //Egy kategória könyveinek lekérése
         [HttpGet("{id}/books")]
         public async Task<ActionResult<IEnumerable<BookDto>>> GetCategoryBooks(int id)
         {

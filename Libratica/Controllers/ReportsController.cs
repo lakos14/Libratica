@@ -4,8 +4,6 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Libratica.Controllers
 {
@@ -21,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Hirdetés vagy felhasználó jelentése
-        /// </summary>
+        //Hirdetés vagy felhasználó jelentése
         [HttpPost]
         public async Task<ActionResult> CreateReport([FromBody] CreateReportDto dto)
         {
@@ -37,11 +33,9 @@ namespace Libratica.Controllers
                 if (dto.ListingId != null && dto.ReportedUserId != null)
                     return BadRequest(new { message = "Egyszerre csak egyet lehet jelenteni" });
 
-                // Ne lehessen saját magát jelenteni
                 if (dto.ReportedUserId == userId)
                     return BadRequest(new { message = "Saját magadat nem jelentheted" });
 
-                // Ne lehessen saját hirdetését jelenteni
                 if (dto.ListingId != null)
                 {
                     var listing = await _context.Listings.FindAsync(dto.ListingId);
@@ -49,7 +43,6 @@ namespace Libratica.Controllers
                         return BadRequest(new { message = "Saját hirdetésedet nem jelentheted" });
                 }
 
-                // Már jelentette-e
                 var alreadyReported = await _context.Reports.AnyAsync(r =>
                     r.ReporterId == userId &&
                     r.ListingId == dto.ListingId &&
@@ -81,9 +74,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Összes report lekérése (csak admin)
-        /// </summary>
+        //Összes report lekérése
         [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult> GetReports([FromQuery] string? status = null)
@@ -136,9 +127,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Report státuszának frissítése (admin)
-        /// </summary>
+        //Report státuszának frissítése
         [HttpPut("{id}/status")]
         [Authorize(Roles = "admin")]
         public async Task<ActionResult> UpdateReportStatus(int id, [FromBody] UpdateReportStatusDto dto)
@@ -156,7 +145,6 @@ namespace Libratica.Controllers
                 report.Status = dto.Status;
                 report.UpdatedAt = DateTime.UtcNow;
 
-                // Ha elfogadják a reportot és hirdetés, törlik a hirdetést
                 if (dto.Status == "resolved" && report.ListingId != null)
                 {
                     var listing = await _context.Listings.FindAsync(report.ListingId);
@@ -167,7 +155,6 @@ namespace Libratica.Controllers
                     }
                 }
 
-                // Ha elfogadják és felhasználó, letiltják
                 if (dto.Status == "resolved" && report.ReportedUserId != null)
                 {
                     var user = await _context.Users.FindAsync(report.ReportedUserId);

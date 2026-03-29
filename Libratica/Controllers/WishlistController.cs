@@ -1,10 +1,8 @@
 ﻿using Libratica.DataContext.Context;
-using Libratica.DataContext.DTOs;
 using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Libratica.Controllers
 {
@@ -20,9 +18,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Saját kívánságlista lekérése
-        /// </summary>
+        //Saját kívánságlista lekérése
         [HttpGet]
         public async Task<ActionResult> GetWishlist()
         {
@@ -76,9 +72,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Könyv hozzáadása a kívánságlistához
-        /// </summary>
+        //Könyv hozzáadása a kívánságlistához
         [HttpPost("{bookId}")]
         public async Task<ActionResult> AddToWishlist(int bookId)
         {
@@ -114,9 +108,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Könyv eltávolítása a kívánságlistából
-        /// </summary>
+        //Könyv eltávolítása a kívánságlistából
         [HttpDelete("{bookId}")]
         public async Task<ActionResult> RemoveFromWishlist(int bookId)
         {
@@ -141,9 +133,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Ellenőrzés hogy egy könyv szerepel-e a kívánságlistán
-        /// </summary>
+        //Ellenőrzés hogy egy könyv szerepel-e a kívánságlistán
         [HttpGet("check/{bookId}")]
         public async Task<ActionResult> CheckWishlist(int bookId)
         {

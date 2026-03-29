@@ -65,7 +65,7 @@ namespace Libratica.Services.Implementations
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 ProfilePictureUrl = user.ProfilePictureUrl,
-                RoleName = user.Role.Name,
+                RoleName = role!.Name,
                 Rating = user.Rating,
                 CreatedAt = user.CreatedAt,
                 ShowPhoneNumber = user.ShowPhoneNumber,

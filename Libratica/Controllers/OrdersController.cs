@@ -1,12 +1,9 @@
 ﻿using Libratica.DataContext.Context;
 using Libratica.DataContext.DTOs;
 using Libratica.DataContext.Entities;
-using Libratica.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Libratica.Controllers
 {
@@ -22,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Összes rendelés lekérése (saját rendelések)
-        /// </summary>
+        //Összes saját rendelés lekérése
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetMyOrders()
         {
@@ -50,9 +45,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy rendelés részletei
-        /// </summary>
+        //Egy rendelés részletei
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderDto>> GetOrder(int id)
         {
@@ -86,31 +79,23 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Rendelés leadása (kosár alapján)
-        /// </summary>
+        //Rendelés leadása
         [HttpPost("checkout")]
         [Authorize]
         public async Task<ActionResult> Checkout([FromBody] CheckoutDto dto)
         {
             var userId = GetCurrentUserId();
-
-            // Validálás: minden tétel ugyanattól az eladótól kell származzon
             foreach (var item in dto.Items)
             {
                 var listing = await _context.Listings
                     .Include(l => l.Book)
                     .FirstOrDefaultAsync(l => l.Id == item.ListingId);
-
                 if (listing == null)
                     return NotFound(new { message = $"Hirdetés nem található: {item.ListingId}" });
-
                 if (!listing.IsAvailable)
                     return BadRequest(new { message = $"A hirdetés már nem elérhető: {listing.Book.Title}" });
-
                 if (listing.SellerId != dto.SellerId)
                     return BadRequest(new { message = "Nem minden tétel ugyanattól az eladótól származik" });
-
                 if (listing.Quantity < item.Quantity)
                     return BadRequest(new { message = $"Nincs elegendő készlet: {listing.Book.Title}" });
             }
@@ -125,14 +110,12 @@ namespace Libratica.Controllers
                 TotalAmount = dto.Items.Sum(x => x.Price * x.Quantity),
                 CreatedAt = DateTime.UtcNow
             };
-
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
             foreach (var item in dto.Items)
             {
                 var listing = await _context.Listings.FindAsync(item.ListingId);
-
                 var orderItem = new OrderItem
                 {
                     OrderId = order.Id,
@@ -140,13 +123,24 @@ namespace Libratica.Controllers
                     Quantity = item.Quantity,
                     PriceAtPurchase = item.Price
                 };
-
                 _context.OrderItems.Add(orderItem);
-
                 listing.Quantity -= item.Quantity;
                 if (listing.Quantity == 0)
                     listing.IsAvailable = false;
             }
+
+            var purchasedListingIds = dto.Items.Select(i => i.ListingId).ToList();
+            var listingBookIds = await _context.Listings
+                .Where(l => purchasedListingIds.Contains(l.Id))
+                .Select(l => l.BookId)
+                .ToListAsync();
+
+            var wishlistItems = await _context.Wishlists
+                .Where(w => w.UserId == userId && listingBookIds.Contains(w.BookId))
+                .ToListAsync();
+
+            if (wishlistItems.Any())
+                _context.Wishlists.RemoveRange(wishlistItems);
 
             await _context.SaveChangesAsync();
 
@@ -157,9 +151,7 @@ namespace Libratica.Controllers
             });
         }
 
-        /// <summary>
-        /// Rendelés státuszának frissítése (eladó)
-        /// </summary>
+        //Rendelés státuszának frissítése az eladó részéről
         [HttpPut("{id}/status")]
         public async Task<ActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusDto updateDto)
         {
@@ -198,9 +190,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Rendelés törlése (lemondás - csak pending státusznál)
-        /// </summary>
+        //Rendelés törlése (lemondás csak pending státusznál)
         [HttpDelete("{id}")]
         public async Task<IActionResult> CancelOrder(int id)
         {
@@ -247,9 +237,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Rendelés elutasítása (eladó) - csak pending státusznál
-        /// </summary>
+        //Rendelés elutasítása csak pending státusznál (eladó)
         [HttpPost("{id}/reject")]
         public async Task<IActionResult> RejectOrder(int id)
         {
@@ -301,9 +289,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Vásárolt rendelések (mint vevő)
-        /// </summary>
+        //Vásárolt rendelések
         [HttpGet("purchases")]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetPurchases()
         {
@@ -329,9 +315,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Eladott rendelések (mint eladó)
-        /// </summary>
+        //Eladott rendelések
         [HttpGet("sales")]
         public async Task<ActionResult<IEnumerable<OrderDto>>> GetSales()
         {

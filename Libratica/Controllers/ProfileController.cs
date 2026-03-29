@@ -3,7 +3,6 @@ using Libratica.DataContext.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Libratica.Controllers
 {
@@ -19,6 +18,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
+        //Profilfrissítés
         [HttpPut]
         public async Task<ActionResult<UserDto>> UpdateProfile([FromBody] UpdateProfileDto dto)
         {
@@ -66,6 +66,7 @@ namespace Libratica.Controllers
             }
         }
 
+        //Jelszóváltoztatás
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {

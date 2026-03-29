@@ -9,12 +9,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 builder.Environment.WebRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 
-// Add services to the container.
+//Services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration
+//CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -26,14 +26,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Database connection
+//Adatbázis kapcsolat
 builder.Services.AddDbContext<LibraticaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register services
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// JWT Authentication
+//JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
 
@@ -58,7 +57,6 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -74,7 +72,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Seed data on startup
+//Seed datas
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -105,7 +103,6 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Seed books if empty
     var booksExist = context.Books.Any();
     if (!booksExist)
     {
@@ -120,7 +117,6 @@ using (var scope = app.Services.CreateScope())
 
         var books = new[]
         {
-            // Sci-Fi
             new Libratica.DataContext.Entities.Book
             {
                 Title = "Dűne", Author = "Frank Herbert", Publisher = "Gabo Kiadó",
@@ -164,7 +160,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8739007-L.jpg", PageCount = 255, CreatedAt = DateTime.UtcNow
             },
 
-            // Fantasy
             new Libratica.DataContext.Entities.Book
             {
                 Title = "Harry Potter és a bölcsek köve", Author = "J.K. Rowling", Publisher = "Animus Kiadó",
@@ -201,7 +196,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8406551-L.jpg", PageCount = 208, CreatedAt = DateTime.UtcNow
             },
 
-            // Romantikus
             new Libratica.DataContext.Entities.Book
             {
                 Title = "Büszkeség és balítélet", Author = "Jane Austen", Publisher = "Európa Kiadó",
@@ -224,7 +218,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8406791-L.jpg", PageCount = 180, CreatedAt = DateTime.UtcNow
             },
 
-            // Krimi
             new Libratica.DataContext.Entities.Book
             {
                 Title = "A Sherlock Holmes kalandjai", Author = "Arthur Conan Doyle", Publisher = "Európa Kiadó",
@@ -254,7 +247,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8739201-L.jpg", PageCount = 463, CreatedAt = DateTime.UtcNow
             },
 
-            // Ismeretterjesztő
             new Libratica.DataContext.Entities.Book
             {
                 Title = "Sapiens - Az emberiség rövid története", Author = "Yuval Noah Harari", Publisher = "Animus Kiadó",
@@ -284,7 +276,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8406801-L.jpg", PageCount = 320, CreatedAt = DateTime.UtcNow
             },
 
-            // Történelem
             new Libratica.DataContext.Entities.Book
             {
                 Title = "A második világháború", Author = "Antony Beevor", Publisher = "Európa Kiadó",
@@ -307,7 +298,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8406804-L.jpg", PageCount = 650, CreatedAt = DateTime.UtcNow
             },
 
-            // Informatika
             new Libratica.DataContext.Entities.Book
             {
                 Title = "Clean Code", Author = "Robert C. Martin", Publisher = "Prentice Hall",
@@ -337,7 +327,6 @@ using (var scope = app.Services.CreateScope())
                 CoverImageUrl = "https://covers.openlibrary.org/b/id/8406808-L.jpg", PageCount = 820, CreatedAt = DateTime.UtcNow
             },
 
-            // Gyerekkönyv
             new Libratica.DataContext.Entities.Book
             {
                 Title = "A kis herceg", Author = "Antoine de Saint-Exupéry", Publisher = "Móra Kiadó",
@@ -371,45 +360,35 @@ using (var scope = app.Services.CreateScope())
         context.Books.AddRange(books);
         context.SaveChanges();
 
-        // Kategóriák hozzárendelése
         var bookCategories = new List<Libratica.DataContext.Entities.BookCategory>();
-
-        // Sci-Fi könyvek (0-5)
         if (sciFiCategory != null)
             for (int i = 0; i <= 5; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = sciFiCategory.Id });
 
-        // Fantasy könyvek (6-10)
         if (fantasyCategory != null)
             for (int i = 6; i <= 10; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = fantasyCategory.Id });
 
-        // Romantikus könyvek (11-13)
         if (romanticCategory != null)
             for (int i = 11; i <= 13; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = romanticCategory.Id });
 
-        // Krimi könyvek (14-17)
         if (krimiCategory != null)
             for (int i = 14; i <= 17; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = krimiCategory.Id });
 
-        // Ismeretterjesztő könyvek (18-21)
         if (ismeretCategory != null)
             for (int i = 18; i <= 21; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = ismeretCategory.Id });
 
-        // Történelem könyvek (22-24)
         if (tortenelmCategory != null)
             for (int i = 22; i <= 24; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = tortenelmCategory.Id });
 
-        // Informatika könyvek (25-28)
         if (informatikCategory != null)
             for (int i = 25; i <= 28; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = informatikCategory.Id });
 
-        // Gyerekkönyvek (29-32)
         if (gyerekCategory != null)
             for (int i = 29; i <= 32; i++)
                 bookCategories.Add(new Libratica.DataContext.Entities.BookCategory { BookId = books[i].Id, CategoryId = gyerekCategory.Id });
@@ -417,7 +396,7 @@ using (var scope = app.Services.CreateScope())
         context.BookCategories.AddRange(bookCategories);
         context.SaveChanges();
 
-        // Hirdetések létrehozása az admin usernek
+        //Hirdetések létrehozása az adminnak
         var adminUser = context.Users.FirstOrDefault(u => u.Email == "admin@libratica.hu");
         if (adminUser != null)
         {

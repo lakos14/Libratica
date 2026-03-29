@@ -4,7 +4,6 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 namespace Libratica.Controllers
 {
@@ -20,9 +19,7 @@ namespace Libratica.Controllers
             _context = context;
         }
 
-        /// <summary>
-        /// Értékelés létrehozása (vevő → eladó VAGY eladó → vevő)
-        /// </summary>
+        //Értékelés létrehozása
         [HttpPost]
         public async Task<ActionResult> CreateReview([FromBody] CreateReviewDto dto)
         {
@@ -39,22 +36,20 @@ namespace Libratica.Controllers
                 if (order.Status != "delivered")
                     return BadRequest(new { message = "Csak teljesített rendelést lehet értékelni" });
 
-                // Meghatározzuk ki értékel kit
                 int reviewedUserId;
                 if (order.BuyerId == userId)
                 {
-                    reviewedUserId = order.SellerId; // vevő értékeli az eladót
+                    reviewedUserId = order.SellerId;
                 }
                 else if (order.SellerId == userId)
                 {
-                    reviewedUserId = order.BuyerId; // eladó értékeli a vevőt
+                    reviewedUserId = order.BuyerId;
                 }
                 else
                 {
                     return Forbid();
                 }
 
-                // Már értékelt-e ebben az irányban
                 var alreadyReviewed = await _context.Reviews
                     .AnyAsync(r => r.OrderId == dto.OrderId && r.ReviewerId == userId);
 
@@ -74,7 +69,6 @@ namespace Libratica.Controllers
                 _context.Reviews.Add(review);
                 await _context.SaveChangesAsync();
 
-                // Frissítjük az értékelt user átlagos ratingját
                 await UpdateUserRating(reviewedUserId);
 
                 return Ok(new { message = "Értékelés sikeresen elküldve!" });
@@ -85,9 +79,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy felhasználó értékelései
-        /// </summary>
+        //Egy felhasználó értékelései
         [HttpGet("user/{userId}")]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetUserReviews(int userId)
@@ -134,9 +126,7 @@ namespace Libratica.Controllers
             }
         }
 
-        /// <summary>
-        /// Egy rendeléshez tartozó értékelések
-        /// </summary>
+        //Egy rendeléshez tartozó értékelések
         [HttpGet("order/{orderId}")]
         public async Task<ActionResult<IEnumerable<ReviewDto>>> GetOrderReviews(int orderId)
         {

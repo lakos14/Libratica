@@ -30,7 +30,6 @@ namespace Libratica.DataContext.Entities
         public string? Images { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-        public int ViewsCount { get; set; } = 0;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

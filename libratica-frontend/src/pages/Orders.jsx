@@ -67,12 +67,14 @@ function Orders() {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('hu-HU', {
+    const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+    return date.toLocaleString('hu-HU', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Europe/Budapest',
     });
   };
 

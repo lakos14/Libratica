@@ -11,7 +11,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class RecommendationsController : ControllerBase
+    public class RecommendationsController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -122,7 +122,7 @@ namespace Libratica.Controllers
                         .Include(l => l.Seller)
                             .ThenInclude(s => s.Role)
                         .Where(l => l.IsAvailable && l.SellerId != userId)
-                        .OrderByDescending(l => l.ViewsCount)
+                        .OrderByDescending(l => l.CreatedAt)
                         .Take(8)
                         .Select(l => (object)new
                         {
@@ -163,13 +163,6 @@ namespace Libratica.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(claim.Value);
         }
     }
 }

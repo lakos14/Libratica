@@ -11,7 +11,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ReviewsController : ControllerBase
+    public class ReviewsController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -206,13 +206,6 @@ namespace Libratica.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(claim.Value);
         }
     }
 }

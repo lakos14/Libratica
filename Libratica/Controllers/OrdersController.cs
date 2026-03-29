@@ -13,7 +13,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class OrdersController : ControllerBase
+    public class OrdersController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -355,14 +355,6 @@ namespace Libratica.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(userIdClaim.Value);
         }
 
         private OrderDto MapToOrderDto(Order order)

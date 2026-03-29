@@ -204,7 +204,6 @@ namespace Libratica.Controllers
                 listings = sortBy?.ToLower() switch
                 {
                     "price" => sortOrder == "desc" ? listings.OrderByDescending(l => l.Price).ToList() : listings.OrderBy(l => l.Price).ToList(),
-                    "views" => sortOrder == "desc" ? listings.OrderByDescending(l => l.ViewsCount).ToList() : listings.OrderBy(l => l.ViewsCount).ToList(),
                     _ => sortOrder == "asc" ? listings.OrderBy(l => l.CreatedAt).ToList() : listings.OrderByDescending(l => l.CreatedAt).ToList()
                 };
 
@@ -252,8 +251,7 @@ namespace Libratica.Controllers
                         ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
                         : new List<string>(),
                     CreatedAt = l.CreatedAt,
-                    UpdatedAt = l.UpdatedAt,
-                    ViewsCount = l.ViewsCount
+                    UpdatedAt = l.UpdatedAt
                 }).ToList();
 
                 var totalCount = listingDtos.Count;

@@ -11,7 +11,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class WishlistController : ControllerBase
+    public class WishlistController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -160,13 +160,6 @@ namespace Libratica.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(claim.Value);
         }
     }
 }

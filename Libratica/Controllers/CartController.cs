@@ -12,7 +12,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class CartController : ControllerBase
+    public class CartController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -230,14 +230,6 @@ namespace Libratica.Controllers
             }
         }
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(userIdClaim.Value);
-        }
-
         private async Task<Cart> GetOrCreateCartAsync(int userId)
         {
             var cart = await _context.Carts.FirstOrDefaultAsync(c => c.UserId == userId);
@@ -255,57 +247,6 @@ namespace Libratica.Controllers
             }
 
             return cart;
-        }
-
-        private ListingDto MapToListingDto(Listing listing)
-        {
-            return new ListingDto
-            {
-                Id = listing.Id,
-                Book = new BookDto
-                {
-                    Id = listing.Book.Id,
-                    ISBN = listing.Book.ISBN,
-                    Title = listing.Book.Title,
-                    Author = listing.Book.Author,
-                    Publisher = listing.Book.Publisher,
-                    PublicationYear = listing.Book.PublicationYear,
-                    Language = listing.Book.Language,
-                    Description = listing.Book.Description,
-                    CoverImageUrl = listing.Book.CoverImageUrl,
-                    PageCount = listing.Book.PageCount,
-                    Categories = listing.Book.BookCategories.Select(bc => new CategoryDto
-                    {
-                        Id = bc.Category.Id,
-                        Name = bc.Category.Name,
-                        Description = bc.Category.Description
-                    }).ToList(),
-                    CreatedAt = listing.Book.CreatedAt
-                },
-                Seller = new UserDto
-                {
-                    Id = listing.Seller.Id,
-                    Username = listing.Seller.Username,
-                    FullName = listing.Seller.FullName,
-                    ProfilePictureUrl = listing.Seller.ProfilePictureUrl,
-                    RoleName = listing.Seller.Role.Name,
-                    Rating = listing.Seller.Rating,
-                    CreatedAt = listing.Seller.CreatedAt
-                },
-                Condition = listing.Condition,
-                ConditionDescription = listing.ConditionDescription,
-                Price = listing.Price,
-                Currency = listing.Currency,
-                Quantity = listing.Quantity,
-                IsAvailable = listing.IsAvailable,
-                Location = listing.Location,
-                Images = !string.IsNullOrEmpty(listing.Images)
-                    ? JsonSerializer.Deserialize<List<string>>(listing.Images) ?? new List<string>()
-                    : new List<string>(),
-                CreatedAt = listing.CreatedAt,
-                UpdatedAt = listing.UpdatedAt,
-                ViewsCount = listing.ViewsCount
-            };
         }
     }
 }

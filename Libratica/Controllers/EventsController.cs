@@ -11,7 +11,7 @@ namespace Libratica.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EventsController : ControllerBase
+    public class EventsController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -33,7 +33,7 @@ namespace Libratica.Controllers
                     .Include(e => e.Attendees)
                     .Include(e => e.Comments)
                     .Where(e => e.Status == "approved")
-                    .OrderBy(e => e.EventDate < DateTime.Now)
+                    .OrderBy(e => e.EventDate < DateTime.UtcNow)
                     .ThenBy(e => e.EventDate)
                     .Select(e => new
                     {
@@ -45,7 +45,7 @@ namespace Libratica.Controllers
                         e.Location,
                         e.Status,
                         e.CreatedAt,
-                        IsExpired = e.EventDate < DateTime.Now,
+                        IsExpired = e.EventDate < DateTime.UtcNow,
                         Organizer = new { e.Organizer.Id, e.Organizer.Username },
                         AttendeesCount = e.Attendees.Count,
                         CommentsCount = e.Comments.Count
@@ -207,7 +207,7 @@ namespace Libratica.Controllers
                     EventId = id,
                     UserId = userId,
                     Content = dto.Content,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 _context.EventComments.Add(comment);
@@ -295,13 +295,6 @@ namespace Libratica.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(claim.Value);
         }
     }
 }

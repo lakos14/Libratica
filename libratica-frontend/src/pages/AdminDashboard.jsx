@@ -51,12 +51,14 @@ function AdminDashboard() {
   const listingsTotalPages = Math.ceil(listings.length / adminPageSize);
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('hu-HU', {
+    const date = new Date(dateString.endsWith('Z') ? dateString : dateString + 'Z');
+    return date.toLocaleString('hu-HU', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      timeZone: 'Europe/Budapest',
     });
   };
 
@@ -83,11 +85,10 @@ function AdminDashboard() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-semibold ${
-              activeTab === tab
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
+            className={`px-4 py-2 font-semibold ${activeTab === tab
+              ? 'text-blue-600 border-b-2 border-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+              }`}
           >
             {tab === 'stats' && 'Statisztikák'}
             {tab === 'reports' && 'Reportok'}
@@ -149,20 +150,18 @@ function AdminDashboard() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.roleName === 'admin'
-                            ? 'bg-purple-100 text-purple-800'
-                            : 'bg-blue-100 text-blue-800'
-                        }`}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${user.roleName === 'admin'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-blue-100 text-blue-800'
+                          }`}
                       >
                         {user.roleName}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}
                       >
                         {user.isActive ? 'Aktív' : 'Inaktív'}
                       </span>
@@ -172,9 +171,8 @@ function AdminDashboard() {
                         <button
                           onClick={() => toggleUserActive.mutate(user.id)}
                           disabled={toggleUserActive.isPending}
-                          className={`px-2 py-1 text-xs rounded text-white ${
-                            user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                          }`}
+                          className={`px-2 py-1 text-xs rounded text-white ${user.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                            }`}
                         >
                           {user.isActive ? 'Tiltás' : 'Aktiválás'}
                         </button>
@@ -233,11 +231,10 @@ function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          listing.isAvailable
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${listing.isAvailable
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                          }`}
                       >
                         {listing.isAvailable ? 'Elérhető' : 'Nem elérhető'}
                       </span>
@@ -247,11 +244,10 @@ function AdminDashboard() {
                         <button
                           onClick={() => toggleListingAvailable.mutate(listing.id)}
                           disabled={toggleListingAvailable.isPending}
-                          className={`px-2 py-1 text-xs rounded text-white ${
-                            listing.isAvailable
-                              ? 'bg-yellow-500 hover:bg-yellow-600'
-                              : 'bg-green-500 hover:bg-green-600'
-                          }`}
+                          className={`px-2 py-1 text-xs rounded text-white ${listing.isAvailable
+                            ? 'bg-yellow-500 hover:bg-yellow-600'
+                            : 'bg-green-500 hover:bg-green-600'
+                            }`}
                         >
                           {listing.isAvailable ? 'Inaktiválás' : 'Aktiválás'}
                         </button>
@@ -291,19 +287,18 @@ function AdminDashboard() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          report.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : report.status === 'resolved'
+                        className={`px-2 py-1 rounded text-xs font-medium ${report.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : report.status === 'resolved'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-800'
-                        }`}
+                          }`}
                       >
                         {report.status === 'pending'
                           ? 'Függőben'
                           : report.status === 'resolved'
-                          ? 'Megoldva'
-                          : 'Elvetve'}
+                            ? 'Megoldva'
+                            : 'Elvetve'}
                       </span>
                       <span className="ml-2 text-sm text-gray-500">{formatDate(report.createdAt)}</span>
                     </div>
@@ -422,19 +417,18 @@ function AdminDashboard() {
                       </p>
                     </div>
                     <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        event.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : event.status === 'approved'
+                      className={`px-2 py-1 rounded text-xs font-medium ${event.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : event.status === 'approved'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
-                      }`}
+                        }`}
                     >
                       {event.status === 'pending'
                         ? '⏳ Függőben'
                         : event.status === 'approved'
-                        ? 'Jóváhagyva'
-                        : 'Elutasítva'}
+                          ? 'Jóváhagyva'
+                          : 'Elutasítva'}
                     </span>
                   </div>
 

@@ -33,7 +33,6 @@ namespace Libratica.Controllers
                 var totalOrders = await _context.Orders.CountAsync();
                 var pendingOrders = await _context.Orders.CountAsync(o => o.Status == "pending");
 
-                // Mai statisztikák
                 var today = DateTime.UtcNow.Date;
                 var todayUsers = await _context.Users.CountAsync(u => u.CreatedAt >= today);
                 var todayListings = await _context.Listings.CountAsync(l => l.CreatedAt >= today);
@@ -133,7 +132,6 @@ namespace Libratica.Controllers
                         l.Quantity,
                         l.IsAvailable,
                         l.Location,
-                        l.ViewsCount,
                         l.CreatedAt,
                         l.UpdatedAt
                     })

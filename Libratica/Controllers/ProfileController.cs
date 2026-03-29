@@ -10,7 +10,7 @@ namespace Libratica.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class ProfileController : ControllerBase
+    public class ProfileController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -54,9 +54,7 @@ namespace Libratica.Controllers
                     FullName = user.FullName,
                     PhoneNumber = user.PhoneNumber,
                     ProfilePictureUrl = user.ProfilePictureUrl,
-                    Bio = user.Bio,
                     RoleName = user.Role.Name,
-                    IsVerified = user.IsVerified,
                     Rating = user.Rating,
                     CreatedAt = user.CreatedAt,
                     ShowPhoneNumber = user.ShowPhoneNumber,
@@ -92,13 +90,6 @@ namespace Libratica.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        private int GetCurrentUserId()
-        {
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (claim == null) throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(claim.Value);
         }
     }
 }

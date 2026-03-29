@@ -21,6 +21,5 @@ namespace Libratica.DataContext.DTOs
         public List<string> Images { get; set; } = new();
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public int ViewsCount { get; set; }
     }
 }

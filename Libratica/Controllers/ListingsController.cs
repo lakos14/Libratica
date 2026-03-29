@@ -10,7 +10,7 @@ namespace Libratica.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ListingsController : ControllerBase
+    public class ListingsController : BaseController
     {
         private readonly LibraticaDbContext _context;
 
@@ -99,8 +99,7 @@ namespace Libratica.Controllers
                         ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
                         : new List<string>(),
                     CreatedAt = l.CreatedAt,
-                    UpdatedAt = l.UpdatedAt,
-                    ViewsCount = l.ViewsCount
+                    UpdatedAt = l.UpdatedAt
                 }).ToList();
 
                 return Ok(listings);
@@ -133,7 +132,6 @@ namespace Libratica.Controllers
                     return NotFound(new { message = "Hirdetés nem található" });
                 }
 
-                listing.ViewsCount++;
                 await _context.SaveChangesAsync();
 
                 var listingDto = new ListingDto
@@ -181,7 +179,6 @@ namespace Libratica.Controllers
                     Images = listing.Images != null ? JsonSerializer.Deserialize<List<string>>(listing.Images) ?? new List<string>() : new List<string>(),
                     CreatedAt = listing.CreatedAt,
                     UpdatedAt = listing.UpdatedAt,
-                    ViewsCount = listing.ViewsCount
                 };
 
                 return Ok(listingDto);
@@ -227,8 +224,7 @@ namespace Libratica.Controllers
                     Location = createListingDto.Location,
                     Images = createListingDto.Images != null ? JsonSerializer.Serialize(createListingDto.Images) : null,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    ViewsCount = 0
+                    UpdatedAt = DateTime.UtcNow
                 };
 
                 _context.Listings.Add(listing);
@@ -338,14 +334,6 @@ namespace Libratica.Controllers
             }
         }
 
-        private int GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userIdClaim == null)
-                throw new UnauthorizedAccessException("Érvénytelen token");
-            return int.Parse(userIdClaim.Value);
-        }
-
         /// <summary>
         /// Saját hirdetések lekérése
         /// </summary>
@@ -416,8 +404,7 @@ namespace Libratica.Controllers
                         ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
                         : new List<string>(),
                     CreatedAt = l.CreatedAt,
-                    UpdatedAt = l.UpdatedAt,
-                    ViewsCount = l.ViewsCount
+                    UpdatedAt = l.UpdatedAt
                 }).ToList();
 
                 return Ok(listings);

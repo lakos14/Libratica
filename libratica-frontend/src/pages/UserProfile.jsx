@@ -96,10 +96,6 @@ function UserProfile() {
             </div>
           </div>
 
-          {profile.bio && (
-            <p className="mt-4 text-gray-600 border-t pt-4">{profile.bio}</p>
-          )}
-
           <div className="flex gap-2 mt-4 pt-4 border-t flex-wrap">
 
             <a href={`https://mail.google.com/mail/?view=cm&to=${profile.email}`}

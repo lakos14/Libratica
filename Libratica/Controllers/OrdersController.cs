@@ -4,6 +4,7 @@ using Libratica.DataContext.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Libratica.Controllers
 {
@@ -392,7 +393,10 @@ namespace Libratica.Controllers
                         CreatedAt = oi.Listing.Book.CreatedAt
                     },
                     Quantity = oi.Quantity,
-                    PriceAtPurchase = oi.PriceAtPurchase
+                    PriceAtPurchase = oi.PriceAtPurchase,
+                    Images = !string.IsNullOrEmpty(oi.Listing.Images)
+                        ? JsonSerializer.Deserialize<List<string>>(oi.Listing.Images) ?? new List<string>()
+                        : new List<string>(),
                 }).ToList(),
                 TotalAmount = order.TotalAmount,
                 Status = order.Status,

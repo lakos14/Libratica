@@ -21,5 +21,6 @@
         public int Quantity { get; set; }
         public decimal PriceAtPurchase { get; set; }
         public decimal Subtotal => PriceAtPurchase * Quantity;
+        public List<string> Images { get; set; } = new();
     }
 }

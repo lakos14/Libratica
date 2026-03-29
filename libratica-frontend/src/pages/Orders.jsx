@@ -240,17 +240,22 @@ function OrderCard({
       <div className="space-y-3 mb-4">
         {order.items?.map((item) => (
           <div key={item.id} className="flex gap-4 p-3 bg-gray-50 rounded">
-            {item.book?.coverImageUrl ? (
-              <img
-                src={item.book.coverImageUrl}
-                alt={item.book?.title}
-                className="w-16 h-20 object-cover rounded"
-              />
-            ) : (
-              <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center">
-                <span className="text-gray-400 text-2xl">📚</span>
-              </div>
-            )}
+            {(() => {
+              const imgUrl = item.images?.length > 0
+                ? `http://localhost:5102${item.images[0]}`
+                : item.book?.coverImageUrl;
+              return imgUrl ? (
+                <img
+                  src={imgUrl}
+                  alt={item.book?.title}
+                  className="w-16 h-20 object-cover rounded"
+                />
+              ) : (
+                <div className="w-16 h-20 bg-gray-200 rounded flex items-center justify-center">
+                  <span className="text-gray-400 text-2xl">📚</span>
+                </div>
+              );
+            })()}
             <div className="flex-1">
               <h4 className="font-bold text-sm text-gray-800">{item.book?.title}</h4>
               <p className="text-xs text-gray-600">{item.book?.author}</p>

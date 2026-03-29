@@ -408,7 +408,6 @@ const EditListing = () => {
         <ul className="space-y-2 text-sm text-gray-700">
           <li>- A könyv adatait nem lehet módosítani (cím, szerző, stb.)</li>
           <li>- A hirdetés létrehozás időpontja nem változik</li>
-          <li>- A megtekintések száma megmarad</li>
           <li>- Ha valaki már kosárba tette, az továbbra is benne lesz</li>
         </ul>
       </div>

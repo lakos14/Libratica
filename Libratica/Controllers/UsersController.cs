@@ -41,6 +41,9 @@ namespace Libratica.Controllers
                         l.Condition,
                         l.Location,
                         l.CreatedAt,
+                        Images = !string.IsNullOrEmpty(l.Images)
+                            ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
+                            : new List<string>(),
                         Book = new
                         {
                             l.Book.Id,

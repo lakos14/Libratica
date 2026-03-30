@@ -60,22 +60,26 @@
 - Tóth Bálint, Ábrahám Gyula, Pulai Gábor
 
 ## Technológiák
+
 ### Backend
 - ASP.NET Core 8.0
-- Entity Framework Core 9
+- Entity Framework Core 9.0.10
 - SQL Server Express
-- JWT Authentication
-- BCrypt.Net (jelszó hash-elés)
-- Swagger/OpenAPI
+- JWT Authentication (Microsoft.AspNetCore.Authentication.JwtBearer)
+- BCrypt.Net-Next 4.0.3 (jelszó hash-elés)
+- Swagger/OpenAPI (Swashbuckle)
 
 ### Frontend
 - React 19
 - React Router v7
-- Axios
-- Tailwind CSS
-- Context API (auth kezelés)
+- TanStack React Query v5 (szerverállapot kezelés)
+- Axios (HTTP kérések)
+- Tailwind CSS (stílusok)
+- React Context API (authentikáció kezelés)
 - React Toastify (értesítések)
+- Leaflet / React Leaflet (interaktív térkép)
 
 ### Külső API-k és szolgáltatások
 - Open Library API (könyv adatok automatikus kitöltése)
-- OpenAI GPT-3.5-turbo (AI alapú könyvkereső)
+- OpenAI GPT-3.5-turbo (AI alapú természetes nyelvi keresés)
+- OpenStreetMap / Nominatim API (térkép megjelenítés és reverse geocoding)

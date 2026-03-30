@@ -1,10 +1,6 @@
 # Libratica
 2026.03.25
 
-## Tervezett funkciók a második félévre:
-### Kötelező:
-- code review, tesztelés
-
 ### Konzulens észrevételei:
 - kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján✅
 - minden jelszóhoz mutasd gomb✅

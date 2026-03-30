@@ -233,20 +233,22 @@ function Books() {
         )}
 
         {!isLoading && books.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
             {books.map((book) => (
-              <div
+              <Link
                 key={book.id}
-                className="bg-white border border-gray-200 rounded p-3 flex flex-col"
+                to={`/listings?bookId=${book.id}`}
+                className="bg-white border border-gray-200 rounded p-3 flex flex-col hover:border-gray-400 transition-colors"
+                style={{ textDecoration: 'none' }}
               >
                 {(() => {
                   const imgUrl = book.firstListingImage
                     ? `http://localhost:5102${JSON.parse(book.firstListingImage)[0]}`
                     : book.coverImageUrl;
                   return imgUrl ? (
-                    <img src={imgUrl} alt={book.title} className="w-full h-64 object-cover rounded mb-3" />
+                    <img src={imgUrl} alt={books.book?.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />
                   ) : (
-                    <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                    <div className="w-full h-40 sm:h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
                       <span className="text-gray-400 text-4xl">📚</span>
                     </div>
                   );
@@ -262,14 +264,7 @@ function Books() {
                     📅 {book.publicationYear}
                   </p>
                 )}
-                <Link
-                  to={`/listings?bookId=${book.id}`}
-                  className="inline-block text-xs font-medium px-3 py-1 rounded text-white mt-auto"
-                  style={{ backgroundColor: '#8b4513' }}
-                >
-                  Hirdetések megtekintése
-                </Link>
-              </div>
+              </Link>
             ))}
           </div>
         )}

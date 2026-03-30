@@ -270,7 +270,7 @@ function Listings() {
         )}
 
         {!isLoading && listings.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
             {listings.map((listing) => (
               <div
                 key={listing.id}
@@ -282,9 +282,9 @@ function Listings() {
                     ? `http://localhost:5102${listing.images[0]}`
                     : listing.book?.coverImageUrl;
                   return imgUrl ? (
-                    <img src={imgUrl} alt={listing.book?.title} className="w-full h-64 object-cover rounded mb-3" />
+                    <img src={imgUrl} alt={listing.book?.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />
                   ) : (
-                    <div className="w-full h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                    <div className="w-full h-40 sm:h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
                       <span className="text-gray-400 text-4xl">📚</span>
                     </div>
                   );

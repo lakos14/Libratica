@@ -89,7 +89,7 @@ function UserProfile() {
                 )}
               </div>
 
-              <div className="flex gap-4 mt-2 text-sm text-gray-500">
+              <div className="flex flex-col gap-1 mt-2 text-sm text-gray-500">
                 <span>{profile.activeListingsCount} aktív hirdetés</span>
                 <span>Regisztrált: {formatDate(profile.createdAt)}</span>
               </div>
@@ -149,7 +149,7 @@ function UserProfile() {
                   <p className="text-gray-500">Nincsenek aktív hirdetések</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {profile.listings?.map((listing) => (
                     <Link
                       key={listing.id}

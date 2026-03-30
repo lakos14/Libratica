@@ -44,8 +44,10 @@ namespace Libratica.Controllers
                         e.CreatedAt,
                         IsExpired = e.EventDate < DateTime.UtcNow,
                         Organizer = new { e.Organizer.Id, e.Organizer.Username },
+                        Attendees = e.Attendees.Select(a => new { a.UserId }),
                         AttendeesCount = e.Attendees.Count,
                         CommentsCount = e.Comments.Count
+
                     })
                     .ToListAsync();
 

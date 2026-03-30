@@ -49,11 +49,13 @@ function Wishlist() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
             {wishlist.map((item) => (
-              <div
+              <Link
                 key={item.id}
-                className="bg-white border border-gray-200 rounded p-3 flex flex-col"
+                to={`/listings?bookId=${item.book?.id}`}
+                className="bg-white border border-gray-200 rounded p-3 flex flex-col hover:border-gray-400 transition-colors"
+                style={{ textDecoration: 'none' }}
               >
                 {(() => {
                   const imgUrl = item.book?.firstListingImage
@@ -68,12 +70,9 @@ function Wishlist() {
                   );
                 })()}
 
-                <Link
-                  to={`/listings?bookId=${item.book?.id}`}
-                  className="font-bold text-sm text-gray-800 line-clamp-2 mb-1 hover:text-[#8b4513]"
-                >
+                <span className="font-bold text-sm text-gray-800 line-clamp-2 mb-1">
                   {item.book?.title}
-                </Link>
+                </span>
                 <p className="text-xs text-gray-600 mb-2">
                   {item.book?.author}
                 </p>
@@ -87,15 +86,15 @@ function Wishlist() {
                 )}
 
                 <div className="flex gap-2 mt-auto">
-                  <Link
-                    to={`/listings?bookId=${item.book?.id}`}
+                  <span
                     className="flex-1 text-center px-2 py-1 text-xs rounded text-white"
                     style={{ backgroundColor: '#8b4513' }}
                   >
                     Hirdetések
-                  </Link>
+                  </span>
                   <button
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      e.preventDefault();
                       await handleRemove(item.book?.id);
                     }}
                     disabled={removeFromWishlist.isPending}
@@ -104,7 +103,7 @@ function Wishlist() {
                     {removeFromWishlist.isPending ? '...' : 'Törlés'}
                   </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

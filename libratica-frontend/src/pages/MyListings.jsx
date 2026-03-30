@@ -49,19 +49,18 @@ function MyListings() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <h1 className="text-3xl font-bold" style={{ color: '#8b4513' }}>
             Saját hirdetéseim
           </h1>
           <Link
             to="/listings/create"
-            className="px-4 py-2 rounded text-white font-medium"
+            className="px-4 py-2 rounded text-white font-medium whitespace-nowrap"
             style={{ backgroundColor: '#8b4513' }}
           >
             + Új hirdetés
           </Link>
         </div>
-
         {listings.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded p-8 text-center">
             <p className="text-gray-500 text-lg mb-4">Még nincs hirdetésed</p>
@@ -78,7 +77,8 @@ function MyListings() {
             {listings.map((listing) => (
               <div
                 key={listing.id}
-                className="bg-white border border-gray-200 rounded p-4 flex flex-col"
+                onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                className="bg-white border border-gray-200 rounded p-4 flex flex-col cursor-pointer hover:border-gray-400 transition-colors"
               >
                 {listing.images?.length > 0 ? (
                   <img
@@ -118,11 +118,10 @@ function MyListings() {
 
                 <div className="mb-3">
                   <span
-                    className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                      listing.isAvailable
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
+                    className={`inline-block px-2 py-1 rounded text-xs font-medium ${listing.isAvailable
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                      }`}
                   >
                     {listing.isAvailable ? 'Elérhető' : 'Nem elérhető'}
                   </span>

@@ -162,14 +162,14 @@ function ListingDetails() {
           </div>
 
           <div className="bg-white border border-gray-200 rounded p-6">
-            <h1 className="text-3xl font-bold mb-2" style={{ color: '#8b4513' }}>
+            <h1 className="text-2xl font-bold mb-2" style={{ color: '#8b4513' }}>
               {listing.book?.title}
             </h1>
 
             <p className="text-xl text-gray-600 mb-4">{listing.book?.author}</p>
 
             <div className="mb-6">
-              <span className="text-4xl font-bold" style={{ color: '#8b4513' }}>
+              <span className="text-3xl font-bold" style={{ color: '#8b4513' }}>
                 {listing.price?.toLocaleString('hu-HU')} Ft
               </span>
             </div>

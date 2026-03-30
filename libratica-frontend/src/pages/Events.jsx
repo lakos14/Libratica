@@ -104,7 +104,7 @@ function Events() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
           <div>
             <h1 className="text-3xl font-bold" style={{ color: '#8b4513' }}>
               Események
@@ -114,7 +114,7 @@ function Events() {
           {user && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-4 py-2 rounded text-white font-medium"
+              className="px-4 py-2 rounded text-white font-medium whitespace-nowrap"
               style={{ backgroundColor: '#8b4513' }}
             >
               + Esemény létrehozása
@@ -161,7 +161,12 @@ function Events() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredEvents.map((event) => (
-              <div key={event.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition">
+              <Link
+                key={event.id}
+                to={`/events/${event.id}`}
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-gray-400 transition block"
+                style={{ textDecoration: 'none' }}
+              >
                 <div className="px-4 pt-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${event.type === 'bookfair'
                     ? 'bg-blue-100 text-blue-800'
@@ -177,7 +182,7 @@ function Events() {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-xl font-bold mb-2" style={{ color: '#8b4513' }}>
+                  <h3 className="text-xl font-bold mb-2 line-clamp-2" style={{ color: '#8b4513' }}>
                     {event.title}
                   </h3>
 
@@ -206,26 +211,32 @@ function Events() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Link
-                      to={`/events/${event.id}`}
+                    <span
                       className="flex-1 text-center px-3 py-2 text-sm rounded border font-medium"
                       style={{ borderColor: '#8b4513', color: '#8b4513' }}
                     >
                       Részletek
-                    </Link>
+                    </span>
                     {user && !event.isExpired && (
                       <button
-                        onClick={() => handleToggleAttend(event.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleToggleAttend(event.id);
+                        }}
                         disabled={toggleAttend.isPending}
-                        className="flex-1 px-3 py-2 text-sm rounded text-white font-medium disabled:opacity-50"
-                        style={{ backgroundColor: '#8b4513' }}
+                        className="flex-1 px-3 py-2 text-sm rounded font-medium disabled:opacity-50"
+                        style={{
+                          backgroundColor: event.attendees?.some(a => a.userId === user.id) ? 'white' : '#8b4513',
+                          color: event.attendees?.some(a => a.userId === user.id) ? '#8b4513' : 'white',
+                          border: event.attendees?.some(a => a.userId === user.id) ? '1px solid #8b4513' : 'none'
+                        }}
                       >
-                        Részt veszek
+                        {event.attendees?.some(a => a.userId === user.id) ? 'Nem veszek részt' : 'Részt veszek'}
                       </button>
                     )}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

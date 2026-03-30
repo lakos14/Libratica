@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const API_BASE_URL = 'http://localhost:5102/api';
 
@@ -18,6 +19,16 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (!error.response) {
+      toast.error('A szerver nem elérhető. Kérjük próbáld újra később.');
+    }
     return Promise.reject(error);
   }
 );

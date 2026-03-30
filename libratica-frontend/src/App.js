@@ -23,12 +23,14 @@ import BookCollection from './pages/BookCollection';
 import Recommendations from './pages/Recommendations';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
+import ScrollToTop from './components/ScrollToTop';
 
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <ScrollToTop />
         <div className="min-h-screen bg-gray-50">
           <Navbar />
           <ToastContainer

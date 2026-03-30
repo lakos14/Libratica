@@ -29,7 +29,7 @@ function Navbar() {
     <nav className="bg-white border-b border-gray-300">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-2xl font-bold" style={{ color: '#8b4513' }}>
+          <Link to="/" className="text-2xl font-bold" style={{ color: '#8b4513', textDecoration: 'none' }}>
             Libratica
           </Link>
 
@@ -100,7 +100,7 @@ function Navbar() {
                 </div>
               </>
             ) : (
-              <>  
+              <>
                 <Link to="/login" className="text-gray-700" style={navLinkStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
                   Bejelentkezés
                 </Link>
@@ -145,6 +145,15 @@ function Navbar() {
                 </Link>
                 <Link to="/orders" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
                   Rendeléseim
+                </Link>
+                <Link to="/wishlist" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  Kívánságlista
+                </Link>
+                <Link to="/collection" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  Gyűjteményem
+                </Link>
+                <Link to="/profile" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>
+                  Profil szerkesztése
                 </Link>
                 {user.roleName === 'admin' && (
                   <Link to="/admin" className="block py-2 text-gray-700" onClick={() => setIsMenuOpen(false)}>

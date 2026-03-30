@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 
 const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
-    name: '',
+    name: user?.fullName || user?.username || '',
     zipCode: '',
     city: '',
     street: '',
     paymentMethod: 'cash',
   });
-
   const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;

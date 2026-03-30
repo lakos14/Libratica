@@ -22,6 +22,9 @@ namespace Libratica.Controllers
             try
             {
                 var apiKey = _configuration["OpenAI:ApiKey"];
+                if (string.IsNullOrEmpty(apiKey))
+                    return BadRequest(new { message = "AI keresés jelenleg nem elérhető" });
+
                 var client = new ChatClient("gpt-3.5-turbo", apiKey);
 
                 var prompt = $@"

@@ -10,6 +10,17 @@ namespace Libratica.DataContext.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<double>(
+                name: "Latitude",
+                table: "Events",
+                type: "float",
+                nullable: true);
+
+            migrationBuilder.AddColumn<double>(
+                name: "Longitude",
+                table: "Events",
+                type: "float",
+                nullable: true);
         }
 
         /// <inheritdoc />

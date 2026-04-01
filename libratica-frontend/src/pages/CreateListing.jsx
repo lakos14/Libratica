@@ -260,6 +260,8 @@ const CreateListing = () => {
         <h1 className="text-4xl font-bold">Új hirdetés létrehozása</h1>
         <p className="text-gray-600 mt-2">Adj el egy könyvet a platformon</p>
       </div>
+      
+      <p className="text-sm text-gray-500 mb-4">A * jelölt mezők kitöltése kötelező.</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white p-6 rounded-lg shadow-md">

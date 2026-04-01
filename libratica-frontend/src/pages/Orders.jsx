@@ -140,6 +140,7 @@ function Orders() {
               />
             ))}
           </div>
+
         )}
       </div>
 
@@ -220,6 +221,13 @@ function OrderCard({
 }) {
   const { data: orderReviews = [] } = useOrderReviews(order.id);
   const alreadyReviewed = orderReviews.some((r) => r.reviewer?.id === user?.id);
+  const getPaymentMethodLabel = (method) => {
+    const labels = {
+      cash: 'Készpénz',
+      transfer: 'Banki átutalás',
+    };
+    return labels[method] || method;
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4">
@@ -272,23 +280,67 @@ function OrderCard({
         ))}
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-        <div>
-          {activeTab === 'buyer' ? (
-            <p className="text-sm text-gray-600">
-              Eladó: <span className="font-medium">{order.seller?.username}</span>
-            </p>
-          ) : (
-            <p className="text-sm text-gray-600">
-              Vevő: <span className="font-medium">{order.buyer?.username}</span>
-            </p>
-          )}
-        </div>
+      <div className="flex justify-between items-center pt-4 border-t border-gray-200 mb-4">
         <div className="text-right">
           <p className="text-sm text-gray-600">Végösszeg:</p>
           <p className="text-xl font-bold" style={{ color: '#8b4513' }}>
             {order.totalAmount?.toLocaleString('hu-HU')} Ft
           </p>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+        {order.shippingAddress && (() => {
+          const parts = order.shippingAddress.split(', ');
+          const name = parts[0];
+          const address = parts.slice(1).join(', ');
+          return (
+            <>
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">{activeTab === 'buyer' ? 'Eladó neve:' : 'Vásárló neve:'}</span> {activeTab === 'buyer' ? order.seller?.fullName || order.seller?.username : name}
+              </p>
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Szállítási cím:</span> {address}
+              </p>
+            </>
+          );
+        })()}
+        {order.paymentMethod && (
+          <p className="text-sm text-gray-600">
+            <span className="font-medium">Fizetési mód:</span> {getPaymentMethodLabel(order.paymentMethod)}
+          </p>
+        )}
+        <div className="flex gap-2 flex-wrap mt-2">
+          <a href={`https://mail.google.com/mail/?view=cm&to=${activeTab === 'buyer' ? order.seller?.email : order.buyer?.email}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block px-3 py-1 text-sm text-white rounded"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            Gmail
+          </a>
+          <a href={`mailto:${activeTab === 'buyer' ? order.seller?.email : order.buyer?.email}`}
+            className="inline-block px-3 py-1 text-sm text-white rounded"
+            style={{ backgroundColor: '#8b4513' }}
+          >
+            Email alkalmazás
+          </a>
+          {activeTab === 'buyer' && order.seller?.phoneNumber && order.seller?.showPhoneNumber && (
+            <a href={`tel:${order.seller.phoneNumber}`}
+              className="inline-block px-3 py-1 text-sm text-white rounded"
+              style={{ backgroundColor: '#8b4513' }}
+            >
+              📞 {order.seller.phoneNumber}
+            </a>
+          )}
+          {activeTab === 'seller' && order.buyer?.phoneNumber && order.buyer?.showPhoneNumber && (
+            <a href={`tel:${order.buyer.phoneNumber}`}
+              className="inline-block px-3 py-1 text-sm text-white rounded"
+              style={{ backgroundColor: '#8b4513' }}
+            >
+              📞 {order.buyer.phoneNumber}
+            </a>
+          )}
         </div>
       </div>
 

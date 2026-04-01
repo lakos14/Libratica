@@ -249,6 +249,8 @@ function Events() {
               Új esemény létrehozása
             </h2>
 
+            <p className="text-sm text-gray-500 mb-4">A * jelölt mezők kitöltése kötelező.</p>
+
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -20,7 +20,6 @@ namespace Libratica.DataContext.DTOs
         [MaxLength(100)]
         public string? FullName { get; set; }
 
-        [Phone(ErrorMessage = "Érvénytelen telefonszám")]
         public string? PhoneNumber { get; set; }
     }
 }

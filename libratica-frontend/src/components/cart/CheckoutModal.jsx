@@ -43,6 +43,8 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
         <h2 className="text-2xl font-bold mb-2">Rendelés véglegesítése</h2>
 
+        <p className="text-sm text-gray-500 mb-4">A * jelölt mezők kitöltése kötelező.</p>
+
         {sellerName && (
           <p className="text-gray-600 mb-4 text-sm">
             Eladó: <span className="font-semibold">{sellerName}</span>
@@ -114,7 +116,7 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Fizetési mód
+              Fizetési mód *
             </label>
             <div className="space-y-2">
               <label className="flex items-center gap-3 p-3 border border-gray-200 rounded cursor-pointer hover:bg-gray-50">

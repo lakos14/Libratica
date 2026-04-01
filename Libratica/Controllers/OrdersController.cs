@@ -356,7 +356,9 @@ namespace Libratica.Controllers
                     ProfilePictureUrl = order.Buyer.ProfilePictureUrl,
                     RoleName = order.Buyer.Role.Name,
                     Rating = order.Buyer.Rating,
-                    CreatedAt = order.Buyer.CreatedAt
+                    CreatedAt = order.Buyer.CreatedAt,
+                    PhoneNumber = order.Buyer.PhoneNumber,
+                    ShowPhoneNumber = order.Buyer.ShowPhoneNumber
                 },
                 Seller = new UserDto
                 {
@@ -367,7 +369,9 @@ namespace Libratica.Controllers
                     ProfilePictureUrl = order.Seller.ProfilePictureUrl,
                     RoleName = order.Seller.Role.Name,
                     Rating = order.Seller.Rating,
-                    CreatedAt = order.Seller.CreatedAt
+                    CreatedAt = order.Seller.CreatedAt,
+                    PhoneNumber = order.Buyer.PhoneNumber,
+                    ShowPhoneNumber = order.Buyer.ShowPhoneNumber
                 },
                 Items = order.OrderItems.Select(oi => new OrderItemDto
                 {

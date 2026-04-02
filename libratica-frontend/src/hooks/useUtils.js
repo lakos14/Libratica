@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../lib/queryClient';
-import api, { usersAPI, recommendationsAPI, bookCollectionAPI, aiAPI, reportsAPI, BASE_URL } from '../services/api';
+import api, { usersAPI, recommendationsAPI, bookCollectionAPI, aiAPI, reportsAPI} from '../services/api';
 import { toast } from 'react-toastify';
 
 

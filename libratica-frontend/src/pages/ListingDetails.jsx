@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { BASE_URL } from '../services/api';
 import {
   useListing,
   useAddToCart,
@@ -127,7 +128,7 @@ function ListingDetails() {
             {listing.images?.length > 0 ? (
               <div className="w-full flex flex-col items-center justify-between h-full">
                 <img
-                  src={`http://localhost:5102${listing.images[selectedImage]}`}
+                  src={`${BASE_URL}${listing.images[selectedImage]}`}
                   alt={listing.book?.title}
                   className="max-w-full max-h-96 object-contain rounded"
                 />
@@ -137,7 +138,7 @@ function ListingDetails() {
                       <img
                         key={index}
                         onClick={() => setSelectedImage(index)}
-                        src={`http://localhost:5102${img}`}
+                        src={`${BASE_URL}${img}`}
                         alt={`Kép ${index + 1}`}
                         className={`w-16 h-20 object-cover rounded cursor-pointer border-2 ${selectedImage === index
                           ? 'border-[#8b4513]'

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useUserProfile } from '../hooks';
+import { BASE_URL } from '../services/api';
 
 function UserProfile() {
   const { username } = useParams();
@@ -158,7 +159,7 @@ function UserProfile() {
                     >
                       {(() => {
                         const imgUrl = listing.images?.length > 0
-                          ? `http://localhost:5102${listing.images[0]}`
+                          ? `${BASE_URL}${listing.images[0]}`
                           : listing.book?.coverImageUrl;
                         return imgUrl ? (
                           <img src={imgUrl} alt={listing.book?.title} className="w-full h-64 object-cover rounded mb-3" />

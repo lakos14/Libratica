@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { BASE_URL } from '../services/api';
 
 const CartItemRow = ({ item, onRemove }) => {
   return (
@@ -8,7 +9,7 @@ const CartItemRow = ({ item, onRemove }) => {
         <div className="w-16 h-20 bg-gray-200 rounded flex-shrink-0 overflow-hidden">
           {(() => {
             const imgUrl = item.listing?.images?.length > 0
-              ? `http://localhost:5102${item.listing.images[0]}`
+              ? `${BASE_URL}${item.listing.images[0]}`
               : item.listing?.book?.coverImageUrl;
             return imgUrl ? (
               <img

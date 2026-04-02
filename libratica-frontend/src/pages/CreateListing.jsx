@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCategories, useCreateListing } from '../hooks';
 import { booksAPI, openLibraryAPI, imagesAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { BASE_URL } from '../services/api';
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -616,7 +617,7 @@ const CreateListing = () => {
               {formData.images.map((url, index) => (
                 <div key={index} className="relative">
                   <img
-                    src={`http://localhost:5102${url}`}
+                    src={`${BASE_URL}${url}`}
                     alt={`Kép ${index + 1}`}
                     className="w-full h-24 object-cover rounded border border-gray-200"
                   />

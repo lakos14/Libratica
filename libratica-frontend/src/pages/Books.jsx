@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useBooksWithListings, useCategories, useAISearch } from '../hooks';
+import { BASE_URL } from '../services/api';
 
 
 function Books() {
@@ -243,7 +244,7 @@ function Books() {
               >
                 {(() => {
                   const imgUrl = book.firstListingImage
-                    ? `http://localhost:5102${JSON.parse(book.firstListingImage)[0]}`
+                    ? `${BASE_URL}${JSON.parse(book.firstListingImage)[0]}`
                     : book.coverImageUrl;
                   return imgUrl ? (
                     <img src={imgUrl} alt={books.book?.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />

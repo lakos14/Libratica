@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMyListings, useDeleteListing } from '../hooks';
 import { toast } from 'react-toastify';
+import { BASE_URL } from '../services/api';
 
 function MyListings() {
   const navigate = useNavigate();
@@ -82,7 +83,7 @@ function MyListings() {
               >
                 {listing.images?.length > 0 ? (
                   <img
-                    src={`http://localhost:5102${listing.images[0]}`}
+                    src={`${BASE_URL}${listing.images[0]}`}
                     alt={listing.book?.title}
                     className="w-full h-64 object-cover rounded mb-3"
                   />

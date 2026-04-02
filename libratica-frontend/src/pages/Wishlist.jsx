@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useWishlist, useRemoveFromWishlist } from '../hooks';
+import { BASE_URL } from '../services/api';
 
 function Wishlist() {
   const { data: wishlist = [], isLoading, isError } = useWishlist();
@@ -59,7 +60,7 @@ function Wishlist() {
               >
                 {(() => {
                   const imgUrl = item.book?.firstListingImage
-                    ? `http://localhost:5102${JSON.parse(item.book.firstListingImage)[0]}`
+                    ? `${BASE_URL}${JSON.parse(item.book.firstListingImage)[0]}`
                     : item.book?.coverImageUrl;
                   return imgUrl ? (
                     <img src={imgUrl} alt={item.book.title} className="w-full h-48 object-cover rounded mb-3" />

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { BASE_URL } from '../services/api';
 import {
   usePurchases,
   useSales,
@@ -26,22 +27,37 @@ function Orders() {
   const isLoading = activeTab === 'buyer' ? purchasesLoading : salesLoading;
 
   const handleStatusUpdate = async (orderId, newStatus) => {
-    await updateStatus.mutateAsync({ orderId, status: newStatus });
+    try {
+      await updateStatus.mutateAsync({ orderId, status: newStatus });
+      toast.success('Státusz frissítve');
+    } catch {
+      toast.error('Hiba történt a státusz frissítésekor');
+    }
   };
 
   const handleRejectOrder = async (orderId) => {
     if (!window.confirm('Biztosan elutasítod ezt a rendelést?')) return;
-    await rejectOrder.mutateAsync(orderId);
+    try {
+      await rejectOrder.mutateAsync(orderId);
+      toast.success('Rendelés elutasítva');
+    } catch {
+      toast.error('Hiba történt az elutasításkor');
+    }
   };
 
   const handleSubmitReview = async () => {
-    await createReview.mutateAsync({
-      orderId: reviewModal.orderId,
-      rating: reviewData.rating,
-      comment: reviewData.comment,
-    });
-    setReviewModal(null);
-    setReviewData({ rating: 5, comment: '' });
+    try {
+      await createReview.mutateAsync({
+        orderId: reviewModal.orderId,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+      });
+      toast.success('Értékelés elküldve!');
+      setReviewModal(null);
+      setReviewData({ rating: 5, comment: '' });
+    } catch {
+      toast.error('Hiba történt az értékelés elküldésekor');
+    }
   };
 
   const getStatusLabel = (status) => {
@@ -228,7 +244,12 @@ function OrderCard({
   isUpdating,
 }) {
   const { data: orderReviews = [] } = useOrderReviews(order.id);
-  const alreadyReviewed = orderReviews.some((r) => r.reviewer?.id === user?.id);
+  const alreadyReviewed = orderReviews.some(
+    (r) => r.reviewer?.id === user?.id &&
+      (activeTab === 'buyer'
+        ? r.reviewedUser?.id === order.seller?.id
+        : r.reviewedUser?.id === order.buyer?.id)
+  );
   const counterparty = activeTab === 'buyer' ? order.seller : order.buyer;
   const counterpartyLabel = activeTab === 'buyer' ? 'Eladó' : 'Vásárló';
 
@@ -255,7 +276,7 @@ function OrderCard({
           <div key={item.id} className="flex gap-4 p-3 bg-gray-50 rounded">
             {(() => {
               const imgUrl = item.images?.length > 0
-                ? `http://localhost:5102${item.images[0]}`
+                ? `${BASE_URL}${item.images[0]}`
                 : item.book?.coverImageUrl;
               return imgUrl ? (
                 <img

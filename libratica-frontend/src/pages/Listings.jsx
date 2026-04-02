@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useListings, useCategories, useAISearch } from '../hooks';
-
+import { BASE_URL } from '../services/api';
 
 function Listings() {
   const [searchParams] = useSearchParams();
@@ -279,7 +279,7 @@ function Listings() {
               >
                 {(() => {
                   const imgUrl = listing.images?.length > 0
-                    ? `http://localhost:5102${listing.images[0]}`
+                    ? `${BASE_URL}${listing.images[0]}`
                     : listing.book?.coverImageUrl;
                   return imgUrl ? (
                     <img src={imgUrl} alt={listing.book?.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />

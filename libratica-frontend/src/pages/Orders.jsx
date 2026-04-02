@@ -310,20 +310,24 @@ function OrderCard({
           </p>
         )}
         <div className="flex gap-2 flex-wrap mt-2">
-          <a href={`https://mail.google.com/mail/?view=cm&to=${counterparty?.email}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block px-3 py-1 text-sm text-white rounded"
-            style={{ backgroundColor: '#8b4513' }}
-          >
-            Gmail
-          </a>
-          <a href={`mailto:${counterparty?.email}`}
-            className="inline-block px-3 py-1 text-sm text-white rounded"
-            style={{ backgroundColor: '#8b4513' }}
-          >
-            Email alkalmazás
-          </a>
+          {counterparty?.email && (
+            <>
+              <a href={`https://mail.google.com/mail/?view=cm&to=${counterparty.email}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block px-3 py-1 text-sm text-white rounded"
+                style={{ backgroundColor: '#8b4513' }}
+              >
+                Gmail
+              </a>
+              <a href={`mailto:${counterparty.email}`}
+                className="inline-block px-3 py-1 text-sm text-white rounded"
+                style={{ backgroundColor: '#8b4513' }}
+              >
+                Email alkalmazás
+              </a>
+            </>
+          )}
           {counterparty?.phoneNumber && counterparty?.showPhoneNumber && (
             <a href={`tel:${counterparty.phoneNumber}`}
               className="inline-block px-3 py-1 text-sm text-white rounded"

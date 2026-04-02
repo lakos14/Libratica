@@ -207,6 +207,14 @@ function Orders() {
   );
 }
 
+const getPaymentMethodLabel = (method) => {
+  const labels = {
+    cash: 'Készpénz',
+    transfer: 'Banki átutalás',
+  };
+  return labels[method] || method;
+};
+
 function OrderCard({
   order,
   activeTab,
@@ -221,13 +229,8 @@ function OrderCard({
 }) {
   const { data: orderReviews = [] } = useOrderReviews(order.id);
   const alreadyReviewed = orderReviews.some((r) => r.reviewer?.id === user?.id);
-  const getPaymentMethodLabel = (method) => {
-    const labels = {
-      cash: 'Készpénz',
-      transfer: 'Banki átutalás',
-    };
-    return labels[method] || method;
-  };
+  const counterparty = activeTab === 'buyer' ? order.seller : order.buyer;
+  const counterpartyLabel = activeTab === 'buyer' ? 'Eladó' : 'Vásárló';
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4">
@@ -290,28 +293,24 @@ function OrderCard({
       </div>
 
       <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
-        {order.shippingAddress && (() => {
-          const parts = order.shippingAddress.split(', ');
-          const name = parts[0];
-          const address = parts.slice(1).join(', ');
-          return (
-            <>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">{activeTab === 'buyer' ? 'Eladó neve:' : 'Vásárló neve:'}</span> {activeTab === 'buyer' ? order.seller?.fullName || order.seller?.username : name}
-              </p>
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Szállítási cím:</span> {address}
-              </p>
-            </>
-          );
-        })()}
+        {order.shippingAddress && (
+          <>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">{counterpartyLabel} neve:</span>{' '}
+              {counterparty?.fullName || counterparty?.username || 'Ismeretlen felhasználó'}
+            </p>
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Szállítási cím:</span> {order.shippingAddress}
+            </p>
+          </>
+        )}
         {order.paymentMethod && (
           <p className="text-sm text-gray-600">
             <span className="font-medium">Fizetési mód:</span> {getPaymentMethodLabel(order.paymentMethod)}
           </p>
         )}
         <div className="flex gap-2 flex-wrap mt-2">
-          <a href={`https://mail.google.com/mail/?view=cm&to=${activeTab === 'buyer' ? order.seller?.email : order.buyer?.email}`}
+          <a href={`https://mail.google.com/mail/?view=cm&to=${counterparty?.email}`}
             target="_blank"
             rel="noreferrer"
             className="inline-block px-3 py-1 text-sm text-white rounded"
@@ -319,26 +318,18 @@ function OrderCard({
           >
             Gmail
           </a>
-          <a href={`mailto:${activeTab === 'buyer' ? order.seller?.email : order.buyer?.email}`}
+          <a href={`mailto:${counterparty?.email}`}
             className="inline-block px-3 py-1 text-sm text-white rounded"
             style={{ backgroundColor: '#8b4513' }}
           >
             Email alkalmazás
           </a>
-          {activeTab === 'buyer' && order.seller?.phoneNumber && order.seller?.showPhoneNumber && (
-            <a href={`tel:${order.seller.phoneNumber}`}
+          {counterparty?.phoneNumber && counterparty?.showPhoneNumber && (
+            <a href={`tel:${counterparty.phoneNumber}`}
               className="inline-block px-3 py-1 text-sm text-white rounded"
               style={{ backgroundColor: '#8b4513' }}
             >
-              📞 {order.seller.phoneNumber}
-            </a>
-          )}
-          {activeTab === 'seller' && order.buyer?.phoneNumber && order.buyer?.showPhoneNumber && (
-            <a href={`tel:${order.buyer.phoneNumber}`}
-              className="inline-block px-3 py-1 text-sm text-white rounded"
-              style={{ backgroundColor: '#8b4513' }}
-            >
-              📞 {order.buyer.phoneNumber}
+              📞 {counterparty.phoneNumber}
             </a>
           )}
         </div>

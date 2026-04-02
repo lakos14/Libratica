@@ -27,7 +27,7 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
 
   const handleSubmit = () => {
     if (!validate()) return;
-    const shippingAddress = `${formData.name}, ${formData.zipCode} ${formData.city}, ${formData.street}`;
+    const shippingAddress = `${formData.zipCode} ${formData.city}, ${formData.street}`;
     onSubmit({ shippingAddress, paymentMethod: formData.paymentMethod });
   };
 

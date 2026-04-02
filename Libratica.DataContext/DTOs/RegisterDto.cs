@@ -17,9 +17,12 @@ namespace Libratica.DataContext.DTOs
         [MinLength(8, ErrorMessage = "Minimum 8 karakter")]
         public string Password { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Teljes név kötelező")]
         [MaxLength(100)]
-        public string? FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
+        [RegularExpression(@"^\+?[0-9\s\-]{7,15}$", ErrorMessage = "Érvénytelen telefonszám")]
         public string? PhoneNumber { get; set; }
+
     }
 }

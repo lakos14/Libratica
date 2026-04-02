@@ -370,8 +370,8 @@ namespace Libratica.Controllers
                     RoleName = order.Seller.Role.Name,
                     Rating = order.Seller.Rating,
                     CreatedAt = order.Seller.CreatedAt,
-                    PhoneNumber = order.Buyer.PhoneNumber,
-                    ShowPhoneNumber = order.Buyer.ShowPhoneNumber
+                    PhoneNumber = order.Seller.PhoneNumber,
+                    ShowPhoneNumber = order.Seller.ShowPhoneNumber
                 },
                 Items = order.OrderItems.Select(oi => new OrderItemDto
                 {

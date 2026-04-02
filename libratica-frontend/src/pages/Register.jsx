@@ -47,8 +47,8 @@ const Register = () => {
         setError('A telefonszám csak számokat, +, - és szóközt tartalmazhat!');
         return false;
       }
-      if (cleanedPhone.length < 11) {
-        setError('A telefonszám túl rövid! (min. 11 karakter, pl. +36301234567)');
+      if (cleanedPhone.length < 7) {
+        setError('A telefonszám túl rövid! (min. 7 karakter, pl. +36301234567)');
         return false;
       }
     }
@@ -140,7 +140,7 @@ const Register = () => {
               value={formData.phoneNumber}
               onChange={handleChange}
               placeholder="+36301234567"
-              pattern="[+0-9\s\-]+"
+              pattern="^\+?[0-9\s\-]{7,15}$"
               title="Csak számokat, +, - és szóközt tartalmazhat"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-gray-500"
             />

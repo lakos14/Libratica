@@ -13,7 +13,7 @@ namespace Libratica.DataContext.DTOs
         [Range(100, 1000000, ErrorMessage = "Az ár 100 és 1,000,000 között lehet")]
         public decimal? Price { get; set; }
 
-        [Range(0, 100, ErrorMessage = "Mennyiség 1-100 között lehet")]
+        [Range(1, 100, ErrorMessage = "Mennyiség 1-100 között lehet")]
         public int? Quantity { get; set; }
 
         public bool? IsAvailable { get; set; }

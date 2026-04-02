@@ -321,7 +321,7 @@ function OrderCard({
               {counterparty?.fullName || counterparty?.username || 'Ismeretlen felhasználó'}
             </p>
             <p className="text-sm text-gray-600">
-              <span className="font-medium">Szállítási cím:</span> {order.shippingAddress}
+              <span className="font-medium">Szállítási adatok:</span> {order.shippingAddress}
             </p>
           </>
         )}

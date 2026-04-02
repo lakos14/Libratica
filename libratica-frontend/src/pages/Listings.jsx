@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useListings, useCategories, useAISearch } from '../hooks';
 import { BASE_URL } from '../services/api';
+import { toast } from 'react-toastify';
 
 function Listings() {
   const [searchParams] = useSearchParams();
@@ -100,6 +101,7 @@ function Listings() {
         condition: condition,
       }));
     } catch (err) {
+      toast.error('Hiba történt az AI keresés során');
     } finally {
       setAiSearching(false);
     }

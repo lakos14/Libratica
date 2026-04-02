@@ -78,33 +78,31 @@ namespace Libratica.Controllers
                     _ => books.OrderBy(b => b.Title).ToList()
                 };
 
-                var bookDtos = books.Select(b => new BookDto
-                {
-                    Id = b.Id,
-                    ISBN = b.ISBN,
-                    Title = b.Title,
-                    Author = b.Author,
-                    Publisher = b.Publisher,
-                    PublicationYear = b.PublicationYear,
-                    Language = b.Language,
-                    Description = b.Description,
-                    CoverImageUrl = b.CoverImageUrl,
-                    PageCount = b.PageCount,
-                    Categories = b.BookCategories.Select(bc => new CategoryDto
-                    {
-                        Id = bc.Category.Id,
-                        Name = bc.Category.Name,
-                        Description = bc.Category.Description
-                    }).ToList(),
-                    CreatedAt = b.CreatedAt
-                }).ToList();
-
-                var totalCount = bookDtos.Count;
+                var totalCount = books.Count;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-                var pagedBooks = bookDtos
+                var pagedBooks = books
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .ToList();
+                    .Select(b => new BookDto
+                    {
+                        Id = b.Id,
+                        ISBN = b.ISBN,
+                        Title = b.Title,
+                        Author = b.Author,
+                        Publisher = b.Publisher,
+                        PublicationYear = b.PublicationYear,
+                        Language = b.Language,
+                        Description = b.Description,
+                        CoverImageUrl = b.CoverImageUrl,
+                        PageCount = b.PageCount,
+                        Categories = b.BookCategories.Select(bc => new CategoryDto
+                        {
+                            Id = bc.Category.Id,
+                            Name = bc.Category.Name,
+                            Description = bc.Category.Description
+                        }).ToList(),
+                        CreatedAt = b.CreatedAt
+                    }).ToList();
 
                 return Ok(new
                 {
@@ -203,59 +201,57 @@ namespace Libratica.Controllers
                     _ => sortOrder == "asc" ? listings.OrderBy(l => l.CreatedAt).ToList() : listings.OrderByDescending(l => l.CreatedAt).ToList()
                 };
 
-                var listingDtos = listings.Select(l => new ListingDto
-                {
-                    Id = l.Id,
-                    Book = new BookDto
-                    {
-                        Id = l.Book.Id,
-                        ISBN = l.Book.ISBN,
-                        Title = l.Book.Title,
-                        Author = l.Book.Author,
-                        Publisher = l.Book.Publisher,
-                        PublicationYear = l.Book.PublicationYear,
-                        Language = l.Book.Language,
-                        Description = l.Book.Description,
-                        CoverImageUrl = l.Book.CoverImageUrl,
-                        PageCount = l.Book.PageCount,
-                        Categories = l.Book.BookCategories.Select(bc => new CategoryDto
-                        {
-                            Id = bc.Category.Id,
-                            Name = bc.Category.Name,
-                            Description = bc.Category.Description
-                        }).ToList(),
-                        CreatedAt = l.Book.CreatedAt
-                    },
-                    Seller = new UserDto
-                    {
-                        Id = l.Seller.Id,
-                        Username = l.Seller.Username,
-                        FullName = l.Seller.FullName,
-                        ProfilePictureUrl = l.Seller.ProfilePictureUrl,
-                        RoleName = l.Seller.Role.Name,
-                        Rating = l.Seller.Rating,
-                        CreatedAt = l.Seller.CreatedAt
-                    },
-                    Condition = l.Condition,
-                    ConditionDescription = l.ConditionDescription,
-                    Price = l.Price,
-                    Currency = l.Currency,
-                    Quantity = l.Quantity,
-                    IsAvailable = l.IsAvailable,
-                    Location = l.Location,
-                    Images = !string.IsNullOrEmpty(l.Images)
-                        ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
-                        : new List<string>(),
-                    CreatedAt = l.CreatedAt,
-                    UpdatedAt = l.UpdatedAt
-                }).ToList();
-
-                var totalCount = listingDtos.Count;
+                var totalCount = listings.Count;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-                var pagedListings = listingDtos
+                var pagedListings = listings
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .ToList();
+                    .Select(l => new ListingDto
+                    {
+                        Id = l.Id,
+                        Book = new BookDto
+                        {
+                            Id = l.Book.Id,
+                            ISBN = l.Book.ISBN,
+                            Title = l.Book.Title,
+                            Author = l.Book.Author,
+                            Publisher = l.Book.Publisher,
+                            PublicationYear = l.Book.PublicationYear,
+                            Language = l.Book.Language,
+                            Description = l.Book.Description,
+                            CoverImageUrl = l.Book.CoverImageUrl,
+                            PageCount = l.Book.PageCount,
+                            Categories = l.Book.BookCategories.Select(bc => new CategoryDto
+                            {
+                                Id = bc.Category.Id,
+                                Name = bc.Category.Name,
+                                Description = bc.Category.Description
+                            }).ToList(),
+                            CreatedAt = l.Book.CreatedAt
+                        },
+                        Seller = new UserDto
+                        {
+                            Id = l.Seller.Id,
+                            Username = l.Seller.Username,
+                            FullName = l.Seller.FullName,
+                            ProfilePictureUrl = l.Seller.ProfilePictureUrl,
+                            RoleName = l.Seller.Role.Name,
+                            Rating = l.Seller.Rating,
+                            CreatedAt = l.Seller.CreatedAt
+                        },
+                        Condition = l.Condition,
+                        ConditionDescription = l.ConditionDescription,
+                        Price = l.Price,
+                        Currency = l.Currency,
+                        Quantity = l.Quantity,
+                        IsAvailable = l.IsAvailable,
+                        Location = l.Location,
+                        Images = !string.IsNullOrEmpty(l.Images)
+                            ? JsonSerializer.Deserialize<List<string>>(l.Images) ?? new List<string>()
+                            : new List<string>(),
+                        CreatedAt = l.CreatedAt,
+                        UpdatedAt = l.UpdatedAt
+                    }).ToList();
 
                 return Ok(new
                 {

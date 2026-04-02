@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BASE_URL } from '../services/api';
+import { BASE_URL } from '../../services/api';
 
 const CartItemRow = ({ item, onRemove }) => {
   return (

@@ -53,6 +53,7 @@ export const useCheckout = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.cart });
       queryClient.invalidateQueries({ queryKey: queryKeys.purchases });
       queryClient.invalidateQueries({ queryKey: queryKeys.listings });
+      queryClient.invalidateQueries({ queryKey: queryKeys.sales });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Hiba történt a rendelés leadásakor');

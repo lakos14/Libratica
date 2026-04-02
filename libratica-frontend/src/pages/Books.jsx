@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useBooksWithListings, useCategories, useAISearch } from '../hooks';
 import { BASE_URL } from '../services/api';
+import { toast } from 'react-toastify';
 
 
 function Books() {
@@ -83,6 +84,7 @@ function Books() {
         categoryId: matchedCategory?.id || '',
       }));
     } catch (err) {
+      toast.error('Hiba történt az AI keresés során');
     } finally {
       setAiSearching(false);
     }
@@ -247,7 +249,7 @@ function Books() {
                     ? `${BASE_URL}${JSON.parse(book.firstListingImage)[0]}`
                     : book.coverImageUrl;
                   return imgUrl ? (
-                    <img src={imgUrl} alt={books.book?.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />
+                    <img src={imgUrl} alt={book.title} className="w-full h-40 sm:h-64 object-cover rounded mb-3" />
                   ) : (
                     <div className="w-full h-40 sm:h-64 bg-gray-200 rounded mb-3 flex items-center justify-center">
                       <span className="text-gray-400 text-4xl">📚</span>

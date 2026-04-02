@@ -62,7 +62,12 @@ namespace Libratica.Controllers
                 if (string.IsNullOrEmpty(url))
                     return BadRequest(new { message = "URL kötelező" });
 
-                var filePath = Path.Combine(_environment.WebRootPath, url.TrimStart('/'));
+                var allowedBasePath = Path.GetFullPath(Path.Combine(_environment.WebRootPath, "images", "listings"));
+                var filePath = Path.GetFullPath(Path.Combine(_environment.WebRootPath, url.TrimStart('/')));
+
+                if (!filePath.StartsWith(allowedBasePath))
+                    return BadRequest(new { message = "Érvénytelen fájl útvonal" });
+
                 if (System.IO.File.Exists(filePath))
                     System.IO.File.Delete(filePath);
 

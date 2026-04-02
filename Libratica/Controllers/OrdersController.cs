@@ -85,71 +85,77 @@ namespace Libratica.Controllers
         [Authorize]
         public async Task<ActionResult> Checkout([FromBody] CheckoutDto dto)
         {
-            var userId = GetCurrentUserId();
-            foreach (var item in dto.Items)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                var listing = await _context.Listings
-                    .Include(l => l.Book)
-                    .FirstOrDefaultAsync(l => l.Id == item.ListingId);
-                if (listing == null)
-                    return NotFound(new { message = $"Hirdetés nem található: {item.ListingId}" });
-                if (!listing.IsAvailable)
-                    return BadRequest(new { message = $"A hirdetés már nem elérhető: {listing.Book.Title}" });
-                if (listing.SellerId != dto.SellerId)
-                    return BadRequest(new { message = "Nem minden tétel ugyanattól az eladótól származik" });
-                if (listing.Quantity < item.Quantity)
-                    return BadRequest(new { message = $"Nincs elegendő készlet: {listing.Book.Title}" });
-            }
-
-            var order = new Order
-            {
-                BuyerId = userId,
-                SellerId = dto.SellerId,
-                Status = "pending",
-                ShippingAddress = dto.ShippingAddress,
-                PaymentMethod = dto.PaymentMethod,
-                TotalAmount = dto.Items.Sum(x => x.Price * x.Quantity),
-                CreatedAt = DateTime.UtcNow
-            };
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-
-            foreach (var item in dto.Items)
-            {
-                var listing = await _context.Listings.FindAsync(item.ListingId);
-                var orderItem = new OrderItem
+                var userId = GetCurrentUserId();
+                foreach (var item in dto.Items)
                 {
-                    OrderId = order.Id,
-                    ListingId = item.ListingId,
-                    Quantity = item.Quantity,
-                    PriceAtPurchase = item.Price
+                    var listing = await _context.Listings
+                        .Include(l => l.Book)
+                        .FirstOrDefaultAsync(l => l.Id == item.ListingId);
+                    if (listing == null)
+                        return NotFound(new { message = $"Hirdetés nem található: {item.ListingId}" });
+                    if (!listing.IsAvailable)
+                        return BadRequest(new { message = $"A hirdetés már nem elérhető: {listing.Book.Title}" });
+                    if (listing.SellerId != dto.SellerId)
+                        return BadRequest(new { message = "Nem minden tétel ugyanattól az eladótól származik" });
+                    if (listing.Quantity < item.Quantity)
+                        return BadRequest(new { message = $"Nincs elegendő készlet: {listing.Book.Title}" });
+                }
+
+                var order = new Order
+                {
+                    BuyerId = userId,
+                    SellerId = dto.SellerId,
+                    Status = "pending",
+                    ShippingAddress = dto.ShippingAddress,
+                    PaymentMethod = dto.PaymentMethod,
+                    TotalAmount = dto.Items.Sum(x => x.Price * x.Quantity),
+                    CreatedAt = DateTime.UtcNow
                 };
-                _context.OrderItems.Add(orderItem);
-                listing.Quantity -= item.Quantity;
-                if (listing.Quantity == 0)
-                    listing.IsAvailable = false;
+                _context.Orders.Add(order);
+                await _context.SaveChangesAsync();
+
+                foreach (var item in dto.Items)
+                {
+                    var listing = await _context.Listings.FindAsync(item.ListingId);
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        ListingId = item.ListingId,
+                        Quantity = item.Quantity,
+                        PriceAtPurchase = item.Price
+                    };
+                    _context.OrderItems.Add(orderItem);
+                    listing.Quantity -= item.Quantity;
+                    if (listing.Quantity == 0)
+                        listing.IsAvailable = false;
+                }
+
+                var purchasedListingIds = dto.Items.Select(i => i.ListingId).ToList();
+                var listingBookIds = await _context.Listings
+                    .Where(l => purchasedListingIds.Contains(l.Id))
+                    .Select(l => l.BookId)
+                    .ToListAsync();
+
+                var wishlistItems = await _context.Wishlists
+                    .Where(w => w.UserId == userId && listingBookIds.Contains(w.BookId))
+                    .ToListAsync();
+
+                if (wishlistItems.Any())
+                    _context.Wishlists.RemoveRange(wishlistItems);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { message = "Rendelés sikeresen létrehozva!", orderId = order.Id });
             }
-
-            var purchasedListingIds = dto.Items.Select(i => i.ListingId).ToList();
-            var listingBookIds = await _context.Listings
-                .Where(l => purchasedListingIds.Contains(l.Id))
-                .Select(l => l.BookId)
-                .ToListAsync();
-
-            var wishlistItems = await _context.Wishlists
-                .Where(w => w.UserId == userId && listingBookIds.Contains(w.BookId))
-                .ToListAsync();
-
-            if (wishlistItems.Any())
-                _context.Wishlists.RemoveRange(wishlistItems);
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
+            catch (Exception ex)
             {
-                message = "Rendelés sikeresen létrehozva!",
-                orderId = order.Id
-            });
+                await transaction.RollbackAsync();
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         //Rendelés státuszának frissítése az eladó részéről

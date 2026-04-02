@@ -238,7 +238,7 @@ function ListingDetails() {
                     Email alkalmazás
                   </a>
 
-                  {listing.seller?.phoneNumber && (
+                  {listing.seller?.phoneNumber && listing.seller?.showPhoneNumber && (
                     <a href={`tel:${listing.seller.phoneNumber}`}
                       className="inline-block text-sm text-gray-600 hover:text-[#8b4513] border border-gray-300 rounded px-3 py-1 hover:bg-gray-50"
                     >

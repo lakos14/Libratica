@@ -52,8 +52,11 @@
 - form validációk, toast értesítések
 
 # Kérdések:
-### Kik lesznek bent a prezentáció során?
-- Tóth Bálint, Ábrahám Gyula, Pulai Gábor
+### Dokumentáció
+- AI arányt beírni
+- Köszönetnyilvánítás
+- Témavezetői nyilatkozatot kitöltsem-e
+- 
 
 ## Technológiák
 

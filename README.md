@@ -10,6 +10,10 @@
 - az eseményeknél legyen egy beágyazott térkép, ahol a helyszínt lehet kiválasztani✅
 - ai keresést a hirdetés oldalra bevonni, felesleges külön oldal neki✅
 - eseményeknél helyszín alapú szűrő✅
+- könyvet lehessen felrakni 0ft-ért is✅
+- kívánságlistára lehessen felvenni külső API szerint is könyveket és ha lesz feltöltve belőle akkor jelenjen meg az ajánlott könyvek között✅
+- a könyvgyüjteményben jelenjenek meg a korábban vásárolt könyvek (csak akkor ha kiszállítva az állapot és kétszer ne vegyen fel egy könyvet)✅
+- könyvgyüjteményhez könyv hozzáadása manuálisan képfeltöltéssel stb✅
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:

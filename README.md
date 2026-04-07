@@ -56,7 +56,8 @@
 - AI arányt beírni
 - Köszönetnyilvánítás
 - Témavezetői nyilatkozatot kitöltsem-e
-- 
+- Milyen pontok legyenek? A jelenlegi megfelelő-e?
+- Kik lesznek bent az előadáson?
 
 ## Technológiák
 

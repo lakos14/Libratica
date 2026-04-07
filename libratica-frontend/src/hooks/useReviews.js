@@ -37,7 +37,6 @@ export const useCreateReview = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.orderReviews(variables.orderId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.purchases });
       queryClient.invalidateQueries({ queryKey: queryKeys.sales });
-      toast.success('Értékelés elküldve!');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Hiba az értékelés elküldésekor');

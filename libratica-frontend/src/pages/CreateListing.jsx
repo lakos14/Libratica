@@ -145,8 +145,8 @@ const CreateListing = () => {
     if (!bookData.title.trim()) newErrors.title = 'Cím kötelező';
     if (!bookData.author.trim()) newErrors.author = 'Szerző kötelező';
     if (!formData.condition) newErrors.condition = 'Állapot megadása kötelező';
-    if (!formData.price || parseFloat(formData.price) < 100)
-      newErrors.price = 'Az ár minimum 100 Ft lehet';
+    if (formData.price === '' || parseFloat(formData.price) < 0)
+      newErrors.price = 'Az ár nem lehet negatív';
     if (parseFloat(formData.price) > 1000000)
       newErrors.price = 'Az ár maximum 1,000,000 Ft lehet';
     if (formData.quantity < 1 || formData.quantity > 100)
@@ -261,7 +261,7 @@ const CreateListing = () => {
         <h1 className="text-4xl font-bold">Új hirdetés létrehozása</h1>
         <p className="text-gray-600 mt-2">Adj el egy könyvet a platformon</p>
       </div>
-      
+
       <p className="text-sm text-gray-500 mb-4">A * jelölt mezők kitöltése kötelező.</p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -309,8 +309,8 @@ const CreateListing = () => {
                     const cover = item.isISBN
                       ? item.data.cover?.medium
                       : item.data.cover_i
-                      ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg`
-                      : null;
+                        ? `https://covers.openlibrary.org/b/id/${item.data.cover_i}-S.jpg`
+                        : null;
                     const year = item.isISBN
                       ? item.data.publish_date?.slice(-4)
                       : item.data.first_publish_year;
@@ -468,11 +468,10 @@ const CreateListing = () => {
                       key={category.id}
                       type="button"
                       onClick={() => handleCategoryToggle(category.id)}
-                      className={`px-3 py-1 rounded-full text-sm transition ${
-                        bookData.categoryIds.includes(category.id)
+                      className={`px-3 py-1 rounded-full text-sm transition ${bookData.categoryIds.includes(category.id)
                           ? 'bg-[#8b4513] text-white'
                           : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                        }`}
                     >
                       {category.name}
                     </button>
@@ -534,14 +533,14 @@ const CreateListing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Ár * (100 - 1,000,000 Ft)</label>
+              <label className="block text-sm font-medium mb-2">Ár * (0 - 1,000,000 Ft)</label>
               <div className="flex gap-2">
                 <input
                   type="number"
                   name="price"
                   value={formData.price}
                   onChange={handleChange}
-                  min="100"
+                  min="0"
                   max="1000000"
                   step="100"
                   placeholder="2500"

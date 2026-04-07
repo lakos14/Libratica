@@ -164,6 +164,8 @@ namespace Libratica.Controllers
                         Rating = listing.Seller.Rating,
                         CreatedAt = listing.Seller.CreatedAt,
                         PhoneNumber = listing.Seller.ShowPhoneNumber ? listing.Seller.PhoneNumber : null,
+                        ShowPhoneNumber = listing.Seller.ShowPhoneNumber
+
                     },
                     Condition = listing.Condition,
                     ConditionDescription = listing.ConditionDescription,

@@ -72,7 +72,6 @@ export const useUpdateOrderStatus = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.purchases });
       queryClient.invalidateQueries({ queryKey: queryKeys.sales });
-      toast.success('Státusz sikeresen frissítve!');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Hiba a státusz frissítésekor');
@@ -91,7 +90,6 @@ export const useRejectOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.purchases });
       queryClient.invalidateQueries({ queryKey: queryKeys.sales });
-      toast.success('Rendelés sikeresen elutasítva!');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Hiba a rendelés elutasításakor');
@@ -110,7 +108,6 @@ export const useCancelOrder = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.purchases });
       queryClient.invalidateQueries({ queryKey: queryKeys.sales });
-      toast.success('Rendelés lemondva!');
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Hiba a rendelés lemondásakor');

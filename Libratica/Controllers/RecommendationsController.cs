@@ -27,7 +27,7 @@ namespace Libratica.Controllers
                 var userId = GetCurrentUserId();
 
                 var purchasedBookIds = await _context.Orders
-                    .Where(o => o.BuyerId == userId && o.Status != "cancelled")
+                    .Where(o => o.BuyerId == userId && o.Status != "cancelled" && o.Status != "rejected")
                     .Include(o => o.OrderItems)
                         .ThenInclude(oi => oi.Listing)
                     .SelectMany(o => o.OrderItems.Select(oi => oi.Listing.BookId))
@@ -62,11 +62,25 @@ namespace Libratica.Controllers
 
                 List<object> recommendations;
 
+                var directWishlistListings = await _context.Listings
+                    .Include(l => l.Book)
+                        .ThenInclude(b => b.BookCategories)
+                            .ThenInclude(bc => bc.Category)
+                    .Include(l => l.Seller)
+                        .ThenInclude(s => s.Role)
+                    .Where(l =>
+                        l.IsAvailable &&
+                        l.SellerId != userId &&
+                        wishlistBookIds.Contains(l.BookId))
+                    .ToListAsync();
+
                 if (preferredCategoryIds.Any())
                 {
-                    var excludedBookIds = purchasedBookIds.Distinct().ToList();
+                    var excludedBookIds = purchasedBookIds
+                        .Concat(directWishlistListings.Select(l => l.BookId))
+                        .Distinct().ToList();
 
-                    var rawListings = await _context.Listings
+                    var categoryListings = await _context.Listings
                         .Include(l => l.Book)
                             .ThenInclude(b => b.BookCategories)
                                 .ThenInclude(bc => bc.Category)
@@ -78,10 +92,12 @@ namespace Libratica.Controllers
                             !excludedBookIds.Contains(l.BookId) &&
                             l.Book.BookCategories.Any(bc => preferredCategoryIds.Contains(bc.CategoryId)))
                         .OrderByDescending(l => l.CreatedAt)
-                        .Take(8)
+                        .Take(8 - directWishlistListings.Count)
                         .ToListAsync();
 
-                    recommendations = rawListings.Select(l => (object)new
+                    var combined = directWishlistListings.Concat(categoryListings).ToList();
+
+                    recommendations = combined.Select(l => (object)new
                     {
                         l.Id,
                         l.Price,
@@ -105,23 +121,34 @@ namespace Libratica.Controllers
                             l.Seller.Username,
                             l.Seller.Rating
                         },
-                        ReasonText = "A kívánságlistád és vásárlásaid alapján"
+                        ReasonText = wishlistBookIds.Contains(l.BookId)
+                            ? "A kívánságlistádon szerepel"
+                            : "A kívánságlistád és vásárlásaid alapján"
                     }).ToList();
                 }
                 else
                 {
-                    var rawListings = await _context.Listings
+                    var excludedBookIds = purchasedBookIds.Distinct().ToList();
+
+                    var popularListings = await _context.Listings
                         .Include(l => l.Book)
                             .ThenInclude(b => b.BookCategories)
                                 .ThenInclude(bc => bc.Category)
                         .Include(l => l.Seller)
                             .ThenInclude(s => s.Role)
-                        .Where(l => l.IsAvailable && l.SellerId != userId)
+                        .Where(l =>
+                            l.IsAvailable &&
+                            l.SellerId != userId &&
+                            !excludedBookIds.Contains(l.BookId))
                         .OrderByDescending(l => l.CreatedAt)
                         .Take(8)
                         .ToListAsync();
 
-                    recommendations = rawListings.Select(l => (object)new
+                    var combined = directWishlistListings.Concat(
+                        popularListings.Where(l => !directWishlistListings.Select(d => d.BookId).Contains(l.BookId))
+                    ).Take(8).ToList();
+
+                    recommendations = combined.Select(l => (object)new
                     {
                         l.Id,
                         l.Price,
@@ -145,7 +172,9 @@ namespace Libratica.Controllers
                             l.Seller.Username,
                             l.Seller.Rating
                         },
-                        ReasonText = "Népszerű a platformon"
+                        ReasonText = wishlistBookIds.Contains(l.BookId)
+                            ? "A kívánságlistádon szerepel"
+                            : "Népszerű a platformon"
                     }).ToList();
                 }
 

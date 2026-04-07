@@ -15,7 +15,7 @@ namespace Libratica.DataContext.DTOs
         public string? ConditionDescription { get; set; }
 
         [Required(ErrorMessage = "Ár megadása kötelező")]
-        [Range(100, 1000000, ErrorMessage = "Az ár 100 és 1,000,000 között lehet")]
+        [Range(0, 1000000, ErrorMessage = "Az ár 0 és 1,000,000 között lehet")]
         public decimal Price { get; set; }
 
         [MaxLength(10)]

@@ -21,11 +21,13 @@ namespace Libratica.Controllers
 
         //Könyvkollekció lekérése
         [HttpGet]
+        [HttpGet]
         public async Task<ActionResult> GetCollection()
         {
             try
             {
                 var userId = GetCurrentUserId();
+
                 var collection = await _context.BookCollections
                     .Where(bc => bc.UserId == userId)
                     .OrderByDescending(bc => bc.CreatedAt)
@@ -38,11 +40,45 @@ namespace Libratica.Controllers
                         bc.CoverImageUrl,
                         bc.Publisher,
                         bc.PublicationYear,
-                        bc.CreatedAt
+                        bc.CreatedAt,
+                        Source = "manual"
                     })
                     .ToListAsync();
 
-                return Ok(collection);
+                var purchasedBooks = await _context.Orders
+                    .Where(o => o.BuyerId == userId && o.Status == "delivered")
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Listing)
+                            .ThenInclude(l => l.Book)
+                    .SelectMany(o => o.OrderItems.Select(oi => new
+                    {
+                        Id = 0,
+                        GoogleBooksId = (string?)null,
+                        oi.Listing.Book.Title,
+                        oi.Listing.Book.Author,
+                        CoverImageUrl = oi.Listing.Book.CoverImageUrl,
+                        Publisher = oi.Listing.Book.Publisher,
+                        PublicationYear = oi.Listing.Book.PublicationYear,
+                        CreatedAt = o.CreatedAt,
+                        Source = "purchased"
+                    }))
+                    .ToListAsync();
+
+                var existingTitles = collection
+                    .Select(c => c.Title.ToLower() + c.Author.ToLower())
+                    .ToHashSet();
+
+                var uniquePurchased = purchasedBooks
+                    .GroupBy(b => b.Title.ToLower() + b.Author.ToLower())
+                    .Select(g => g.First())
+                    .ToList();
+
+                var result = collection
+                    .Select(c => (object)c)
+                    .Concat(uniquePurchased.Select(p => (object)p))
+                    .ToList();
+
+                return Ok(result);
             }
             catch (Exception ex)
             {

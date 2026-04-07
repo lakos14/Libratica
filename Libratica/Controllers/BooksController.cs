@@ -112,10 +112,43 @@ namespace Libratica.Controllers
         //Új könyv létrehozása (csak admin)
         [HttpPost]
         [Authorize]
+        [HttpPost]
+        [Authorize]
         public async Task<ActionResult<BookDto>> CreateBook([FromBody] CreateBookDto createBookDto)
         {
             try
             {
+                var existingBook = await _context.Books
+                    .Include(b => b.BookCategories)
+                        .ThenInclude(bc => bc.Category)
+                    .FirstOrDefaultAsync(b =>
+                        b.Title.ToLower() == createBookDto.Title.ToLower() &&
+                        b.Author.ToLower() == createBookDto.Author.ToLower());
+
+                if (existingBook != null)
+                {
+                    return Ok(new BookDto
+                    {
+                        Id = existingBook.Id,
+                        ISBN = existingBook.ISBN,
+                        Title = existingBook.Title,
+                        Author = existingBook.Author,
+                        Publisher = existingBook.Publisher,
+                        PublicationYear = existingBook.PublicationYear,
+                        Language = existingBook.Language,
+                        Description = existingBook.Description,
+                        CoverImageUrl = existingBook.CoverImageUrl,
+                        PageCount = existingBook.PageCount,
+                        Categories = existingBook.BookCategories.Select(bc => new CategoryDto
+                        {
+                            Id = bc.Category.Id,
+                            Name = bc.Category.Name,
+                            Description = bc.Category.Description
+                        }).ToList(),
+                        CreatedAt = existingBook.CreatedAt
+                    });
+                }
+
                 var book = new Libratica.DataContext.Entities.Book
                 {
                     ISBN = createBookDto.ISBN,

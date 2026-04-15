@@ -1,6 +1,12 @@
 # Libratica
 2026.03.25
 
+### Bizottság észrevételei:
+- jogi kérdések
+- adatvédelmi nyilatkozat
+- videó feldarabolása, hozzáadása a folyamatábrákhoz (pl gif?)
+- prezin ne legyen fekete háttér
+
 ### Konzulens észrevételei:
 - kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján✅
 - minden jelszóhoz mutasd gomb✅

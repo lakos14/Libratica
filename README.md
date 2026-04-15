@@ -6,6 +6,7 @@
 - adatvédelmi nyilatkozat
 - videó feldarabolása, hozzáadása a folyamatábrákhoz (pl gif?)
 - prezin ne legyen fekete háttér
+- kategória alapú ellenőrzés is a kívánságlista-ajánlónál
 
 ### Konzulens észrevételei:
 - kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján✅
@@ -20,6 +21,12 @@
 - kívánságlistára lehessen felvenni külső API szerint is könyveket és ha lesz feltöltve belőle akkor jelenjen meg az ajánlott könyvek között✅
 - a könyvgyüjteményben jelenjenek meg a korábban vásárolt könyvek (csak akkor ha kiszállítva az állapot és kétszer ne vegyen fel egy könyvet)✅
 - könyvgyüjteményhez könyv hozzáadása manuálisan képfeltöltéssel stb✅
+- AI keresés hibája, telefonszám megjelenítési hiba, dupla toast értesítés rendelés oldalon✅
+- Könyv feltöltése 0ft-ért is✅
+- Kívánságlistára lehessen felvenni külső API szerint is könyveket és ha lesz feltöltve belőle, akkor jelenjen meg az ajánlott könyvek között is (cím és szerző alapú ellenőrzés)✅
+- Könyvgyüjteményben jelenjenek meg azok a könyvek, amelyeket korábban megvásárolt a felhasználó (csak egyszer, ha többet vett)✅
+- Lehessen felvinni könyv gyüjteménybe manuálisan is könyvet, mint pl. a hirdetéslétrehozásnál✅
+
 
 ## Megvalósított funkciók:
 ### Autentikáció és felhasználók:

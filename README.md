@@ -7,6 +7,7 @@
 - videó feldarabolása, hozzáadása a folyamatábrákhoz (pl gif?)
 - prezin ne legyen fekete háttér
 - kategória alapú ellenőrzés is a kívánságlista-ajánlónál
+- saját hirdetés megtekintésnél is a szerkesztéshez dob
 
 ### Konzulens észrevételei:
 - kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján✅

@@ -70,11 +70,10 @@
 
 # Kérdések:
 ### Dokumentáció
-- AI arányt beírni
-- Köszönetnyilvánítás
-- Témavezetői nyilatkozatot kitöltsem-e
-- Milyen pontok legyenek? A jelenlegi megfelelő-e?
-- Kik lesznek bent az előadáson?
+- AI arányt beírni - kódban használt ai-t is írjam be, szövegben ahol használtam (pl abstract) ott 100%
+- Köszönetnyilvánítás - ahogy gondolom
+- Témavezetői nyilatkozatot kitöltsem-e - nem
+- Milyen pontok legyenek? A jelenlegi megfelelő-e? - megfelelő
 
 ## Technológiák
 

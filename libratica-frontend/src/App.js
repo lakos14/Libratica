@@ -24,6 +24,7 @@ import Recommendations from './pages/Recommendations';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
 import ScrollToTop from './components/ScrollToTop';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
             <Route path="/books" element={<Books />} />
             <Route path="/listings" element={<Listings />} />
             <Route path="/listings/:id" element={<ListingDetails />} />
+            <Route path="/adatvedelmi-nyilatkozat" element={<PrivacyPolicy />} />
             <Route
               path="/cart"
               element={

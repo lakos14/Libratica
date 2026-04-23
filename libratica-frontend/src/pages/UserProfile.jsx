@@ -175,7 +175,7 @@ function UserProfile() {
                       <p className="text-xs text-gray-600 mb-2">{listing.book?.author}</p>
                       <div className="mt-auto">
                         <p className="font-bold text-sm" style={{ color: '#8b4513' }}>
-                          {listing.price?.toLocaleString('hu-HU')} {listing.currency}
+                          {listing.price?.toLocaleString('hu-HU')} Ft
                         </p>
                         <p className="text-xs text-gray-500">{getConditionLabel(listing.condition)}</p>
                       </div>

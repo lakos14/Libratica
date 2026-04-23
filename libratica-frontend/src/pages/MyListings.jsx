@@ -130,20 +130,29 @@ function MyListings() {
 
                 <div className="flex gap-2 mt-auto">
                   <button
-                    onClick={() => navigate(`/listings/${listing.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/listings/${listing.id}`);
+                    }}
                     className="flex-1 px-3 py-2 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Megtekintés
                   </button>
                   <button
-                    onClick={() => navigate(`/edit-listing/${listing.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/edit-listing/${listing.id}`);
+                    }}
                     className="flex-1 px-3 py-2 text-xs rounded text-white"
                     style={{ backgroundColor: '#8b4513' }}
                   >
                     Szerkesztés
                   </button>
                   <button
-                    onClick={() => handleDelete(listing.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(listing.id);
+                    }}
                     disabled={deleteListing.isPending}
                     className="px-3 py-2 text-xs rounded bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-400"
                   >

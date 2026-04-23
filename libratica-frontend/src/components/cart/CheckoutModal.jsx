@@ -153,6 +153,21 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
               A platform nem kezel pénzügyi tranzakciókat. A fizetés közvetlenül az eladóval történik.
             </p>
           </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded p-3">
+            <p className="text-xs text-blue-800">
+              <span className="font-medium">Számlázási tájékoztató:</span> A számla kiállítása az eladó kötelezettsége. A számla kiállításához javasoljuk a{' '}
+
+              <a href="https://www.szamlazz.hu"
+                target="_blank"
+                rel="noreferrer"
+                className="underline hover:text-blue-900"
+              >
+                Számlázz.hu
+              </a>
+              {' '}szolgáltatás használatát. A Libratica platform a számlázásért felelősséget nem vállal.
+            </p>
+          </div>
         </div>
 
         <div className="flex gap-3">
@@ -170,7 +185,7 @@ const CheckoutModal = ({ isOpen, onClose, onSubmit, sellerName }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

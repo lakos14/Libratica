@@ -126,7 +126,7 @@ namespace Libratica.DataContext.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("GoogleBooksId")
+                    b.Property<string>("OpenLibraryId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -148,7 +148,7 @@ namespace Libratica.DataContext.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "GoogleBooksId")
+                    b.HasIndex("UserId", "OpenLibraryId")
                         .IsUnique();
 
                     b.ToTable("BookCollections");

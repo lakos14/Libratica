@@ -198,6 +198,26 @@ const Register = () => {
               <p className="text-green-500 text-xs mt-1">A jelszavak egyeznek</p>
             )}
           </div>
+          <div className="mb-4">
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                required
+                className="mt-1"
+              />
+              <span className="text-sm text-gray-600">
+                Elfogadom az{' '}
+
+                <a href="/adatvedelmi-nyilatkozat"
+                  target="_blank"
+                  className="text-[#8b4513] hover:underline"
+                >
+                  Adatvédelmi nyilatkozatot
+                </a>
+                {' '}*
+              </span>
+            </label>
+          </div>
 
           <button
             type="submit"

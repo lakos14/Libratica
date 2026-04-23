@@ -5,7 +5,7 @@ namespace Libratica.DataContext.DTOs
     public class AddToCollectionDto
     {
         [Required]
-        public string GoogleBooksId { get; set; } = string.Empty;
+        public string OpenLibraryId { get; set; } = string.Empty;
         [Required]
         public string Title { get; set; } = string.Empty;
         public string? Author { get; set; }

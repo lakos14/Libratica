@@ -19,14 +19,10 @@ namespace Libratica.DataContext.Entities
         public string? FullName { get; set; }
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
-        [MaxLength(500)]
-        public string? ProfilePictureUrl { get; set; }
         public int RoleId { get; set; }
         [ForeignKey(nameof(RoleId))]
         public Role Role { get; set; } = null!;
-        public bool IsVerified { get; set; } = false;
         public bool IsActive { get; set; } = true;
-        public DateTime? BannedUntil { get; set; }
         [MaxLength(500)]
         public string? BannedReason { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -34,7 +34,7 @@ namespace Libratica.Controllers
                     .Select(bc => new
                     {
                         bc.Id,
-                        bc.GoogleBooksId,
+                        bc.OpenLibraryId,
                         bc.Title,
                         bc.Author,
                         bc.CoverImageUrl,
@@ -53,7 +53,7 @@ namespace Libratica.Controllers
                     .SelectMany(o => o.OrderItems.Select(oi => new
                     {
                         Id = 0,
-                        GoogleBooksId = (string?)null,
+                        OpenLibraryId = (string?)null,
                         oi.Listing.Book.Title,
                         oi.Listing.Book.Author,
                         CoverImageUrl = oi.Listing.Book.CoverImageUrl,
@@ -95,7 +95,7 @@ namespace Libratica.Controllers
                 var userId = GetCurrentUserId();
 
                 var alreadyExists = await _context.BookCollections
-                    .AnyAsync(bc => bc.UserId == userId && bc.GoogleBooksId == dto.GoogleBooksId);
+                    .AnyAsync(bc => bc.UserId == userId && bc.OpenLibraryId == dto.OpenLibraryId);
 
                 if (alreadyExists)
                     return BadRequest(new { message = "Ez a könyv már szerepel a gyűjteményedben" });
@@ -103,7 +103,7 @@ namespace Libratica.Controllers
                 var item = new BookCollection
                 {
                     UserId = userId,
-                    GoogleBooksId = dto.GoogleBooksId,
+                    OpenLibraryId = dto.OpenLibraryId,
                     Title = dto.Title,
                     Author = dto.Author,
                     CoverImageUrl = dto.CoverImageUrl,
@@ -149,14 +149,14 @@ namespace Libratica.Controllers
         }
 
         //Könyv ellenőrzése a kollekcióban
-        [HttpGet("check/{googleBooksId}")]
-        public async Task<ActionResult> CheckCollection(string googleBooksId)
+        [HttpGet("check/{OpenLibraryId}")]
+        public async Task<ActionResult> CheckCollection(string OpenLibraryId)
         {
             try
             {
                 var userId = GetCurrentUserId();
                 var isInCollection = await _context.BookCollections
-                    .AnyAsync(bc => bc.UserId == userId && bc.GoogleBooksId == googleBooksId);
+                    .AnyAsync(bc => bc.UserId == userId && bc.OpenLibraryId == OpenLibraryId);
 
                 return Ok(new { isInCollection });
             }

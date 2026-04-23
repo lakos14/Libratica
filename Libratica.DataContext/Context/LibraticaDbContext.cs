@@ -82,11 +82,6 @@ namespace Libratica.DataContext.Context
             {
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.Name);
-
-                entity.HasOne(c => c.ParentCategory)
-                    .WithMany(c => c.SubCategories)
-                    .HasForeignKey(c => c.ParentCategoryId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             //Book
@@ -240,7 +235,7 @@ namespace Libratica.DataContext.Context
             modelBuilder.Entity<BookCollection>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => new { e.UserId, e.GoogleBooksId }).IsUnique();
+                entity.HasIndex(e => new { e.UserId, e.OpenLibraryId }).IsUnique();
 
                 entity.HasOne(bc => bc.User)
                     .WithMany()

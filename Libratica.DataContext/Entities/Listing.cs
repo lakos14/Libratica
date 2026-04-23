@@ -20,8 +20,6 @@ namespace Libratica.DataContext.Entities
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
-        [MaxLength(10)]
-        public string Currency { get; set; } = "HUF";
         public int Quantity { get; set; } = 1;
         public bool IsAvailable { get; set; } = true;
         [MaxLength(200)]

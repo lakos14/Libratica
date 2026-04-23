@@ -18,9 +18,6 @@ namespace Libratica.DataContext.DTOs
         [Range(0, 1000000, ErrorMessage = "Az ár 0 és 1,000,000 között lehet")]
         public decimal Price { get; set; }
 
-        [MaxLength(10)]
-        public string Currency { get; set; } = "HUF";
-
         [Range(1, 100, ErrorMessage = "Mennyiség 1-100 között lehet")]
         public int Quantity { get; set; } = 1;
 

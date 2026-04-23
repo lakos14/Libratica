@@ -37,7 +37,6 @@ namespace Libratica.Controllers
                     {
                         l.Id,
                         l.Price,
-                        l.Currency,
                         l.Condition,
                         l.Location,
                         l.CreatedAt,
@@ -73,7 +72,6 @@ namespace Libratica.Controllers
                     user.Id,
                     user.Username,
                     user.FullName,
-                    user.ProfilePictureUrl,
                     user.Rating,
                     user.CreatedAt,
                     ActiveListingsCount = activeListings.Count(),

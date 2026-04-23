@@ -164,7 +164,7 @@ export const bookCollectionAPI = {
   getCollection: () => api.get('/bookcollection'),
   addToCollection: (data) => api.post('/bookcollection', data),
   removeFromCollection: (id) => api.delete(`/bookcollection/${id}`),
-  checkCollection: (googleBooksId) => api.get(`/bookcollection/check/${googleBooksId}`),
+  checkCollection: (OpenLibraryId) => api.get(`/bookcollection/check/${OpenLibraryId}`),
 };
 
 //Recommendations API

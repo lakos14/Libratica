@@ -123,7 +123,7 @@ namespace Libratica.DataContext.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("GoogleBooksId")
+                    b.Property<string>("OpenLibraryId")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -145,7 +145,7 @@ namespace Libratica.DataContext.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId", "GoogleBooksId")
+                    b.HasIndex("UserId", "OpenLibraryId")
                         .IsUnique();
 
                     b.ToTable("BookCollections");
@@ -225,14 +225,9 @@ namespace Libratica.DataContext.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("ParentCategoryId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
-
-                    b.HasIndex("ParentCategoryId");
 
                     b.ToTable("Categories");
 
@@ -436,11 +431,6 @@ namespace Libratica.DataContext.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Images")
                         .HasMaxLength(2000)
@@ -685,9 +675,6 @@ namespace Libratica.DataContext.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime?>("BannedUntil")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -703,9 +690,6 @@ namespace Libratica.DataContext.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
 
@@ -716,10 +700,6 @@ namespace Libratica.DataContext.Migrations
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal?>("Rating")
                         .HasColumnType("decimal(3,2)");
@@ -836,16 +816,6 @@ namespace Libratica.DataContext.Migrations
                     b.Navigation("Cart");
 
                     b.Navigation("Listing");
-                });
-
-            modelBuilder.Entity("Libratica.DataContext.Entities.Category", b =>
-                {
-                    b.HasOne("Libratica.DataContext.Entities.Category", "ParentCategory")
-                        .WithMany("SubCategories")
-                        .HasForeignKey("ParentCategoryId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("ParentCategory");
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Event", b =>
@@ -1051,8 +1021,6 @@ namespace Libratica.DataContext.Migrations
             modelBuilder.Entity("Libratica.DataContext.Entities.Category", b =>
                 {
                     b.Navigation("BookCategories");
-
-                    b.Navigation("SubCategories");
                 });
 
             modelBuilder.Entity("Libratica.DataContext.Entities.Event", b =>

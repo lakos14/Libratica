@@ -11,11 +11,7 @@ namespace Libratica.DataContext.Entities
         public string Name { get; set; } = string.Empty;
         [MaxLength(500)]
         public string? Description { get; set; }
-        public int? ParentCategoryId { get; set; }
-        [ForeignKey(nameof(ParentCategoryId))]
-        public Category? ParentCategory { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public ICollection<Category> SubCategories { get; set; } = new List<Category>();
         public ICollection<BookCategory> BookCategories { get; set; } = new List<BookCategory>();
     }
 }

@@ -23,14 +23,11 @@ namespace Libratica.Controllers
             try
             {
                 var categories = await _context.Categories
-                    .Include(c => c.ParentCategory)
                     .Select(c => new CategoryDto
                     {
                         Id = c.Id,
                         Name = c.Name,
                         Description = c.Description,
-                        ParentCategoryId = c.ParentCategoryId,
-                        ParentCategoryName = c.ParentCategory != null ? c.ParentCategory.Name : null
                     })
                     .ToListAsync();
 
@@ -49,15 +46,12 @@ namespace Libratica.Controllers
             try
             {
                 var category = await _context.Categories
-                    .Include(c => c.ParentCategory)
                     .Where(c => c.Id == id)
                     .Select(c => new CategoryDto
                     {
                         Id = c.Id,
                         Name = c.Name,
                         Description = c.Description,
-                        ParentCategoryId = c.ParentCategoryId,
-                        ParentCategoryName = c.ParentCategory != null ? c.ParentCategory.Name : null
                     })
                     .FirstOrDefaultAsync();
 

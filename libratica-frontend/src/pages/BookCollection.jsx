@@ -63,7 +63,7 @@ function BookCollection() {
 
     try {
       await addToCollection.mutateAsync({
-        googleBooksId: uniqueId,
+        openLibraryId: uniqueId,
         title,
         author: author || null,
         coverImageUrl: cover || null,
@@ -105,7 +105,7 @@ function BookCollection() {
 
     try {
       await addToCollection.mutateAsync({
-        googleBooksId: uniqueId,
+        openLibraryId: uniqueId,
         title: manualData.title,
         author: manualData.author,
         coverImageUrl: manualData.coverImageUrl || null,

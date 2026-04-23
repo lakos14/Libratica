@@ -13,7 +13,7 @@ namespace Libratica.DataContext.Entities
 
         [Required]
         [MaxLength(100)]
-        public string GoogleBooksId { get; set; } = string.Empty;
+        public string OpenLibraryId { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(200)]

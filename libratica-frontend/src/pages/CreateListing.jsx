@@ -10,9 +10,9 @@ const CreateListing = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [googleSearchQuery, setGoogleSearchQuery] = useState('');
-  const [googleSearching, setGoogleSearching] = useState(false);
-  const [googleResults, setGoogleResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: categories = [] } = useCategories();
@@ -35,7 +35,6 @@ const CreateListing = () => {
     condition: 'good',
     conditionDescription: '',
     price: '',
-    currency: 'HUF',
     quantity: 1,
     location: '',
     images: [],
@@ -50,27 +49,27 @@ const CreateListing = () => {
   }, [isAuthenticated, navigate]);
 
   const searchOpenLibrary = async () => {
-    if (!googleSearchQuery.trim()) return;
+    if (!searchQuery.trim()) return;
 
-    setGoogleSearching(true);
+    setSearching(true);
     try {
       let results;
-      if (/^\d+$/.test(googleSearchQuery.replace(/-/g, ''))) {
-        const data = await openLibraryAPI.searchByISBN(googleSearchQuery);
-        results = data ? [{ isISBN: true, data, isbn: googleSearchQuery }] : [];
+      if (/^\d+$/.test(searchQuery.replace(/-/g, ''))) {
+        const data = await openLibraryAPI.searchByISBN(searchQuery);
+        results = data ? [{ isISBN: true, data, isbn: searchQuery }] : [];
       } else {
-        const docs = await openLibraryAPI.searchByTitle(googleSearchQuery);
+        const docs = await openLibraryAPI.searchByTitle(searchQuery);
         results = docs.map((doc) => ({ isISBN: false, data: doc }));
       }
 
       if (results.length === 0) {
         toast.info('Nem található könyv');
       }
-      setGoogleResults(results);
+      setSearchResults(results);
     } catch (err) {
       toast.error('Hiba a keresés során');
     } finally {
-      setGoogleSearching(false);
+      setSearching(false);
     }
   };
 
@@ -103,8 +102,8 @@ const CreateListing = () => {
         pageCount: d.number_of_pages_median || '',
       });
     }
-    setGoogleResults([]);
-    setGoogleSearchQuery('');
+    setSearchResults([]);
+    setSearchQuery('');
     toast.success('Könyv adatai betöltve!');
   };
 
@@ -188,7 +187,6 @@ const CreateListing = () => {
         condition: formData.condition,
         conditionDescription: formData.conditionDescription || null,
         price: parseFloat(formData.price),
-        currency: formData.currency,
         quantity: parseInt(formData.quantity),
         location: formData.location || null,
         images: formData.images.length > 0 ? formData.images : null,
@@ -275,13 +273,13 @@ const CreateListing = () => {
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-sm font-medium text-blue-800 mb-2">
-                Automatikus kitöltés Open Books alapján
+                Automatikus kitöltés Open Library alapján
               </p>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={googleSearchQuery}
-                  onChange={(e) => setGoogleSearchQuery(e.target.value)}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) =>
                     e.key === 'Enter' && (e.preventDefault(), searchOpenLibrary())
                   }
@@ -291,17 +289,17 @@ const CreateListing = () => {
                 <button
                   type="button"
                   onClick={searchOpenLibrary}
-                  disabled={googleSearching}
+                  disabled={searching}
                   className="px-4 py-2 text-white rounded disabled:bg-gray-400"
                   style={{ backgroundColor: '#8b4513' }}
                 >
-                  {googleSearching ? '⏳' : '🔍'}
+                  {searching ? '⏳' : '🔍'}
                 </button>
               </div>
 
-              {googleResults.length > 0 && (
+              {searchResults.length > 0 && (
                 <div className="mt-3 border rounded-lg max-h-64 overflow-y-auto bg-white">
-                  {googleResults.map((item, index) => {
+                  {searchResults.map((item, index) => {
                     const title = item.isISBN ? item.data.title : item.data.title;
                     const author = item.isISBN
                       ? item.data.authors?.map((a) => a.name).join(', ')

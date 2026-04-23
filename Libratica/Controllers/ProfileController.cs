@@ -53,7 +53,6 @@ namespace Libratica.Controllers
                     Username = user.Username,
                     FullName = user.FullName,
                     PhoneNumber = user.PhoneNumber,
-                    ProfilePictureUrl = user.ProfilePictureUrl,
                     RoleName = user.Role.Name,
                     Rating = user.Rating,
                     CreatedAt = user.CreatedAt,

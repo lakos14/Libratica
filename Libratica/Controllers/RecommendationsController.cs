@@ -101,7 +101,6 @@ namespace Libratica.Controllers
                     {
                         l.Id,
                         l.Price,
-                        l.Currency,
                         l.Condition,
                         l.Location,
                         Images = !string.IsNullOrEmpty(l.Images)
@@ -152,7 +151,6 @@ namespace Libratica.Controllers
                     {
                         l.Id,
                         l.Price,
-                        l.Currency,
                         l.Condition,
                         l.Location,
                         Images = !string.IsNullOrEmpty(l.Images)

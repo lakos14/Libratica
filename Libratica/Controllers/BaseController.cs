@@ -46,7 +46,6 @@ namespace Libratica.Controllers
                     Username = listing.Seller.Username,
                     Email = listing.Seller.Email,
                     FullName = listing.Seller.FullName,
-                    ProfilePictureUrl = listing.Seller.ProfilePictureUrl,
                     RoleName = listing.Seller.Role.Name,
                     Rating = listing.Seller.Rating,
                     CreatedAt = listing.Seller.CreatedAt
@@ -54,7 +53,6 @@ namespace Libratica.Controllers
                 Condition = listing.Condition,
                 ConditionDescription = listing.ConditionDescription,
                 Price = listing.Price,
-                Currency = listing.Currency,
                 Quantity = listing.Quantity,
                 IsAvailable = listing.IsAvailable,
                 Location = listing.Location,

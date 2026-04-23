@@ -18,7 +18,7 @@ namespace Libratica.DataContext.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    GoogleBooksId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    OpenLibraryId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Author = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     CoverImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -38,9 +38,9 @@ namespace Libratica.DataContext.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BookCollections_UserId_GoogleBooksId",
+                name: "IX_BookCollections_UserId_OpenLibraryId",
                 table: "BookCollections",
-                columns: new[] { "UserId", "GoogleBooksId" },
+                columns: new[] { "UserId", "OpenLibraryId" },
                 unique: true);
         }
 

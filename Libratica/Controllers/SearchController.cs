@@ -234,7 +234,6 @@ namespace Libratica.Controllers
                             Id = l.Seller.Id,
                             Username = l.Seller.Username,
                             FullName = l.Seller.FullName,
-                            ProfilePictureUrl = l.Seller.ProfilePictureUrl,
                             RoleName = l.Seller.Role.Name,
                             Rating = l.Seller.Rating,
                             CreatedAt = l.Seller.CreatedAt
@@ -242,7 +241,6 @@ namespace Libratica.Controllers
                         Condition = l.Condition,
                         ConditionDescription = l.ConditionDescription,
                         Price = l.Price,
-                        Currency = l.Currency,
                         Quantity = l.Quantity,
                         IsAvailable = l.IsAvailable,
                         Location = l.Location,

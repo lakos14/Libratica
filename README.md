@@ -2,16 +2,13 @@
 2026.03.25
 
 ### Bizottság észrevételei:
-- jogi kérdések
-- adatvédelmi nyilatkozat
 - videó feldarabolása, hozzáadása a folyamatábrákhoz (pl gif?)
 - prezin ne legyen fekete háttér
-- kategória alapú ellenőrzés is a kívánságlista-ajánlónál
-- saját hirdetés megtekintésnél is a szerkesztéshez dob
-- adatbázis felesleges táblák eltávolítása (Users: profilepictureurl, isverified, banneduntil, updatedat. Listings: currency
 - 
-
 ### Konzulens észrevételei:
+- saját hirdetés megtekintésnél is a szerkesztéshez dob✅
+- adatvédelmi nyilatkozat✅
+- - jogi kérdések✅
 - kívánságlista alapján történjen a könyvajánlás, ha nincs rajta semmi akkor a korábbi vásárlások alapján✅
 - minden jelszóhoz mutasd gomb✅
 - a kapcsolatfelvételnél legyen egy másik gomb ami csak az alapértelmezet email alkalmazást nyitja meg✅

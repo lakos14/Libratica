@@ -25,7 +25,7 @@ namespace Libratica.DataContext.DTOs
         [Range(1, 100, ErrorMessage = "Mennyiség 1-100 között lehet")]
         public int Quantity { get; set; }
 
-        [Range(0.01, 1000000, ErrorMessage = "Érvénytelen ár")]
+        [Range(0, 1000000, ErrorMessage = "Érvénytelen ár")]
         public decimal Price { get; set; }
     }
 }
